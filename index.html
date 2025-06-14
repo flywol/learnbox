@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link
+			rel="icon"
+			type="image/svg+xml"
+			href="/vite.svg" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+
+		<!-- Fonts -->
+		<link
+			rel="preconnect"
+			href="https://fonts.googleapis.com" />
+		<link
+			rel="preconnect"
+			href="https://fonts.gstatic.com"
+			crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+			rel="stylesheet" />
+
+		<title>Learn Box</title>
+
+		<!-- Splash Screen Styles -->
+		<style>
+			#splash-screen {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+				background-color: oklch(0.99 0.01 35.7);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 9999;
+				opacity: 1;
+				visibility: visible;
+				transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+			}
+			#splash-screen img {
+				width: 150px;
+				animation: pulse 2s infinite ease-in-out;
+			}
+			#splash-screen.loaded {
+				opacity: 0;
+				visibility: hidden;
+			}
+			@keyframes pulse {
+				0% {
+					transform: scale(1);
+				}
+				50% {
+					transform: scale(1.05);
+				}
+				100% {
+					transform: scale(1);
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Splash Screen -->
+		<div id="splash-screen">
+			<img
+				src="/logo-splash.svg"
+				alt="Learn Box Loading..." />
+		</div>
+
+		<!-- React App Mount Point -->
+		<div id="root"></div>
+
+		<!-- React Entry -->
+		<script
+			type="module"
+			src="/src/main.tsx"></script>
+
+		<!-- Splash Screen Hide Logic -->
+		<script>
+			window.addEventListener("load", () => {
+				const splash = document.getElementById("splash-screen");
+				if (splash) {
+					splash.classList.add("loaded");
+				}
+			});
+		</script>
+	</body>
+</html>
