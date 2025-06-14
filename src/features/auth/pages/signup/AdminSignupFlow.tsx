@@ -1,9 +1,9 @@
-import { SchoolInfoFormData, PersonalInfoFormData } from "@/common/schemas/SignupSchema";
+import { SchoolInfoFormData, PersonalInfoFormData } from "@/features/auth/schemas/authSchema.ts";
 import { useState } from "react";
 import OtpVerificationStep from "./components/OtpVerificationStep";
 import PersonalInfoStep from "./components/PersonalInfoStep";
 import SchoolInfoStep from "./components/SchoolInfoStep";
-import { SuccessStep, ErrorStep } from "./components/SuccessAndErrorSteps";
+import { SuccessStep, ErrorStep } from "./components/SignupResultSteps.tsx";
 
 
 type SignupStep = "school-info" | "personal-info" | "otp" | "success" | "error";

@@ -1,11 +1,12 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useAuthStore } from "./features/auth/store/useAuthStore";
+import { useAuthStore } from "./features/auth/store/authStore";
 import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
-import OnboardingPage from "./features/auth/pages/OnboardingPage";
-import CombinedSchoolLoginPage from "./features/auth/pages/LoginPage";
+
 import { JSX } from "react";
-import SchoolSetupPage from "./features/auth/pages/UrlPage";
-import SignupFlow from "./features/auth/pages/adminSignup/AdminSignup";
+import SchoolSetupPage from "./features/auth/pages/SchoolSetupPage";
+import SignupFlow from "./features/auth/pages/signup/AdminSignupFlow";
+import OnboardingPage from "./features/auth/pages/onboarding/OnboardingPage";
+import CombinedSchoolLoginPage from "./features/auth/pages/login/LoginPage";
 
 // --- Helper Components for Routing ---
 
