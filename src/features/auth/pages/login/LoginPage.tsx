@@ -1,10 +1,12 @@
+// src/features/auth/pages/login/LoginPage.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "../store/useAuthStore";
-import { User } from "../types/auth.types";
+import { useAuthStore } from "../../store/authStore";
+import { mockAuthApi } from "../../api/mockAuthApi";
+import { LoginFormData, SchoolSetupFormData } from "../../schemas/authSchema";
 
 // Validation schemas
 const schoolSetupSchema = z.object({
@@ -27,51 +29,12 @@ const loginSchema = z.object({
 		.min(6, { message: "Password must be at least 6 characters" }),
 });
 
-type SchoolSetupFormValues = z.infer<typeof schoolSetupSchema>;
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-// Mock API functions
-const validateSchoolApi = (
-	url: string
-): Promise<{ isValid: boolean; schoolName?: string }> => {
-	console.log(`Validating school URL: ${url}`);
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve({
-				isValid: true,
-				schoolName: "Sample School",
-			});
-		}, 1500);
-	});
-};
-
-const loginApi = (
-	data: LoginFormValues,
-	role: string,
-	schoolDomain: string
-): Promise<{ user: User }> => {
-	console.log(
-		`Simulating login for ${data.email} as ${role} at ${schoolDomain}...`
-	);
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			const mockUser: User = {
-				id: `user-${Date.now()}`,
-				name: "Test User",
-				email: data.email,
-				role: role as any,
-			};
-			resolve({ user: mockUser });
-		}, 1500);
-	});
-};
-
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
 	<div className="hidden lg:flex lg:w-1/2 bg-[#FFEFE980] items-center justify-center p-8">
 		<div className="w-full max-w-md">
 			<img
-			className="w[710px] h-[560px] object-contain" 
+				className="w-[710px] h-[560px] object-contain"
 				src="/images/illustration.svg"
 				alt="illustration"
 			/>
@@ -83,23 +46,31 @@ const CombinedSchoolLoginPage = () => {
 	const [currentStep, setCurrentStep] = useState<"school" | "login">("school");
 	const [isValidating, setIsValidating] = useState(false);
 	const [isLoggingIn, setIsLoggingIn] = useState(false);
+	const [loginError, setLoginError] = useState<string | null>(null);
 
 	const navigate = useNavigate();
+	const location = useLocation();
 	const {
 		selectedRole,
 		schoolDomain,
 		setSchoolDomain,
 		hasSeenOnboarding,
 		login: loginAction,
+		setFirstTimeLogin,
+		intendedDestination,
+		setIntendedDestination,
 	} = useAuthStore();
 
 	// School setup form
-	const schoolForm = useForm<SchoolSetupFormValues>({
+	const schoolForm = useForm<SchoolSetupFormData>({
 		resolver: zodResolver(schoolSetupSchema),
+		defaultValues: {
+			schoolUrl: schoolDomain || "",
+		},
 	});
 
 	// Login form
-	const loginForm = useForm<LoginFormValues>({
+	const loginForm = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
 	});
 
@@ -109,13 +80,18 @@ const CombinedSchoolLoginPage = () => {
 		return null;
 	}
 
-	const handleSchoolSubmit = async (data: SchoolSetupFormValues) => {
+	// If school domain is already set, go directly to login
+	if (schoolDomain && currentStep === "school") {
+		setCurrentStep("login");
+	}
+
+	const handleSchoolSubmit = async (data: SchoolSetupFormData) => {
 		setIsValidating(true);
 
 		try {
-			const { isValid } = await validateSchoolApi(data.schoolUrl);
+			const response = await mockAuthApi.validateSchool(data.schoolUrl);
 
-			if (isValid) {
+			if (response.success && response.data) {
 				setSchoolDomain(data.schoolUrl);
 				// Wait a brief moment then slide to login
 				setTimeout(() => {
@@ -124,7 +100,9 @@ const CombinedSchoolLoginPage = () => {
 			} else {
 				schoolForm.setError("schoolUrl", {
 					type: "manual",
-					message: "School not found. Please check the URL and try again.",
+					message:
+						response.error?.message ||
+						"School not found. Please check the URL and try again.",
 				});
 			}
 		} catch (error) {
@@ -138,26 +116,62 @@ const CombinedSchoolLoginPage = () => {
 		}
 	};
 
-	const handleLoginSubmit = async (data: LoginFormValues) => {
-		if (!schoolDomain) return;
+	const handleLoginSubmit = async (data: LoginFormData) => {
+		if (!schoolDomain || !selectedRole) return;
 
 		setIsLoggingIn(true);
+		setLoginError(null);
 
 		try {
-			const { user } = await loginApi(data, selectedRole, schoolDomain);
-			loginAction(user);
+			const response = await mockAuthApi.login(
+				data.email,
+				data.password,
+				selectedRole,
+				schoolDomain
+			);
 
-			if (hasSeenOnboarding) {
-				navigate("/dashboard");
+			if (response.success && response.data) {
+				const { user, isFirstTimeLogin, resetToken } = response.data;
+
+				// Set login context for first-time users
+				if (isFirstTimeLogin && resetToken) {
+					setFirstTimeLogin(true, resetToken);
+				}
+
+				// Log the user in
+				loginAction(user);
+
+				// Navigation logic
+				if (isFirstTimeLogin && resetToken) {
+					// First-time users go to password reset
+					navigate("/reset-password", {
+						state: {
+							resetToken,
+							email: user.email,
+							from: intendedDestination || "/dashboard",
+						},
+					});
+				} else if (intendedDestination) {
+					// Go to intended destination
+					const destination = intendedDestination;
+					setIntendedDestination(null); // Clear it
+					navigate(destination);
+				} else if (hasSeenOnboarding) {
+					// Regular users who've completed onboarding
+					navigate("/dashboard");
+				} else {
+					// New users who need onboarding
+					navigate("/onboarding");
+				}
 			} else {
-				navigate("/onboarding");
+				setLoginError(
+					response.error?.message ||
+						"Login failed. Please check your credentials."
+				);
 			}
 		} catch (error) {
 			console.error("Login failed:", error);
-			loginForm.setError("email", {
-				type: "manual",
-				message: "Login failed. Please check your credentials.",
-			});
+			setLoginError("An unexpected error occurred. Please try again.");
 		} finally {
 			setIsLoggingIn(false);
 		}
@@ -165,6 +179,13 @@ const CombinedSchoolLoginPage = () => {
 
 	const handleBackToSchool = () => {
 		setCurrentStep("school");
+		setLoginError(null);
+	};
+
+	const handleForgotPassword = () => {
+		navigate("/forgot-password", {
+			state: { email: loginForm.getValues("email") },
+		});
 	};
 
 	return (
@@ -216,7 +237,7 @@ const CombinedSchoolLoginPage = () => {
 							type="submit"
 							disabled={isValidating}
 							className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-							{isValidating ? "Next" : "Next"}
+							{isValidating ? "Validating..." : "Next"}
 						</button>
 					</form>
 				</div>
@@ -233,7 +254,18 @@ const CombinedSchoolLoginPage = () => {
 						<p className="mt-2 text-muted-foreground">
 							Sign in to stay connected.
 						</p>
+						{schoolDomain && (
+							<p className="mt-1 text-sm text-gray-600">
+								{schoolDomain} • {selectedRole.toLowerCase()}
+							</p>
+						)}
 					</div>
+
+					{loginError && (
+						<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+							{loginError}
+						</div>
+					)}
 
 					<form
 						onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
@@ -276,19 +308,30 @@ const CombinedSchoolLoginPage = () => {
 								/>
 								Remember me
 							</label>
-							<a
-								href="#"
+							<button
+								type="button"
+								onClick={handleForgotPassword}
 								className="text-gray-500 hover:text-gray-700">
 								Forgot password?
-							</a>
+							</button>
 						</div>
 						<button
 							type="submit"
 							disabled={isLoggingIn}
 							className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-							{isLoggingIn ? "Login" : "Login"}
+							{isLoggingIn ? "Signing in..." : "Login"}
 						</button>
 					</form>
+
+					<div className="text-center">
+						<button
+							type="button"
+							onClick={handleBackToSchool}
+							className="text-sm text-gray-500 hover:text-gray-700"
+							disabled={isLoggingIn}>
+							← Change school
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -1,67 +1,22 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+// src/App.tsx
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./features/auth/store/authStore";
-import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
 
-import { JSX } from "react";
+// Auth components and guards
+import { AuthGuard } from "./features/auth/components/guards/AuthGuard";
+import { FlowGuard } from "./features/auth/components/guards/FlowGuard";
+import { ProtectedRoute } from "./features/auth/components/guards/FirstTimeLoginGuard";
+
+// Pages
+import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
 import SchoolSetupPage from "./features/auth/pages/SchoolSetupPage";
 import SignupFlow from "./features/auth/pages/signup/AdminSignupFlow";
+import LoginPage from "./features/auth/pages/login/LoginPage";
 import OnboardingPage from "./features/auth/pages/onboarding/OnboardingPage";
-import CombinedSchoolLoginPage from "./features/auth/pages/login/LoginPage";
+import ForgotPasswordPage from "./features/auth/pages/password/ForgotPassword";
+import ResetPasswordPage from "./features/auth/pages/password/ResetPassword";
 
-// --- Helper Components for Routing ---
-
-// 1. A protected route component
-// This component checks if a user is authenticated.
-// If they are, it shows the page. If not, it redirects them to the role selection.
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-	return isAuthenticated ? (
-		children
-	) : (
-		<Navigate
-			to="/"
-			replace
-		/>
-	);
-};
-
-// 2. Flow-aware route guard
-// This ensures users go through the proper flow: role -> school -> login
-const FlowGuard = ({
-	children,
-	requiresRole = false,
-	requiresSchool = false,
-}: {
-	children: JSX.Element;
-	requiresRole?: boolean;
-	requiresSchool?: boolean;
-}) => {
-	const { selectedRole, schoolDomain } = useAuthStore();
-
-	// If role is required but not set, redirect to role selection
-	if (requiresRole && !selectedRole) {
-		return (
-			<Navigate
-				to="/"
-				replace
-			/>
-		);
-	}
-
-	// If school is required but not set, redirect to school setup
-	if (requiresSchool && !schoolDomain) {
-		return (
-			<Navigate
-				to="/school-setup"
-				replace
-			/>
-		);
-	}
-
-	return children;
-};
-
-// 3. A placeholder for your main dashboard
+// Placeholder components
 const DashboardPage = () => {
 	const { user, logout } = useAuthStore();
 	return (
@@ -79,51 +34,78 @@ const DashboardPage = () => {
 	);
 };
 
-// 4. A placeholder for onboarding (role-based welcome screens)
-const OnboardingPageWrapper = () => {
-	return <OnboardingPage />;
-};
-
-// 5. A placeholder for a 404 Not Found page
-const NotFoundPage = () => (
-	<div className="p-8 text-center">
-		<h1 className="text-2xl font-bold">404: Page Not Found</h1>
-		<p className="mt-2 text-gray-600">
-			The page you're looking for doesn't exist.
-		</p>
+const UnauthorizedPage = () => (
+	<div className="flex min-h-screen items-center justify-center bg-gray-50">
+		<div className="text-center">
+			<h1 className="text-3xl font-bold text-gray-900 mb-2">Unauthorized</h1>
+			<p className="text-gray-600 mb-4">
+				You don't have permission to access this page.
+			</p>
+			<a
+				href="/"
+				className="text-orange-500 hover:underline">
+				Go back to home
+			</a>
+		</div>
 	</div>
 );
 
-// --- Main App Component with Route Definitions ---
+const NotFoundPage = () => (
+	<div className="flex min-h-screen items-center justify-center bg-gray-50">
+		<div className="text-center">
+			<h1 className="text-3xl font-bold text-gray-900 mb-2">
+				404: Page Not Found
+			</h1>
+			<p className="text-gray-600 mb-4">
+				The page you're looking for doesn't exist.
+			</p>
+			<a
+				href="/"
+				className="text-orange-500 hover:underline">
+				Go back to home
+			</a>
+		</div>
+	</div>
+);
 
 function App() {
-	const navigate = useNavigate();
-
 	return (
 		<Routes>
+			{/* Public Routes - No authentication required */}
+
 			{/* Step 1: Role Selection (entry point) */}
 			<Route
 				path="/"
-				element={<RoleSelectionPage />}
+				element={
+					<AuthGuard requiresAuth={false}>
+						<RoleSelectionPage />
+					</AuthGuard>
+				}
 			/>
 
 			{/* Step 2: School Setup (requires role) */}
 			<Route
 				path="/school-setup"
 				element={
-					<FlowGuard requiresRole={true}>
-						<SchoolSetupPage />
-					</FlowGuard>
+					<AuthGuard requiresAuth={false}>
+						<FlowGuard requiresRole={true}>
+							<SchoolSetupPage />
+						</FlowGuard>
+					</AuthGuard>
 				}
 			/>
 
-			{/* Step 2.5: Signup Flow for Admin users creating new schools */}
+			{/* Step 2.5: Admin Signup Flow */}
 			<Route
 				path="/signup"
 				element={
-					<FlowGuard requiresRole={true}>
-						<SignupFlow onComplete={() => navigate("/school-setup")} />
-					</FlowGuard>
+					<AuthGuard requiresAuth={false}>
+						<FlowGuard
+							requiresRole={true}
+							allowedRoles={["ADMIN"]}>
+							<SignupFlow />
+						</FlowGuard>
+					</AuthGuard>
 				}
 			/>
 
@@ -131,25 +113,44 @@ function App() {
 			<Route
 				path="/login"
 				element={
-					<FlowGuard
-						requiresRole={true}
-						requiresSchool={true}>
-						<CombinedSchoolLoginPage />
-					</FlowGuard>
+					<AuthGuard requiresAuth={false}>
+						<FlowGuard
+							requiresRole={true}
+							requiresSchool={true}>
+							<LoginPage />
+						</FlowGuard>
+					</AuthGuard>
 				}
 			/>
 
-			{/* Step 4: Onboarding (first-time users after login) */}
+			{/* Password Reset Routes */}
+			<Route
+				path="/forgot-password"
+				element={
+					<AuthGuard requiresAuth={false}>
+						<ForgotPasswordPage />
+					</AuthGuard>
+				}
+			/>
+
+			<Route
+				path="/reset-password"
+				element={<ResetPasswordPage />}
+			/>
+
+			{/* Protected Routes - Authentication required */}
+
+			{/* Onboarding (first-time users after login) */}
 			<Route
 				path="/onboarding"
 				element={
 					<ProtectedRoute>
-						<OnboardingPageWrapper />
+						<OnboardingPage />
 					</ProtectedRoute>
 				}
 			/>
 
-			{/* Step 5: Main Dashboard (protected) */}
+			{/* Main Dashboard */}
 			<Route
 				path="/dashboard"
 				element={
@@ -159,7 +160,13 @@ function App() {
 				}
 			/>
 
-			{/* Legacy route redirects for old flow */}
+			{/* Error Pages */}
+			<Route
+				path="/unauthorized"
+				element={<UnauthorizedPage />}
+			/>
+
+			{/* Legacy route redirects */}
 			<Route
 				path="/select-role"
 				element={
@@ -170,7 +177,7 @@ function App() {
 				}
 			/>
 
-			{/* Catch-all route for any other path */}
+			{/* Catch-all route */}
 			<Route
 				path="*"
 				element={<NotFoundPage />}
