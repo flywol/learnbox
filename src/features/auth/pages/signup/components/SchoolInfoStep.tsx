@@ -52,73 +52,73 @@ export default function SchoolInfoStep({
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(generatedUrl);
 	};
-
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50">
-			<div className="w-full max-w-2xl px-8">
-				<div className="text-center mb-8">
-					<h1 className="text-4xl font-bold mb-2">Learn</h1>
-					<h1 className="text-4xl font-bold">
-						B<span className="text-orange-500">o</span>x
-					</h1>
-				</div>
-
-				<div className="bg-white rounded-lg shadow-sm p-8">
-					<h2 className="text-3xl font-bold text-center mb-2">Sign Up</h2>
-					<p className="text-center text-gray-600 mb-8">
+		<div className="min-h-screen bg-white px-4 py-12">
+			<div className="max-w-3xl mx-auto">
+				<div className="flex flex-col items-center mb-16">
+					<img
+						src="/logo-splash.svg"
+						alt="LearnBox logo"
+						className="w-28 h-20"
+					/>
+					<h2 className="text-3xl font-semibold mt-10">Sign Up</h2>
+					<p className="text-gray-600 mt-2 text-center">
 						Let's start with a bit of information about your school
 					</p>
+				</div>
 
-					<form
-						onSubmit={handleSubmit(onSubmit)}
-						className="space-y-4">
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<input
-									type="text"
-									placeholder="School name *"
-									{...register("name")}
-									className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-										errors.name ? "border-red-500" : "border-gray-300"
-									}`}
-								/>
-								{errors.name && (
-									<p className="text-red-500 text-sm mt-1">
-										{errors.name.message}
-									</p>
-								)}
-							</div>
-
-							<div>
-								<input
-									type="text"
-									placeholder="School short name *"
-									{...register("shortName")}
-									className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-										errors.shortName ? "border-red-500" : "border-gray-300"
-									}`}
-								/>
-								{errors.shortName && (
-									<p className="text-red-500 text-sm mt-1">
-										{errors.shortName.message}
-									</p>
-								)}
-							</div>
+				<form
+					onSubmit={handleSubmit(onSubmit)}
+					className="space-y-8">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<input
+								type="text"
+								placeholder="School name *"
+								{...register("name")}
+								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
+									errors.name ? "border-red-500" : "border-gray-300"
+								}`}
+							/>
+							{errors.name && (
+								<p className="text-red-500 text-xs mt-1">
+									{errors.name.message}
+								</p>
+							)}
 						</div>
 
-						<div className="relative">
+						<div>
+							<input
+								type="text"
+								placeholder="School short name *"
+								{...register("shortName")}
+								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
+									errors.shortName ? "border-red-500" : "border-gray-300"
+								}`}
+							/>
+							{errors.shortName && (
+								<p className="text-red-500 text-xs mt-1">
+									{errors.shortName.message}
+								</p>
+							)}
+						</div>
+
+						<div className="relative col-span-1">
+							<label className="absolute -top-2 left-3 bg-white text-xs text-orange-500 px-1">
+								This will be the main URL to your portal
+							</label>
 							<input
 								type="text"
 								value={generatedUrl}
 								readOnly
-								className="w-full px-4 py-3 pr-12 border border-orange-500 rounded-lg bg-orange-50 text-orange-600"
+								className="w-full px-4 py-3 pr-10 border border-orange-500 bg-orange-50 rounded-lg text-sm text-orange-600 focus:outline-none"
 							/>
 							<button
 								type="button"
 								onClick={copyToClipboard}
-								className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-orange-100 p-1 rounded">
+								className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-orange-600">
 								<svg
-									className="w-5 h-5 text-gray-500"
+									className="w-5 h-5"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24">
@@ -130,9 +130,6 @@ export default function SchoolInfoStep({
 									/>
 								</svg>
 							</button>
-							<p className="text-sm text-gray-500 mt-1">
-								This will be the main URL to your portal
-							</p>
 						</div>
 
 						<div>
@@ -140,29 +137,31 @@ export default function SchoolInfoStep({
 								type="text"
 								placeholder="School website *"
 								{...register("website")}
-								className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
 									errors.website ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
 							{errors.website && (
-								<p className="text-red-500 text-sm mt-1">
+								<p className="text-red-500 text-xs mt-1">
 									{errors.website.message}
 								</p>
 							)}
 						</div>
+					</div>
 
+					<div className="flex justify-center pt-12">
 						<button
 							type="submit"
 							disabled={!isValid}
-							className={`w-full mt-8 py-4 rounded-full font-semibold text-lg transition-colors ${
+							className={`w-48 py-3 rounded-full font-semibold text-base transition-colors ${
 								isValid
 									? "bg-orange-500 text-white hover:bg-orange-600"
 									: "bg-gray-200 text-gray-400 cursor-not-allowed"
 							}`}>
 							Next
 						</button>
-					</form>
-				</div>
+					</div>
+				</form>
 			</div>
 		</div>
 	);

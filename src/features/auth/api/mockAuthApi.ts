@@ -2,6 +2,7 @@ import { User, Role } from "../types/user.types";
 
 // API Response Types
 interface ApiResponse<T> {
+	[x: string]: any;
 	success: boolean;
 	data?: T;
 	error?: {

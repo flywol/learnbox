@@ -1,6 +1,6 @@
 // src/features/auth/pages/login/LoginPage.tsx
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -49,7 +49,6 @@ const CombinedSchoolLoginPage = () => {
 	const [loginError, setLoginError] = useState<string | null>(null);
 
 	const navigate = useNavigate();
-	const location = useLocation();
 	const {
 		selectedRole,
 		schoolDomain,

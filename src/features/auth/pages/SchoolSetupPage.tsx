@@ -1,3 +1,4 @@
+// src/features/auth/pages/SchoolSetupPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -5,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "../store/authStore";
 import SignupFlow from "./signup/AdminSignupFlow";
+import { AuthPageWrapper } from "../components/ui/AuthPageWrapper";
 
 // Validation schema for school URL
 const schoolSetupSchema = z.object({
@@ -21,9 +23,6 @@ const schoolSetupSchema = z.object({
 		),
 });
 
-type SchoolSetupFormValues = z.infer<typeof schoolSetupSchema>;
-
-// Mock API function to simulate school validation
 const validateSchoolApi = (
 	url: string
 ): Promise<{ isValid: boolean; schoolName?: string }> => {
@@ -39,6 +38,8 @@ const validateSchoolApi = (
 		}, 1500); // Simulate network delay
 	});
 };
+
+type SchoolSetupFormValues = z.infer<typeof schoolSetupSchema>;
 
 const SchoolSetupPage = () => {
 	const navigate = useNavigate();
@@ -99,17 +100,12 @@ const SchoolSetupPage = () => {
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-			<div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-sm border">
+		<AuthPageWrapper>
+			<div className="space-y-6">
 				<div className="text-center">
-					<h1 className="text-3xl font-bold tracking-tight">
-						Connect to your school
-					</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Sign In</h1>
 					<p className="mt-2 text-muted-foreground">
-						Enter your school's Learn Box URL to continue as a{" "}
-						<span className="font-medium text-orange-600">
-							{selectedRole.toLowerCase()}
-						</span>
+						Sign in to stay connected.
 					</p>
 				</div>
 
@@ -117,17 +113,12 @@ const SchoolSetupPage = () => {
 					onSubmit={handleSubmit(onSubmit)}
 					className="space-y-4">
 					<div className="space-y-2">
-						<label
-							htmlFor="schoolUrl"
-							className="text-sm font-medium">
-							School URL
-						</label>
 						<input
 							id="schoolUrl"
 							type="text"
 							{...register("schoolUrl")}
-							className="w-full p-3 border rounded-md focus:outline-none focus:border-orange-500"
-							placeholder="e.g., westfield-high.learnbox.com"
+							className="w-full p-3 border rounded-md"
+							placeholder="Input school domain"
 							disabled={isValidating}
 						/>
 						{errors.schoolUrl && (
@@ -137,46 +128,36 @@ const SchoolSetupPage = () => {
 						)}
 					</div>
 
+					<div className="text-right">
+						<a
+							href="#"
+							className="text-sm text-gray-500 hover:text-gray-700">
+							Need help?
+						</a>
+					</div>
+
 					<button
 						type="submit"
 						disabled={isValidating}
 						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-						{isValidating ? "Validating..." : "Continue"}
+						{isValidating ? "Validating..." : "Next"}
 					</button>
 				</form>
 
-				{/* Show Create Account button only for ADMIN role */}
+				{/* Show Create Account link only for ADMIN role */}
 				{selectedRole === "ADMIN" && (
-					<div className="relative">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-gray-300" />
-						</div>
-						<div className="relative flex justify-center text-sm">
-							<span className="bg-white px-2 text-gray-500">OR</span>
-						</div>
+					<div className="text-center">
+						<button
+							type="button"
+							onClick={() => setShowSignupFlow(true)}
+							className="text-sm text-gray-500 hover:text-gray-700"
+							disabled={isValidating}>
+							Create your school
+						</button>
 					</div>
 				)}
-
-				{selectedRole === "ADMIN" && (
-					<button
-						type="button"
-						onClick={() => setShowSignupFlow(true)}
-						className="w-full border-2 border-orange-500 text-orange-500 p-3 rounded-md font-semibold hover:bg-orange-50 transition-colors"
-						disabled={isValidating}>
-						Create New School Account
-					</button>
-				)}
-
-				<div className="text-center">
-					<button
-						onClick={() => navigate("/")}
-						className="text-sm text-gray-500 hover:text-gray-700"
-						disabled={isValidating}>
-						← Back to role selection
-					</button>
-				</div>
 			</div>
-		</div>
+		</AuthPageWrapper>
 	);
 };
 

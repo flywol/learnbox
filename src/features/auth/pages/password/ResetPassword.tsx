@@ -10,6 +10,19 @@ import {
 import { useAuthStore } from "../../store/authStore";
 import { mockAuthApi } from "../../api/mockAuthApi";
 
+// Illustration component that stays static during transition
+const AuthIllustration = () => (
+	<div className="hidden lg:flex lg:w-1/2 bg-[#FFEFE980] items-center justify-center p-8">
+		<div className="w-full max-w-md">
+			<img
+				className="w-[710px] h-[560px] object-contain"
+				src="/images/illustration.svg"
+				alt="illustration"
+			/>
+		</div>
+	</div>
+);
+
 const ResetPasswordPage = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -120,147 +133,145 @@ const ResetPasswordPage = () => {
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50">
-			<div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-sm border">
-				<div className="text-center">
-					<h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
-					{loginContext.isFirstTimeLogin ? (
-						<p className="mt-2 text-muted-foreground">
-							Welcome! Please create a new password for your account.
-						</p>
-					) : (
-						<p className="mt-2 text-muted-foreground">
-							Enter your new password below.
-						</p>
-					)}
-					{userEmail && (
-						<p className="mt-1 text-sm text-gray-600">Account: {userEmail}</p>
-					)}
-				</div>
-
-				{error && (
-					<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-						{error}
-					</div>
-				)}
-
-				<form
-					onSubmit={handleSubmit(onSubmit)}
-					className="space-y-4">
-					<div className="space-y-2">
-						<label
-							htmlFor="password"
-							className="text-sm font-medium">
-							New Password
-						</label>
-						<div className="relative">
-							<input
-								id="password"
-								type={showPassword ? "text" : "password"}
-								{...register("password")}
-								className="w-full p-3 pr-10 border rounded-md focus:outline-none focus:border-orange-500"
-								placeholder="Enter new password"
-								disabled={isResetting}
-							/>
-							<button
-								type="button"
-								onClick={() => setShowPassword(!showPassword)}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-								{showPassword ? "Hide" : "Show"}
-							</button>
-						</div>
-						{errors.password && (
-							<p className="text-red-500 text-sm mt-1">
-								{errors.password.message}
+		<div className="flex min-h-screen bg-white">
+			<AuthIllustration />
+			<div className="flex flex-1 flex-col justify-center items-center p-6 sm:p-8">
+				<div className="w-full max-w-sm space-y-6">
+					<div className="text-center">
+						<h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
+						{loginContext.isFirstTimeLogin ? (
+							<p className="mt-2 text-muted-foreground">
+								Welcome! Please create a new password for your account.
+							</p>
+						) : (
+							<p className="mt-2 text-muted-foreground">
+								Enter your new password below.
 							</p>
 						)}
-						{password && (
-							<div className="mt-2">
-								<div className="flex items-center gap-2">
-									<div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-										<div
-											className={`h-full transition-all ${
-												passwordStrength.strength === 1
-													? "bg-red-500 w-1/4"
-													: passwordStrength.strength === 2
-													? "bg-yellow-500 w-2/4"
-													: passwordStrength.strength === 3
-													? "bg-blue-500 w-3/4"
-													: passwordStrength.strength === 4
-													? "bg-green-500 w-full"
-													: "w-0"
-											}`}
-										/>
-									</div>
-									<span
-										className={`text-sm font-medium ${
-											passwordStrength.strength === 1
-												? "text-red-500"
-												: passwordStrength.strength === 2
-												? "text-yellow-500"
-												: passwordStrength.strength === 3
-												? "text-blue-500"
-												: passwordStrength.strength === 4
-												? "text-green-500"
-												: "text-gray-400"
-										}`}>
-										{passwordStrength.label}
-									</span>
-								</div>
-								<p className="text-xs text-gray-500 mt-1">
-									Use 8+ characters with numbers and special characters
-								</p>
+					</div>
+
+					{error && (
+						<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+							{error}
+						</div>
+					)}
+
+					<form
+						onSubmit={handleSubmit(onSubmit)}
+						className="space-y-4">
+						<div className="space-y-2">
+							<label
+								htmlFor="password"
+								className="text-sm font-medium block text-gray-700">
+								New Password
+							</label>
+							<div className="relative">
+								<input
+									id="password"
+									type={showPassword ? "text" : "password"}
+									{...register("password")}
+									className="w-full p-3 pr-10 border rounded-md"
+									placeholder="Enter new password"
+									disabled={isResetting}
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword(!showPassword)}
+									className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+									{showPassword ? "Hide" : "Show"}
+								</button>
 							</div>
-						)}
-					</div>
-
-					<div className="space-y-2">
-						<label
-							htmlFor="confirmPassword"
-							className="text-sm font-medium">
-							Confirm New Password
-						</label>
-						<div className="relative">
-							<input
-								id="confirmPassword"
-								type={showConfirmPassword ? "text" : "password"}
-								{...register("confirmPassword")}
-								className="w-full p-3 pr-10 border rounded-md focus:outline-none focus:border-orange-500"
-								placeholder="Confirm new password"
-								disabled={isResetting}
-							/>
-							<button
-								type="button"
-								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-								{showConfirmPassword ? "Hide" : "Show"}
-							</button>
+							{errors.password && (
+								<p className="text-red-500 text-sm mt-1">
+									{errors.password.message}
+								</p>
+							)}
+							{password && (
+								<div className="mt-2">
+									<div className="flex items-center gap-2">
+										<div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+											<div
+												className={`h-full transition-all ${
+													passwordStrength.strength === 1
+														? "bg-red-500 w-1/4"
+														: passwordStrength.strength === 2
+														? "bg-yellow-500 w-2/4"
+														: passwordStrength.strength === 3
+														? "bg-blue-500 w-3/4"
+														: passwordStrength.strength === 4
+														? "bg-green-500 w-full"
+														: "w-0"
+												}`}
+											/>
+										</div>
+										<span
+											className={`text-sm font-medium ${
+												passwordStrength.strength === 1
+													? "text-red-500"
+													: passwordStrength.strength === 2
+													? "text-yellow-500"
+													: passwordStrength.strength === 3
+													? "text-blue-500"
+													: passwordStrength.strength === 4
+													? "text-green-500"
+													: "text-gray-400"
+											}`}>
+											{passwordStrength.label}
+										</span>
+									</div>
+									<p className="text-xs text-gray-500 mt-1">
+										Use 8+ characters with numbers and special characters
+									</p>
+								</div>
+							)}
 						</div>
-						{errors.confirmPassword && (
-							<p className="text-red-500 text-sm mt-1">
-								{errors.confirmPassword.message}
-							</p>
-						)}
-					</div>
 
-					<div className="pt-4">
+						<div className="space-y-2">
+							<label
+								htmlFor="confirmPassword"
+								className="text-sm font-medium block text-gray-700">
+								Confirm New Password
+							</label>
+							<div className="relative">
+								<input
+									id="confirmPassword"
+									type={showConfirmPassword ? "text" : "password"}
+									{...register("confirmPassword")}
+									className="w-full p-3 pr-10 border rounded-md"
+									placeholder="Confirm new password"
+									disabled={isResetting}
+								/>
+								<button
+									type="button"
+									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+									className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+									{showConfirmPassword ? "Hide" : "Show"}
+								</button>
+							</div>
+							{errors.confirmPassword && (
+								<p className="text-red-500 text-sm mt-1">
+									{errors.confirmPassword.message}
+								</p>
+							)}
+						</div>
+
 						<button
 							type="submit"
 							disabled={!isValid || isResetting}
 							className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
 							{isResetting ? "Resetting Password..." : "Reset Password"}
 						</button>
-					</div>
-				</form>
+					</form>
 
-				{loginContext.isFirstTimeLogin && (
-					<div className="text-center text-sm text-gray-600">
-						<p>
-							This is a one-time setup. After resetting your password, you'll
-							need to login again with your new credentials.
-						</p>
-					</div>
-				)}
+					{loginContext.isFirstTimeLogin && (
+						<div className="text-center text-sm text-gray-600">
+							<p>
+								This is a one-time setup. After resetting your password, you'll
+								need to login again with your new credentials.
+							</p>
+						</div>
+					)}
+				</div>
 			</div>
 		</div>
 	);

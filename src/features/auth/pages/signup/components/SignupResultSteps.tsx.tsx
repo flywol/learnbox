@@ -7,7 +7,7 @@ export function SuccessStep({ onClose, onContinue }: SuccessStepProps) {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50">
 			<div className="w-full max-w-2xl px-8">
-				<div className="bg-white rounded-lg shadow-sm p-12 relative">
+				<div>
 					<button
 						onClick={onClose}
 						className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">

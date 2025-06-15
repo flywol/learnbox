@@ -1,4 +1,4 @@
-// src/features/auth/pages/password/ForgotPasswordPage.tsx
+// src/features/auth/pages/password/ForgotPassword.tsx
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import {
 import { mockAuthApi } from "../../api/mockAuthApi";
 import { useAuthStore } from "../../store/authStore";
 import OtpVerificationStep from "../signup/components/OtpVerificationStep";
+import { AuthPageWrapper } from "../../components/ui/AuthPageWrapper";
 
 type ForgotPasswordStep = "email" | "otp" | "success";
 
@@ -96,7 +97,7 @@ const ForgotPasswordPage = () => {
 		navigate("/login", { state: { email: userEmail || defaultEmail } });
 	};
 
-	// Render different steps
+	// Render OTP step with its own layout
 	if (currentStep === "otp") {
 		return (
 			<div className="min-h-screen bg-gray-50">
@@ -127,6 +128,7 @@ const ForgotPasswordPage = () => {
 		);
 	}
 
+	// Render success step with its own layout
 	if (currentStep === "success") {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -157,10 +159,10 @@ const ForgotPasswordPage = () => {
 		);
 	}
 
-	// Default: Email step
+	// Default: Email step within AuthLayout
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50">
-			<div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-sm border">
+		<AuthPageWrapper>
+			<div className="space-y-6">
 				<div className="text-center">
 					<h1 className="text-3xl font-bold tracking-tight">Forgot Password</h1>
 					<p className="mt-2 text-muted-foreground">
@@ -184,17 +186,12 @@ const ForgotPasswordPage = () => {
 					onSubmit={handleSubmit(onEmailSubmit)}
 					className="space-y-4">
 					<div className="space-y-2">
-						<label
-							htmlFor="email"
-							className="text-sm font-medium">
-							Email Address
-						</label>
 						<input
 							id="email"
 							type="email"
 							{...register("email")}
-							className="w-full p-3 border rounded-md focus:outline-none focus:border-orange-500"
-							placeholder="Enter your email"
+							className="w-full p-3 border rounded-md"
+							placeholder="Email address"
 							disabled={isSubmitting}
 						/>
 						{errors.email && (
@@ -204,35 +201,26 @@ const ForgotPasswordPage = () => {
 						)}
 					</div>
 
-					<div className="pt-4 space-y-3">
-						<button
-							type="submit"
-							disabled={!isValid || isSubmitting}
-							className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-							{isSubmitting ? "Sending..." : "Send Verification Code"}
-						</button>
-
-						<button
-							type="button"
-							onClick={handleBackToLogin}
-							className="w-full border border-gray-300 text-gray-700 p-3 rounded-md font-semibold hover:bg-gray-50 transition-colors">
-							Back to Login
-						</button>
-					</div>
+					<button
+						type="submit"
+						disabled={!isValid || isSubmitting}
+						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
+						{isSubmitting ? "Sending..." : "Send Verification Code"}
+					</button>
 				</form>
 
-				<div className="text-center text-sm text-gray-600">
-					<p>
+				<div className="text-center text-sm">
+					<p className="text-gray-600">
 						Remember your password?{" "}
 						<button
 							onClick={handleBackToLogin}
-							className="text-orange-500 hover:underline font-medium">
+							className="text-gray-500 hover:text-gray-700 font-medium">
 							Sign in
 						</button>
 					</p>
 				</div>
 			</div>
-		</div>
+		</AuthPageWrapper>
 	);
 };
 
