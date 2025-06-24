@@ -1,3 +1,4 @@
+// src/features/auth/pages/signup/components/SignupResultSteps.tsx
 interface SuccessStepProps {
 	onClose: () => void;
 	onContinue: () => void;
@@ -7,7 +8,7 @@ export function SuccessStep({ onClose, onContinue }: SuccessStepProps) {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50">
 			<div className="w-full max-w-2xl px-8">
-				<div>
+				<div className="relative">
 					<button
 						onClick={onClose}
 						className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -42,14 +43,18 @@ export function SuccessStep({ onClose, onContinue }: SuccessStepProps) {
 						</div>
 					</div>
 
-					<h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+					<h2 className="text-3xl font-bold text-center text-gray-800 mb-4">
 						Congratulations! You've successfully created your school.
 					</h2>
+					<p className="text-center text-gray-600 mb-8">
+						Your account has been verified. You can now log in to access your
+						admin dashboard.
+					</p>
 
 					<button
 						onClick={onContinue}
 						className="w-full max-w-sm mx-auto block bg-orange-500 text-white py-4 rounded-full font-semibold text-lg hover:bg-orange-600 transition-colors">
-						Let's Begin
+						Go to Login
 					</button>
 				</div>
 			</div>
@@ -59,10 +64,17 @@ export function SuccessStep({ onClose, onContinue }: SuccessStepProps) {
 
 interface ErrorStepProps {
 	onClose: () => void;
-	onRetry: () => void;
+	onRetry?: () => void;
+	onStartOver: () => void;
+	errorMessage?: string;
 }
 
-export function ErrorStep({ onClose, onRetry }: ErrorStepProps) {
+export function ErrorStep({
+	onClose,
+	onRetry,
+	onStartOver,
+	errorMessage,
+}: ErrorStepProps) {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50">
 			<div className="w-full max-w-2xl px-8">
@@ -102,17 +114,17 @@ export function ErrorStep({ onClose, onRetry }: ErrorStepProps) {
 					</div>
 
 					<h2 className="text-3xl font-bold text-center text-gray-800 mb-4">
-						The verification link is invalid or has expired.
+						{errorMessage || "The verification link is invalid or has expired."}
 					</h2>
 					<p className="text-center text-xl text-gray-600 mb-8">
-						Please request a new OTP.
+						Please try again or contact support if the issue persists.
 					</p>
 
-					<button
-						onClick={onRetry}
-						className="w-full max-w-sm mx-auto block bg-orange-500 text-white py-4 rounded-full font-semibold text-lg hover:bg-orange-600 transition-colors">
-						Request
-					</button>
+					<div className="flex gap-4">
+						<button onClick={onClose}>Close</button>
+						{onRetry && <button onClick={onRetry}>Try Again</button>}
+						<button onClick={onStartOver}>Start Over</button>
+					</div>
 				</div>
 			</div>
 		</div>

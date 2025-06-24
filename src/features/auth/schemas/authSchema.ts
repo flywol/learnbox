@@ -37,9 +37,9 @@ export const otpSchema = z.object({
 // ===== LOGIN SCHEMAS =====
 
 export const loginSchema = z.object({
-	email: emailSchema,
-	password: z.string().min(1, "Password is required"),
-	rememberMe: z.boolean().optional(),
+    email: z.string().email({ message: "Please enter a valid email address" }),
+    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+    rememberMe: z.boolean()
 });
 
 // ===== SIGNUP SCHEMAS =====

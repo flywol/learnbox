@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./features/auth/store/authStore";
 
@@ -15,15 +16,14 @@ import LoginPage from "./features/auth/pages/login/LoginPage";
 import OnboardingPage from "./features/auth/pages/onboarding/OnboardingPage";
 import ForgotPasswordPage from "./features/auth/pages/password/ForgotPassword";
 import ResetPasswordPage from "./features/auth/pages/password/ResetPassword";
+import EmailVerificationPage from "./features/auth/pages/login/EmailVerificationPage";
 
 // Placeholder components
 const DashboardPage = () => {
 	const { user, logout } = useAuthStore();
 	return (
 		<div className="p-8">
-			<h1 className="text-2xl font-bold">
-				Welcome to the Dashboard, {user?.name}!
-			</h1>
+			<h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
 			<p>Your role is: {user?.role}</p>
 			<button
 				onClick={logout}
@@ -69,6 +69,13 @@ const NotFoundPage = () => (
 );
 
 function App() {
+	const { checkAuthStatus } = useAuthStore();
+
+	// Check auth status on app mount
+	useEffect(() => {
+		checkAuthStatus();
+	}, [checkAuthStatus]);
+
 	return (
 		<Routes>
 			{/* Public Routes - No authentication required */}
@@ -121,6 +128,11 @@ function App() {
 						</FlowGuard>
 					</AuthGuard>
 				}
+			/>
+
+			<Route
+				path="/verify-email"
+				element={<EmailVerificationPage />}
 			/>
 
 			{/* Password Reset Routes */}

@@ -47,11 +47,7 @@ export type PasswordResetStep = "email" | "otp" | "newPassword" | null;
 export type AuthFlow = "login" | "signup" | "forgotPassword" | "firstTimeLogin";
 
 // Form data types
-export interface LoginFormData {
-	email: string;
-	password: string;
-	rememberMe?: boolean;
-}
+// Note: LoginFormData is now exported from authSchema.ts
 
 export interface SignupFormData {
 	schoolInfo: {

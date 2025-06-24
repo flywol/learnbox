@@ -1,4 +1,4 @@
-// src/features/auth/pages/password/ResetPasswordPage.tsx
+// src/features/auth/pages/password/ResetPassword.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -8,7 +8,7 @@ import {
 	ResetPasswordFormData,
 } from "../../schemas/authSchema";
 import { useAuthStore } from "../../store/authStore";
-import { mockAuthApi } from "../../api/mockAuthApi";
+import { authApi } from "../../api/authApi";
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -33,9 +33,14 @@ const ResetPasswordPage = () => {
 
 	const { loginContext, user, logout, completePasswordReset } = useAuthStore();
 
-	// Get reset token and email from either location state or auth store
-	const resetToken = location.state?.resetToken || loginContext.resetToken;
+	// Get email from location state (from forgot password flow)
 	const userEmail = location.state?.email || user?.email;
+	const isFromForgotPassword = location.state?.fromForgotPassword || false;
+
+	// For first-time login, we use the token from login response
+	// For forgot password, email verification has already happened
+	const isFirstTimeLogin =
+		loginContext.isFirstTimeLogin && !isFromForgotPassword;
 
 	const {
 		register,
@@ -49,25 +54,12 @@ const ResetPasswordPage = () => {
 
 	const password = watch("password");
 
-	// Validate token on mount
+	// Redirect if no email available
 	useEffect(() => {
-		if (!resetToken) {
-			// No token available, redirect to login
+		if (!userEmail) {
 			navigate("/login");
-			return;
 		}
-
-		// Validate the token
-		mockAuthApi.validateResetToken(resetToken).then((response) => {
-			if (!response.success) {
-				setError("Invalid or expired reset token. Please login again.");
-				setTimeout(() => {
-					logout(); // Clear any existing session
-					navigate("/login");
-				}, 3000);
-			}
-		});
-	}, [resetToken, navigate, logout]);
+	}, [userEmail, navigate]);
 
 	// Password strength indicator
 	const getPasswordStrength = (pwd: string) => {
@@ -86,49 +78,48 @@ const ResetPasswordPage = () => {
 	const passwordStrength = getPasswordStrength(password || "");
 
 	const onSubmit = async (data: ResetPasswordFormData) => {
+		if (!userEmail) {
+			setError("Email not found. Please start the process again.");
+			return;
+		}
+
 		setIsResetting(true);
 		setError(null);
 
 		try {
-			const response = await mockAuthApi.resetPassword(
-				resetToken!,
+			await authApi.resetPassword(
+				userEmail,
 				data.password,
-				userEmail
+				data.confirmPassword
 			);
 
-			if (response.success) {
-				// Clear the first-time login flag
-				completePasswordReset();
+			// Clear the password reset state
+			completePasswordReset();
 
-				// Log out the user (they need to login with new password)
+			// For first-time login, they're already logged in, just redirect
+			if (isFirstTimeLogin) {
+				navigate("/dashboard");
+			} else {
+				// For forgot password, they need to login again
 				logout();
 
 				// Show success message and redirect to login
 				alert(
 					"Password reset successful! Please login with your new password."
 				);
-				navigate("/login", {
-					state: {
-						message:
-							"Password reset successful! Please login with your new password.",
-						email: userEmail,
-					},
-				});
-			} else {
-				setError(
-					response.error?.message ||
-						"Failed to reset password. Please try again."
-				);
+				navigate("/login");
 			}
-		} catch (error) {
-			console.error("Password reset failed:", error);
-			setError("An unexpected error occurred. Please try again.");
+		} catch (error: any) {
+			setError(
+				error.response?.data?.message ||
+					"Failed to reset password. Please try again."
+			);
 		} finally {
 			setIsResetting(false);
 		}
 	};
 
-	if (!resetToken) {
+	if (!userEmail) {
 		return null; // Will redirect in useEffect
 	}
 
@@ -138,8 +129,10 @@ const ResetPasswordPage = () => {
 			<div className="flex flex-1 flex-col justify-center items-center p-6 sm:p-8">
 				<div className="w-full max-w-sm space-y-6">
 					<div className="text-center">
-						<h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
-						{loginContext.isFirstTimeLogin ? (
+						<h1 className="text-3xl font-bold tracking-tight">
+							Reset Password
+						</h1>
+						{isFirstTimeLogin ? (
 							<p className="mt-2 text-muted-foreground">
 								Welcome! Please create a new password for your account.
 							</p>
@@ -263,11 +256,11 @@ const ResetPasswordPage = () => {
 						</button>
 					</form>
 
-					{loginContext.isFirstTimeLogin && (
+					{isFirstTimeLogin && (
 						<div className="text-center text-sm text-gray-600">
 							<p>
 								This is a one-time setup. After resetting your password, you'll
-								need to login again with your new credentials.
+								be able to access your dashboard.
 							</p>
 						</div>
 					)}

@@ -1,5 +1,5 @@
 // src/features/auth/pages/password/ForgotPassword.tsx
-import { useState } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,31 +7,39 @@ import {
 	forgotPasswordSchema,
 	ForgotPasswordFormData,
 } from "../../schemas/authSchema";
-import { mockAuthApi } from "../../api/mockAuthApi";
+import { authApi } from "../../api/authApi";
 import { useAuthStore } from "../../store/authStore";
-import OtpVerificationStep from "../signup/components/OtpVerificationStep";
+import OtpVerification from "../../components/OtpVerification";
 import { AuthPageWrapper } from "../../components/ui/AuthPageWrapper";
 
-type ForgotPasswordStep = "email" | "otp" | "success";
-
 const ForgotPasswordPage = () => {
-	const [currentStep, setCurrentStep] = useState<ForgotPasswordStep>("email");
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [emailSent, setEmailSent] = useState(false);
-	const [userEmail, setUserEmail] = useState("");
-
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { setPasswordResetEmail, setPasswordResetStep } = useAuthStore();
+
+	const {
+		passwordResetEmail,
+		passwordResetStep,
+		loadingState,
+		setPasswordResetEmail,
+		setPasswordResetStep,
+		setLoadingState,
+	} = useAuthStore();
 
 	// Pre-fill email if coming from login page
 	const defaultEmail = location.state?.email || "";
+
+	// Initialize password reset flow
+	useEffect(() => {
+		if (passwordResetStep === null) {
+			setPasswordResetStep("email");
+		}
+	}, [passwordResetStep, setPasswordResetStep]);
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
+		setError,
 	} = useForm<ForgotPasswordFormData>({
 		resolver: zodResolver(forgotPasswordSchema),
 		defaultValues: {
@@ -39,71 +47,86 @@ const ForgotPasswordPage = () => {
 		},
 	});
 
-	const onEmailSubmit = async (data: ForgotPasswordFormData) => {
-		setIsSubmitting(true);
-		setError(null);
+	const onEmailSubmit = useCallback(
+		async (data: ForgotPasswordFormData) => {
+			setLoadingState("submitting");
 
-		try {
-			const response = await mockAuthApi.forgotPassword(data.email);
-
-			if (response.success) {
-				setUserEmail(data.email);
+			try {
+				await authApi.forgotPassword(data.email);
 				setPasswordResetEmail(data.email);
 				setPasswordResetStep("otp");
-				setEmailSent(true);
-
-				// Move to OTP step
-				setCurrentStep("otp");
-			} else {
-				setError(
-					response.error?.message ||
-						"Failed to send reset email. Please try again."
-				);
+				setLoadingState("success");
+			} catch (err: any) {
+				const errorMessage =
+					err.response?.data?.message ||
+					"Failed to send reset email. Please try again.";
+				setError("email", { message: errorMessage });
+				setLoadingState("error");
 			}
-		} catch (error) {
-			console.error("Forgot password failed:", error);
-			setError("An unexpected error occurred. Please try again.");
-		} finally {
-			setIsSubmitting(false);
+		},
+		[setPasswordResetEmail, setPasswordResetStep, setLoadingState, setError]
+	);
+
+	// OTP verification callback
+	const handleOtpVerify = useCallback(
+		async (otp: string) => {
+			if (!passwordResetEmail) {
+				throw new Error("Email is required for OTP verification");
+			}
+
+			await authApi.verifyForgotPasswordOtp(passwordResetEmail, otp);
+
+			// Move to success step briefly, then redirect to reset password
+			setPasswordResetStep("newPassword");
+
+			// Redirect to reset password page after a brief delay
+			setTimeout(() => {
+				navigate("/reset-password", {
+					state: {
+						email: passwordResetEmail,
+						fromForgotPassword: true,
+					},
+				});
+			}, 1500);
+		},
+		[passwordResetEmail, setPasswordResetStep, navigate]
+	);
+
+	// OTP resend callback
+	const handleOtpResend = useCallback(async () => {
+		if (!passwordResetEmail) {
+			throw new Error("Email is required for resending OTP");
 		}
-	};
+		await authApi.forgotPassword(passwordResetEmail);
+	}, [passwordResetEmail]);
 
-	const handleOtpSuccess = async () => {
-		// In real implementation, the OTP verification would return a reset token
-		// For now, we'll generate a mock token
-		const mockResetToken = `verified-${Date.now()}-reset`;
+	// OTP error callback
+	const handleOtpError = useCallback(
+		(_error: string) => {
+			// Show error and go back to email step
+			setPasswordResetStep("email");
+			setLoadingState("error");
+		},
+		[setPasswordResetStep, setLoadingState]
+	);
 
-		setPasswordResetStep("newPassword");
-		setCurrentStep("success");
+	const handleBackToLogin = useCallback(() => {
+		navigate("/login", {
+			state: { email: passwordResetEmail || defaultEmail },
+		});
+	}, [navigate, passwordResetEmail, defaultEmail]);
 
-		// Redirect to reset password page with the token
-		setTimeout(() => {
-			navigate("/reset-password", {
-				state: {
-					resetToken: mockResetToken,
-					email: userEmail,
-					fromForgotPassword: true,
-				},
-			});
-		}, 2000);
-	};
+	const handleBackToEmail = useCallback(() => {
+		setPasswordResetStep("email");
+	}, [setPasswordResetStep]);
 
-	const handleOtpError = () => {
-		setError("OTP verification failed. Please try again.");
-		setCurrentStep("email");
-	};
-
-	const handleBackToLogin = () => {
-		navigate("/login", { state: { email: userEmail || defaultEmail } });
-	};
-
-	// Render OTP step with its own layout
-	if (currentStep === "otp") {
+	// Render OTP step
+	if (passwordResetStep === "otp") {
 		return (
 			<div className="min-h-screen bg-gray-50">
 				<div className="fixed top-4 left-4">
 					<button
-						onClick={() => setCurrentStep("email")}
+						onClick={handleBackToEmail}
 						className="text-gray-600 hover:text-gray-800 flex items-center gap-2">
 						<svg
 							className="w-5 h-5"
@@ -120,16 +143,18 @@ const ForgotPasswordPage = () => {
 						Back
 					</button>
 				</div>
-				<OtpVerificationStep
-					onSubmit={handleOtpSuccess}
+				<OtpVerification
+					email={passwordResetEmail || ""}
+					onVerify={handleOtpVerify}
+					onResend={handleOtpResend}
 					onError={handleOtpError}
 				/>
 			</div>
 		);
 	}
 
-	// Render success step with its own layout
-	if (currentStep === "success") {
+	// Render success/redirect step
+	if (passwordResetStep === "newPassword") {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gray-50">
 				<div className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm border text-center">
@@ -159,7 +184,7 @@ const ForgotPasswordPage = () => {
 		);
 	}
 
-	// Default: Email step within AuthLayout
+	// Default: Email step
 	return (
 		<AuthPageWrapper>
 			<div className="space-y-6">
@@ -169,18 +194,6 @@ const ForgotPasswordPage = () => {
 						Enter your email address and we'll send you a verification code.
 					</p>
 				</div>
-
-				{error && (
-					<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-						{error}
-					</div>
-				)}
-
-				{emailSent && (
-					<div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-						Verification code sent! Please check your email.
-					</div>
-				)}
 
 				<form
 					onSubmit={handleSubmit(onEmailSubmit)}
@@ -192,7 +205,7 @@ const ForgotPasswordPage = () => {
 							{...register("email")}
 							className="w-full p-3 border rounded-md"
 							placeholder="Email address"
-							disabled={isSubmitting}
+							disabled={loadingState === "submitting"}
 						/>
 						{errors.email && (
 							<p className="text-red-500 text-sm mt-1">
@@ -203,9 +216,11 @@ const ForgotPasswordPage = () => {
 
 					<button
 						type="submit"
-						disabled={!isValid || isSubmitting}
+						disabled={!isValid || loadingState === "submitting"}
 						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-						{isSubmitting ? "Sending..." : "Send Verification Code"}
+						{loadingState === "submitting"
+							? "Sending..."
+							: "Send Verification Code"}
 					</button>
 				</form>
 

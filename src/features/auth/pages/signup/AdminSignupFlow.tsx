@@ -1,123 +1,224 @@
-import { SchoolInfoFormData, PersonalInfoFormData } from "@/features/auth/schemas/authSchema.ts";
-import { useState } from "react";
-import OtpVerificationStep from "./components/OtpVerificationStep";
+import {
+	SchoolInfoFormData,
+	PersonalInfoFormData,
+} from "@/features/auth/schemas/authSchema";
+import { useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/authStore";
+import { authApi } from "../../api/authApi";
+import OtpVerification from "../../components/OtpVerification";
 import PersonalInfoStep from "./components/PersonalInfoStep";
 import SchoolInfoStep from "./components/SchoolInfoStep";
 import { SuccessStep, ErrorStep } from "./components/SignupResultSteps.tsx";
-
-
-type SignupStep = "school-info" | "personal-info" | "otp" | "success" | "error";
 
 interface SignupFlowProps {
 	onComplete?: () => void;
 }
 
 export default function SignupFlow({ onComplete }: SignupFlowProps) {
-	const [currentStep, setCurrentStep] = useState<SignupStep>("school-info");
-	const [schoolInfo, setSchoolInfo] = useState<SchoolInfoFormData | null>(null);
-	const [personalInfo, setPersonalInfo] = useState<PersonalInfoFormData | null>(
-		null
-	);
-	const [generatedUrl, setGeneratedUrl] = useState("");
+	const navigate = useNavigate();
 
-	const handleSchoolInfoNext = (info: SchoolInfoFormData, url: string) => {
-		setSchoolInfo(info);
-		setGeneratedUrl(url);
-		setCurrentStep("personal-info");
-	};
+	const {
+		signupStep,
+		signupData,
+		loadingState,
+		setSignupStep,
+		updateSignupData,
+		clearSignupData,
+		completeSignup,
+		setSchoolDomain,
+		setLoadingState,
+	} = useAuthStore();
 
-	const handlePersonalInfoNext = (info: PersonalInfoFormData) => {
-		setPersonalInfo(info);
-		setCurrentStep("otp");
-
-		// In real implementation, this would trigger OTP sending
-		console.log("Sending OTP to:", info.email);
-
-		// API call example:
-		// await sendOtp({ email: info.email });
-	};
-
-	const handleOtpSuccess = async () => {
-		try {
-			// Since APIs aren't ready, just move to success
-			setCurrentStep("success");
-
-			// In real implementation, this would create the school and user
-			console.log("Creating school:", schoolInfo);
-			console.log("Creating user:", personalInfo);
-
-			// API calls example:
-			// const schoolResponse = await createSchool({
-			//   name: schoolInfo.name,
-			//   shortName: schoolInfo.shortName,
-			//   website: schoolInfo.website,
-			//   portalUrl: generatedUrl
-			// });
-
-			// const userResponse = await createAdminUser({
-			//   schoolId: schoolResponse.id,
-			//   fullName: personalInfo.fullName,
-			//   email: personalInfo.email,
-			//   phoneNumber: `+234${personalInfo.phoneNumber}`,
-			//   password: personalInfo.password
-			// });
-		} catch (error) {
-			console.error("Error creating school/user:", error);
-			setCurrentStep("error");
+	// Initialize signup flow if not already started
+	useEffect(() => {
+		if (signupStep === null) {
+			setSignupStep("school");
 		}
-	};
+	}, [signupStep, setSignupStep]);
 
-	const handleOtpError = () => {
-		setCurrentStep("error");
-	};
+	const handleSchoolInfoNext = useCallback(
+		(info: SchoolInfoFormData, url: string) => {
+			// Save school info to store
+			updateSignupData({
+				schoolName: info.name,
+				schoolWebsite: info.website,
+				schoolShortName: info.shortName,
+				learnboxUrl: url,
+			});
 
-	const handleComplete = () => {
-		// Navigate back to school link input page
+			// Move to next step
+			setSignupStep("personal");
+		},
+		[updateSignupData, setSignupStep]
+	);
+
+	const handlePersonalInfoNext = useCallback(
+		async (info: PersonalInfoFormData) => {
+			// Save personal info to store
+			updateSignupData({
+				fullName: info.fullName,
+				email: info.email,
+				phoneNumber: info.phoneNumber,
+				password: info.password,
+			});
+
+			if (!signupData?.schoolName) {
+				updateSignupData({ error: "School information is missing" });
+				setSignupStep("error");
+				return;
+			}
+
+			setLoadingState("submitting");
+
+			try {
+				// Call the register endpoint with all collected data
+				await authApi.register({
+					fullName: info.fullName,
+					email: info.email,
+					password: info.password,
+					schoolName: signupData.schoolName,
+					schoolWebsite: signupData.schoolWebsite || "",
+					schoolShortName: signupData.schoolShortName || "",
+					learnboxUrl: signupData.learnboxUrl || "",
+					phoneNumber: `+234${info.phoneNumber}`,
+				});
+
+				// Registration successful, now send OTP
+				await authApi.resendOtp(info.email);
+
+				// Move to OTP step
+				setSignupStep("otp");
+				setLoadingState("success");
+			} catch (error: any) {
+				console.error("Registration failed:", error);
+				updateSignupData({
+					error: error.response?.data?.message || "Failed to create account",
+				});
+				setSignupStep("error");
+				setLoadingState("error");
+			}
+		},
+		[signupData, updateSignupData, setSignupStep, setLoadingState]
+	);
+
+	// OTP verification callback
+	const handleOtpVerify = useCallback(
+		async (otp: string) => {
+			if (!signupData?.email) {
+				throw new Error("Email is required for OTP verification");
+			}
+			await authApi.verifyOtp(signupData.email, otp);
+
+			// Mark OTP as verified
+			updateSignupData({ otpVerified: true });
+
+			// Set the school domain for future login
+			if (signupData?.learnboxUrl) {
+				setSchoolDomain(signupData.learnboxUrl);
+			}
+
+			// Complete signup and show success
+			completeSignup();
+		},
+		[signupData, updateSignupData, setSchoolDomain, completeSignup]
+	);
+
+	// OTP resend callback
+	const handleOtpResend = useCallback(async () => {
+		if (!signupData?.email) {
+			throw new Error("Email is required for resending OTP");
+		}
+		await authApi.resendOtp(signupData.email);
+	}, [signupData?.email]);
+
+	// OTP error callback
+	const handleOtpError = useCallback(
+		(error: string) => {
+			updateSignupData({ error });
+			setSignupStep("error");
+		},
+		[updateSignupData, setSignupStep]
+	);
+
+	const handleComplete = useCallback(() => {
+		// Clear signup data and navigate to login
+		clearSignupData();
+		navigate("/login");
+	}, [clearSignupData, navigate]);
+
+	const handleClose = useCallback(() => {
+		// Clear signup data
+		clearSignupData();
+
 		if (onComplete) {
 			onComplete();
 		} else {
-			console.log("Signup complete! Navigating to school link input...");
-			// In real app: navigate("/school-link-input");
+			navigate("/");
 		}
-	};
+	}, [clearSignupData, onComplete, navigate]);
 
-	const handleClose = () => {
-		// Handle close button on success/error screens
-		handleComplete();
-	};
+	const handleRetry = useCallback(() => {
+		// Clear error and go back to OTP screen
+		updateSignupData({ error: undefined });
+		setSignupStep("otp");
+		setLoadingState("idle");
+	}, [updateSignupData, setSignupStep, setLoadingState]);
 
-	const handleRetry = () => {
-		// Go back to OTP screen
-		setCurrentStep("otp");
-	};
+	const handleStartOver = useCallback(() => {
+		// Clear all data and start from beginning
+		clearSignupData();
+		setSignupStep("school");
+		setLoadingState("idle");
+	}, [clearSignupData, setSignupStep, setLoadingState]);
 
 	const renderStep = () => {
-		switch (currentStep) {
-			case "school-info":
+		switch (signupStep) {
+			case "school":
 				return (
 					<SchoolInfoStep
 						onNext={handleSchoolInfoNext}
-						initialData={schoolInfo || undefined}
+						initialData={
+							signupData
+								? {
+										name: signupData.schoolName || "",
+										website: signupData.schoolWebsite || "",
+										shortName: signupData.schoolShortName || "",
+								  }
+								: undefined
+						}
 					/>
 				);
 
-			case "personal-info":
+			case "personal":
 				return (
 					<PersonalInfoStep
 						onNext={handlePersonalInfoNext}
-						initialData={personalInfo || undefined}
+						initialData={
+							signupData
+								? {
+										fullName: signupData.fullName || "",
+										email: signupData.email || "",
+										phoneNumber: signupData.phoneNumber || "",
+										password: "", // Don't pre-fill password for security
+								  }
+								: undefined
+						}
+						isSubmitting={loadingState === "submitting"}
 					/>
 				);
 
 			case "otp":
 				return (
-					<OtpVerificationStep
-						onSubmit={handleOtpSuccess}
+					<OtpVerification
+						email={signupData?.email || ""}
+						onVerify={handleOtpVerify}
+						onResend={handleOtpResend}
 						onError={handleOtpError}
 					/>
 				);
 
-			case "success":
+			case "complete":
 				return (
 					<SuccessStep
 						onClose={handleClose}
@@ -129,11 +230,19 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 				return (
 					<ErrorStep
 						onClose={handleClose}
-						onRetry={handleRetry}
+						onRetry={
+							signupStep === "error" && signupData?.otpVerified === false
+								? handleRetry
+								: undefined
+						}
+						onStartOver={handleStartOver}
+						errorMessage={signupData?.error}
 					/>
 				);
 
 			default:
+				// If somehow we get into an invalid state, start over
+				setSignupStep("school");
 				return null;
 		}
 	};

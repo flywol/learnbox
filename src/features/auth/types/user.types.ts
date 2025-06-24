@@ -3,15 +3,20 @@ export type Role = "STUDENT" | "PARENT" | "ADMIN" | "TEACHER";
 
 export interface User {
 	id: string;
-	name: string;
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+	fullName: string;
+	phoneNumber: string;
 	email: string;
-	role: Role;
-	phoneNumber?: string;
-	schoolId?: string;
-	profileImage?: string;
-	lastLogin?: Date;
-	createdAt?: Date;
-	updatedAt?: Date;
+	role: string;
+	isVerified: boolean;
+	isActive: boolean;
+	isDeleted: boolean;
+	otp: string;
+	otpExpiration: string;
+	resetPasswordToken: string;
+	resetPasswordExpires: string;
 }
 
 export interface UserProfile extends User {

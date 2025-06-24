@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "../store/useAuthStore";
-import { User } from "../types/auth.types";
+import { useAuthStore } from "../../store/authStore";
+import { User } from "../../types/user.types";
 
 // 1. Define the validation schema with Zod
 const loginSchema = z.object({

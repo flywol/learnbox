@@ -1,3 +1,4 @@
+// src/features/auth/pages/signup/components/PersonalInfoStep.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,11 +32,13 @@ type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
 interface PersonalInfoStepProps {
 	onNext: (personalInfo: PersonalInfoFormData) => void;
 	initialData?: PersonalInfoFormData;
+	isSubmitting?: boolean;
 }
 
 export default function PersonalInfoStep({
 	onNext,
 	initialData,
+	isSubmitting = false,
 }: PersonalInfoStepProps) {
 	const {
 		register,
@@ -80,9 +83,10 @@ export default function PersonalInfoStep({
 								type="text"
 								placeholder="Full name *"
 								{...register("fullName")}
+								disabled={isSubmitting}
 								className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
 									errors.fullName ? "border-red-500" : "border-gray-300"
-								}`}
+								} ${isSubmitting ? "bg-gray-100" : ""}`}
 							/>
 							{errors.fullName && (
 								<p className="text-red-500 text-sm mt-1">
@@ -96,9 +100,10 @@ export default function PersonalInfoStep({
 								type="email"
 								placeholder="Email address *"
 								{...register("email")}
+								disabled={isSubmitting}
 								className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
 									errors.email ? "border-red-500" : "border-gray-300"
-								}`}
+								} ${isSubmitting ? "bg-gray-100" : ""}`}
 							/>
 							{errors.email && (
 								<p className="text-red-500 text-sm mt-1">
@@ -134,7 +139,10 @@ export default function PersonalInfoStep({
 									type="tel"
 									placeholder="Phone number *"
 									{...register("phoneNumber")}
-									className="flex-1 px-4 py-3 focus:outline-none"
+									disabled={isSubmitting}
+									className={`flex-1 px-4 py-3 focus:outline-none ${
+										isSubmitting ? "bg-gray-100" : ""
+									}`}
 								/>
 							</div>
 							{errors.phoneNumber && (
@@ -149,9 +157,10 @@ export default function PersonalInfoStep({
 								type="password"
 								placeholder="Password *"
 								{...register("password")}
+								disabled={isSubmitting}
 								className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
 									errors.password ? "border-red-500" : "border-gray-300"
-								}`}
+								} ${isSubmitting ? "bg-gray-100" : ""}`}
 							/>
 							<p
 								className={`text-sm mt-1 ${
@@ -166,13 +175,36 @@ export default function PersonalInfoStep({
 					<div className="flex justify-center pt-12">
 						<button
 							type="submit"
-							disabled={!isValid}
-							className={`w-48 py-3 rounded-full font-semibold text-base transition-colors ${
-								isValid
+							disabled={!isValid || isSubmitting}
+							className={`w-48 py-3 rounded-full font-semibold text-base transition-colors flex items-center justify-center ${
+								isValid && !isSubmitting
 									? "bg-orange-500 text-white hover:bg-orange-600"
 									: "bg-gray-200 text-gray-400 cursor-not-allowed"
 							}`}>
-							Next
+							{isSubmitting ? (
+								<>
+									<svg
+										className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24">
+										<circle
+											className="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="4"></circle>
+										<path
+											className="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									Creating Account...
+								</>
+							) : (
+								"Next"
+							)}
 						</button>
 					</div>
 				</form>

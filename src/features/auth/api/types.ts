@@ -21,8 +21,6 @@ export interface ApiError {
 export interface LoginRequest {
 	email: string;
 	password: string;
-	role: string;
-	schoolDomain: string;
 }
 
 export interface SignupRequest {
@@ -40,9 +38,9 @@ export interface SignupRequest {
 }
 
 export interface ResetPasswordRequest {
-	token: string;
-	newPassword: string;
-	email?: string;
+	password: string;
+	confirmPassword: string;
+	email: string;
 }
 
 export interface OtpVerificationRequest {
@@ -75,4 +73,44 @@ export interface OtpResponse {
 export interface PasswordResetResponse {
 	success: boolean;
 	message?: string;
+}
+
+// Add to existing types
+export interface RegisterRequest {
+	fullName: string;
+	email: string;
+	password: string;
+	schoolName: string;
+	schoolWebsite: string;
+	schoolShortName: string;
+	learnboxUrl: string;
+	phoneNumber: string;
+}
+
+export interface LoginRequest {
+	email: string;
+	password: string;
+}
+
+export interface LoginResponse {
+	user: User;
+	tokens: {
+		accessToken: string;
+		refreshToken: string;
+	};
+}
+
+export interface OtpVerificationRequest {
+	email: string;
+	otp: string;
+}
+
+export interface ResetPasswordRequest {
+	password: string;
+	confirmPassword: string;
+	email: string;
+}
+
+export interface VerifyDomainRequest {
+	schoolDomain: string;
 }

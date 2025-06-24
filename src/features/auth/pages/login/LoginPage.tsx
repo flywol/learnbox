@@ -1,33 +1,14 @@
 // src/features/auth/pages/login/LoginPage.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "../../store/authStore";
-import { mockAuthApi } from "../../api/mockAuthApi";
-import { LoginFormData, SchoolSetupFormData } from "../../schemas/authSchema";
+import { authApi } from "../../api/authApi";
+import { loginSchema, SchoolSetupFormData, schoolSetupSchema } from "../../schemas/authSchema";
 
-// Validation schemas
-const schoolSetupSchema = z.object({
-	schoolUrl: z
-		.string()
-		.min(1, { message: "Please enter your school's URL" })
-		.refine(
-			(url) => {
-				const urlPattern = /^(https?:\/\/)?([\w\-]+\.)*[\w\-]+\.[a-z]{2,}$/i;
-				return urlPattern.test(url);
-			},
-			{ message: "Please enter a valid school URL" }
-		),
-});
 
-const loginSchema = z.object({
-	email: z.string().email({ message: "Please enter a valid email address" }),
-	password: z
-		.string()
-		.min(6, { message: "Password must be at least 6 characters" }),
-});
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -47,8 +28,8 @@ const CombinedSchoolLoginPage = () => {
 	const [isValidating, setIsValidating] = useState(false);
 	const [isLoggingIn, setIsLoggingIn] = useState(false);
 	const [loginError, setLoginError] = useState<string | null>(null);
-
 	const navigate = useNavigate();
+
 	const {
 		selectedRole,
 		schoolDomain,
@@ -58,6 +39,8 @@ const CombinedSchoolLoginPage = () => {
 		setFirstTimeLogin,
 		intendedDestination,
 		setIntendedDestination,
+		setPasswordResetEmail,
+		setPasswordResetStep,
 	} = useAuthStore();
 
 	// School setup form
@@ -68,109 +51,132 @@ const CombinedSchoolLoginPage = () => {
 		},
 	});
 
-	// Login form
-	const loginForm = useForm<LoginFormData>({
+	// Login form - updated type
+	type LoginFormValues = z.infer<typeof loginSchema>;
+	const loginForm = useForm<LoginFormValues>({
 		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			rememberMe: false,
+		},
 	});
 
 	// Redirect if no role selected
-	if (!selectedRole) {
-		navigate("/");
-		return null;
-	}
+	useEffect(() => {
+		if (!selectedRole) {
+			navigate("/");
+		}
+	}, [selectedRole, navigate]);
 
 	// If school domain is already set, go directly to login
-	if (schoolDomain && currentStep === "school") {
-		setCurrentStep("login");
-	}
+	useEffect(() => {
+		if (schoolDomain && currentStep === "school") {
+			setCurrentStep("login");
+		}
+	}, [schoolDomain]); // Don't include currentStep to avoid infinite loop
 
 	const handleSchoolSubmit = async (data: SchoolSetupFormData) => {
+		// Skip validation for admin signup
+		if (selectedRole === "ADMIN") {
+			setSchoolDomain(data.schoolUrl);
+			navigate("/signup");
+			return;
+		}
+
 		setIsValidating(true);
+		setLoginError(null);
 
 		try {
-			const response = await mockAuthApi.validateSchool(data.schoolUrl);
-
-			if (response.success && response.data) {
+			const response = await authApi.verifyDomain(data.schoolUrl);
+			if (response.data) {
 				setSchoolDomain(data.schoolUrl);
 				// Wait a brief moment then slide to login
 				setTimeout(() => {
 					setCurrentStep("login");
 				}, 300);
-			} else {
-				schoolForm.setError("schoolUrl", {
-					type: "manual",
-					message:
-						response.error?.message ||
-						"School not found. Please check the URL and try again.",
-				});
 			}
-		} catch (error) {
-			console.error("School validation failed:", error);
+		} catch (error: any) {
 			schoolForm.setError("schoolUrl", {
 				type: "manual",
-				message: "Unable to validate school. Please try again.",
+				message:
+					error.response?.data?.message ||
+					"School not found. Please check the URL and try again.",
 			});
 		} finally {
 			setIsValidating(false);
 		}
 	};
 
-	const handleLoginSubmit = async (data: LoginFormData) => {
+	const handleLoginSubmit = async (data: LoginFormValues) => {
 		if (!schoolDomain || !selectedRole) return;
 
 		setIsLoggingIn(true);
 		setLoginError(null);
 
 		try {
-			const response = await mockAuthApi.login(
+			const response = await authApi.login(
 				data.email,
 				data.password,
-				selectedRole,
-				schoolDomain
+				data.rememberMe || false
 			);
+			const { user, tokens } = response.data;
 
-			if (response.success && response.data) {
-				const { user, isFirstTimeLogin, resetToken } = response.data;
+			// Check if user needs email verification
+			if (!user.isVerified) {
+				// Don't complete login yet - user needs to verify email
+				setPasswordResetEmail(user.email);
+				setPasswordResetStep("otp");
 
-				// Set login context for first-time users
-				if (isFirstTimeLogin && resetToken) {
-					setFirstTimeLogin(true, resetToken);
-				}
-
-				// Log the user in
-				loginAction(user);
-
-				// Navigation logic
-				if (isFirstTimeLogin && resetToken) {
-					// First-time users go to password reset
-					navigate("/reset-password", {
-						state: {
-							resetToken,
-							email: user.email,
-							from: intendedDestination || "/dashboard",
-						},
-					});
-				} else if (intendedDestination) {
-					// Go to intended destination
-					const destination = intendedDestination;
-					setIntendedDestination(null); // Clear it
-					navigate(destination);
-				} else if (hasSeenOnboarding) {
-					// Regular users who've completed onboarding
-					navigate("/dashboard");
-				} else {
-					// New users who need onboarding
-					navigate("/onboarding");
-				}
-			} else {
-				setLoginError(
-					response.error?.message ||
-						"Login failed. Please check your credentials."
-				);
+				// Navigate to email verification
+				navigate("/verify-email", {
+					state: {
+						user: user,
+						tokens: tokens,
+						from: intendedDestination || "/dashboard",
+					},
+				});
+				return;
 			}
-		} catch (error) {
-			console.error("Login failed:", error);
-			setLoginError("An unexpected error occurred. Please try again.");
+
+			// Check if this is a first-time login (backend should indicate this)
+			// For now, we'll assume if user has a certain flag or pattern
+			// TODO: Update this based on actual backend response
+			const isFirstTimeLogin = false; // Backend should provide this
+
+			// Set login context for first-time users
+			if (isFirstTimeLogin) {
+				setFirstTimeLogin(true, tokens.accessToken);
+			}
+
+			// Log the user in
+			loginAction(user);
+
+			// Navigation logic for verified users
+			if (isFirstTimeLogin) {
+				// First-time users go to password reset
+				navigate("/reset-password", {
+					state: {
+						resetToken: tokens.accessToken,
+						email: user.email,
+						from: intendedDestination || "/dashboard",
+					},
+				});
+			} else if (intendedDestination) {
+				// Go to intended destination
+				const destination = intendedDestination;
+				setIntendedDestination(null); // Clear it
+				navigate(destination);
+			} else if (hasSeenOnboarding) {
+				// Regular users who've completed onboarding
+				navigate("/dashboard");
+			} else {
+				// New users who need onboarding
+				navigate("/onboarding");
+			}
+		} catch (error: any) {
+			setLoginError(
+				error.response?.data?.message ||
+					"Login failed. Please check your credentials."
+			);
 		} finally {
 			setIsLoggingIn(false);
 		}
@@ -186,6 +192,10 @@ const CombinedSchoolLoginPage = () => {
 			state: { email: loginForm.getValues("email") },
 		});
 	};
+
+	if (!selectedRole) {
+		return null; // Will redirect in useEffect
+	}
 
 	return (
 		<div className="flex min-h-screen bg-white">
@@ -239,6 +249,24 @@ const CombinedSchoolLoginPage = () => {
 							{isValidating ? "Validating..." : "Next"}
 						</button>
 					</form>
+
+					{/* Show Create Account link only for ADMIN role */}
+					{selectedRole === "ADMIN" && (
+						<div className="text-center">
+							<button
+								type="button"
+								onClick={() => {
+									if (schoolForm.getValues("schoolUrl")) {
+										setSchoolDomain(schoolForm.getValues("schoolUrl"));
+									}
+									navigate("/signup");
+								}}
+								className="text-sm text-gray-500 hover:text-gray-700"
+								disabled={isValidating}>
+								Create your school
+							</button>
+						</div>
+					)}
 				</div>
 
 				{/* Login Form */}
@@ -284,6 +312,7 @@ const CombinedSchoolLoginPage = () => {
 								</p>
 							)}
 						</div>
+
 						<div className="space-y-2">
 							<input
 								id="password"
@@ -299,10 +328,12 @@ const CombinedSchoolLoginPage = () => {
 								</p>
 							)}
 						</div>
+
 						<div className="flex items-center justify-between text-sm">
 							<label className="flex items-center gap-2">
 								<input
 									type="checkbox"
+									{...loginForm.register("rememberMe")}
 									className="rounded"
 								/>
 								Remember me
@@ -314,6 +345,7 @@ const CombinedSchoolLoginPage = () => {
 								Forgot password?
 							</button>
 						</div>
+
 						<button
 							type="submit"
 							disabled={isLoggingIn}
