@@ -1,12 +1,12 @@
 // src/App.tsx
-import { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./features/auth/store/authStore";
 
-// Auth components and guards
+// Guards
 import { AuthGuard } from "./features/auth/components/guards/AuthGuard";
 import { FlowGuard } from "./features/auth/components/guards/FlowGuard";
 import { ProtectedRoute } from "./features/auth/components/guards/FirstTimeLoginGuard";
+import { HydrationGate } from "./components/HydrationGate";
 
 // Pages
 import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
@@ -17,22 +17,9 @@ import OnboardingPage from "./features/auth/pages/onboarding/OnboardingPage";
 import ForgotPasswordPage from "./features/auth/pages/password/ForgotPassword";
 import ResetPasswordPage from "./features/auth/pages/password/ResetPassword";
 import EmailVerificationPage from "./features/auth/pages/login/EmailVerificationPage";
-
-// Placeholder components
-const DashboardPage = () => {
-	const { user, logout } = useAuthStore();
-	return (
-		<div className="p-8">
-			<h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
-			<p>Your role is: {user?.role}</p>
-			<button
-				onClick={logout}
-				className="mt-4 bg-red-500 text-white p-2 rounded">
-				Log Out
-			</button>
-		</div>
-	);
-};
+import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
+import CompleteSetupPage from "./features/dashboard/school-setup/pages/CompleteSetupPage";
+import { useEffect } from "react";
 
 const UnauthorizedPage = () => (
 	<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -68,134 +55,113 @@ const NotFoundPage = () => (
 	</div>
 );
 
-function App() {
+export default function App() {
 	const { checkAuthStatus } = useAuthStore();
 
-	// Check auth status on app mount
+	// Check auth status
 	useEffect(() => {
 		checkAuthStatus();
 	}, [checkAuthStatus]);
 
 	return (
-		<Routes>
-			{/* Public Routes - No authentication required */}
+		<HydrationGate>
+			<Routes>
+				{/* Public Routes */}
+				<Route
+					path="/"
+					element={
+						<AuthGuard requiresAuth={false}>
+							<RoleSelectionPage />
+						</AuthGuard>
+					}
+				/>
+				<Route
+					path="/school-setup"
+					element={
+						<AuthGuard requiresAuth={false}>
+							<FlowGuard requiresRole>
+								<SchoolSetupPage />
+							</FlowGuard>
+						</AuthGuard>
+					}
+				/>
+				<Route
+					path="/signup"
+					element={
+						<AuthGuard requiresAuth={false}>
+							<FlowGuard
+								requiresRole
+								allowedRoles={["ADMIN"]}>
+								<SignupFlow />
+							</FlowGuard>
+						</AuthGuard>
+					}
+				/>
+				<Route
+					path="/login"
+					element={
+						<AuthGuard requiresAuth={false}>
+							<FlowGuard
+								requiresRole
+								requiresSchool>
+								<LoginPage />
+							</FlowGuard>
+						</AuthGuard>
+					}
+				/>
+				<Route
+					path="/verify-email"
+					element={<EmailVerificationPage />}
+				/>
+				<Route
+					path="/forgot-password"
+					element={
+						<AuthGuard requiresAuth={false}>
+							<ForgotPasswordPage />
+						</AuthGuard>
+					}
+				/>
+				<Route
+					path="/reset-password"
+					element={<ResetPasswordPage />}
+				/>
 
-			{/* Step 1: Role Selection (entry point) */}
-			<Route
-				path="/"
-				element={
-					<AuthGuard requiresAuth={false}>
-						<RoleSelectionPage />
-					</AuthGuard>
-				}
-			/>
+				{/* Protected Routes */}
+				<Route
+					path="/onboarding"
+					element={
+						<ProtectedRoute>
+							<OnboardingPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard"
+					element={
+						<ProtectedRoute>
+							<AdminDashboard />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/complete-school-setup"
+					element={
+						<ProtectedRoute>
+							<CompleteSetupPage />
+						</ProtectedRoute>
+					}
+				/>
 
-			{/* Step 2: School Setup (requires role) */}
-			<Route
-				path="/school-setup"
-				element={
-					<AuthGuard requiresAuth={false}>
-						<FlowGuard requiresRole={true}>
-							<SchoolSetupPage />
-						</FlowGuard>
-					</AuthGuard>
-				}
-			/>
-
-			{/* Step 2.5: Admin Signup Flow */}
-			<Route
-				path="/signup"
-				element={
-					<AuthGuard requiresAuth={false}>
-						<FlowGuard
-							requiresRole={true}
-							allowedRoles={["ADMIN"]}>
-							<SignupFlow />
-						</FlowGuard>
-					</AuthGuard>
-				}
-			/>
-
-			{/* Step 3: Login (requires both role and school) */}
-			<Route
-				path="/login"
-				element={
-					<AuthGuard requiresAuth={false}>
-						<FlowGuard
-							requiresRole={true}
-							requiresSchool={true}>
-							<LoginPage />
-						</FlowGuard>
-					</AuthGuard>
-				}
-			/>
-
-			<Route
-				path="/verify-email"
-				element={<EmailVerificationPage />}
-			/>
-
-			{/* Password Reset Routes */}
-			<Route
-				path="/forgot-password"
-				element={
-					<AuthGuard requiresAuth={false}>
-						<ForgotPasswordPage />
-					</AuthGuard>
-				}
-			/>
-
-			<Route
-				path="/reset-password"
-				element={<ResetPasswordPage />}
-			/>
-
-			{/* Protected Routes - Authentication required */}
-
-			{/* Onboarding (first-time users after login) */}
-			<Route
-				path="/onboarding"
-				element={
-					<ProtectedRoute>
-						<OnboardingPage />
-					</ProtectedRoute>
-				}
-			/>
-
-			{/* Main Dashboard */}
-			<Route
-				path="/dashboard"
-				element={
-					<ProtectedRoute>
-						<DashboardPage />
-					</ProtectedRoute>
-				}
-			/>
-
-			{/* Error Pages */}
-			<Route
-				path="/unauthorized"
-				element={<UnauthorizedPage />}
-			/>
-
-			{/* Legacy route redirects */}
-			<Route
-				path="/select-role"
-				element={
-					<Navigate
-						to="/"
-						replace
-					/>
-				}
-			/>
-
-			{/* Catch-all route */}
-			<Route
-				path="*"
-				element={<NotFoundPage />}
-			/>
-		</Routes>
+				{/* Errors */}
+				<Route
+					path="/unauthorized"
+					element={<UnauthorizedPage />}
+				/>
+				<Route
+					path="*"
+					element={<NotFoundPage />}
+				/>
+			</Routes>
+		</HydrationGate>
 	);
 }
-
-export default App;
