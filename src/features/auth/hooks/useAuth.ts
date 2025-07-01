@@ -1,9 +1,8 @@
-// src/features/auth/hooks/useAuth.ts
 import { useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import { authApi } from "../api/authApi";
-import { Role } from "../types/user.types";
+import { Role, User, UserData } from "../types/auth.types";
+import { authApiClient } from "../api/authApiClient";
 
 interface UseAuthOptions {
 	redirectTo?: string;
@@ -11,16 +10,30 @@ interface UseAuthOptions {
 	allowedRoles?: Role[];
 }
 
-/**
- * useAuth - Main authentication hook
- *
- * Provides:
- * - Authentication state and user info
- * - Login/logout functions with proper flow handling
- * - Role-based access control
- * - Automatic redirects based on auth state
- * - First-time login detection
- */
+// Helper function to transform API user data to internal User type
+const transformUserData = (apiUser: UserData): User => {
+	return {
+		id: apiUser.id || "",
+		created_at: new Date().toISOString(),
+		updated_at: new Date().toISOString(),
+		deleted_at: "",
+		fullName:
+			apiUser.firstName && apiUser.lastName
+				? `${apiUser.firstName} ${apiUser.lastName}`
+				: apiUser.fullName || "",
+		phoneNumber: apiUser.phone || apiUser.phoneNumber || "",
+		email: apiUser.email,
+		role: apiUser.role,
+		isVerified: apiUser.isVerified ?? true,
+		isActive: apiUser.isActive ?? true,
+		isDeleted: false,
+		otp: "",
+		otpExpiration: "",
+		resetPasswordToken: apiUser.resetPasswordToken || "",
+		resetPasswordExpires: "",
+	};
+};
+
 export const useAuth = (options: UseAuthOptions = {}) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -51,46 +64,41 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 		if (!requireAuth) return true;
 		if (!isAuthenticated) return false;
 		if (allowedRoles.length > 0 && user?.role) {
-			return allowedRoles.includes(user.role);
+			return allowedRoles.includes(user.role as Role);
 		}
 		return true;
 	}, [requireAuth, isAuthenticated, allowedRoles, user]);
 
 	// Enhanced login function
 	const login = useCallback(
-		async (email: string, password: string, role?: Role, school?: string) => {
+		async (email: string, password: string, rememberMe: boolean = false) => {
 			setLoadingState("submitting");
 
 			try {
-				// Use provided role/school or fall back to store values
-				const loginRole = role || selectedRole;
-				const loginSchool = school || schoolDomain;
+				const response = await authApiClient.login(
+					{ email, password },
+					rememberMe
+				);
 
-				if (!loginRole || !loginSchool) {
-					throw new Error("Role and school must be selected before login");
-				}
+				// Transform user data
+				const transformedUser = transformUserData(response.data.user);
 
-				const response = await authApi.login(email, password, false);
-				const { user, tokens } = response.data;
+				// Check for first-time login
+				const isFirstTimeLogin = !!transformedUser.resetPasswordToken;
 
-				// Check for first-time login (backend should provide this)
-				// TODO: Update based on actual backend response
-				const isFirstTimeLogin = false;
-
-				// Set first-time login context if needed
 				if (isFirstTimeLogin) {
-					setFirstTimeLogin(true, tokens.accessToken);
+					setFirstTimeLogin(true, response.data.accessToken);
 				}
 
 				// Log the user in
-				storeLogin(user);
+				storeLogin(transformedUser);
 				setLoadingState("success");
 
 				return {
 					success: true,
-					user,
+					user: transformedUser,
 					isFirstTimeLogin,
-					resetToken: isFirstTimeLogin ? tokens.accessToken : undefined,
+					resetToken: isFirstTimeLogin ? response.data.accessToken : undefined,
 				};
 			} catch (error) {
 				setLoadingState("error");
@@ -100,24 +108,16 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 				};
 			}
 		},
-		[selectedRole, schoolDomain, setLoadingState, setFirstTimeLogin, storeLogin]
+		[setLoadingState, setFirstTimeLogin, storeLogin]
 	);
 
 	// Enhanced logout function
 	const logout = useCallback(async () => {
 		try {
-			// Call API to invalidate session
-			await authApi.logout();
-
-			// Clear local state
-			storeLogout();
-
-			// Redirect to login
+			await storeLogout();
 			navigate(redirectTo);
 		} catch (error) {
 			console.error("Logout error:", error);
-			// Still clear local state even if API fails
-			storeLogout();
 			navigate(redirectTo);
 		}
 	}, [storeLogout, navigate, redirectTo]);
@@ -125,11 +125,9 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 	// Redirect logic based on auth state
 	useEffect(() => {
 		if (requireAuth && !isAuthenticated) {
-			// Save intended destination
 			setIntendedDestination(location.pathname);
 			navigate(redirectTo, { state: { from: location } });
 		} else if (requireAuth && !hasAccess()) {
-			// User is authenticated but doesn't have the right role
 			navigate("/unauthorized");
 		}
 	}, [
@@ -141,21 +139,6 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 		location,
 		setIntendedDestination,
 	]);
-
-	// Handle first-time login redirects
-	useEffect(() => {
-		if (isAuthenticated && loginContext.requiresPasswordReset) {
-			// Don't redirect if already on password reset page
-			if (!location.pathname.includes("/reset-password")) {
-				navigate("/reset-password", {
-					state: {
-						resetToken: loginContext.resetToken,
-						email: user?.email,
-					},
-				});
-			}
-		}
-	}, [isAuthenticated, loginContext, navigate, location, user]);
 
 	return {
 		// State

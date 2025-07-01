@@ -1,7 +1,7 @@
 // src/features/auth/hooks/usePasswordReset.ts
 import { useState, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
-import { authApi } from "../api/authApi";
+import { authApiClient } from "../api/authApiClient";
 
 interface UsePasswordResetReturn {
 	// State
@@ -15,7 +15,8 @@ interface UsePasswordResetReturn {
 	verifyOtp: (otp: string) => Promise<boolean>;
 	resetPassword: (
 		newPassword: string,
-		confirmPassword: string
+		confirmPassword: string,
+		email: string
 	) => Promise<boolean>;
 	resendOtp: () => Promise<boolean>;
 	clearError: () => void;
@@ -51,13 +52,13 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				await authApi.forgotPassword(email);
+				await authApiClient.forgotPassword({ email });
 
 				setPasswordResetEmail(email);
 				setPasswordResetStep("otp");
 				return true;
 			} catch (err: any) {
-				setError(err.response?.data?.message || "Failed to send reset email");
+				setError(err.message || "Failed to send reset email");
 				return false;
 			} finally {
 				setIsLoading(false);
@@ -78,11 +79,14 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				await authApi.verifyForgotPasswordOtp(passwordResetEmail, otp);
+				await authApiClient.verifyForgotPasswordOtp({
+					email: passwordResetEmail,
+					otp,
+				});
 				setPasswordResetStep("newPassword");
 				return true;
 			} catch (err: any) {
-				setError(err.response?.data?.message || "Invalid or expired OTP");
+				setError(err.message || "Invalid or expired OTP");
 				return false;
 			} finally {
 				setIsLoading(false);
@@ -93,7 +97,7 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 
 	// Reset password with new password
 	const resetPassword = useCallback(
-		async (newPassword: string, confirmPassword: string): Promise<boolean> => {
+		async (password: string, confirmPassword: string): Promise<boolean> => {
 			if (!passwordResetEmail) {
 				setError("Email not found. Please start over.");
 				return false;
@@ -103,17 +107,17 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				await authApi.resetPassword(
-					passwordResetEmail,
-					newPassword,
-					confirmPassword
-				);
+				await authApiClient.resetPassword({
+					password: password,
+					confirmPassword: confirmPassword,
+					email: passwordResetEmail,
+				});
 
 				// Clear reset state
 				completePasswordReset();
 				return true;
 			} catch (err: any) {
-				setError(err.response?.data?.message || "Failed to reset password");
+				setError(err.message || "Failed to reset password");
 				return false;
 			} finally {
 				setIsLoading(false);
@@ -133,10 +137,10 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 		setError(null);
 
 		try {
-			await authApi.forgotPassword(passwordResetEmail);
+			await authApiClient.forgotPassword({ email: passwordResetEmail });
 			return true;
 		} catch (err: any) {
-			setError(err.response?.data?.message || "Failed to resend OTP");
+			setError(err.message || "Failed to resend OTP");
 			return false;
 		} finally {
 			setIsLoading(false);

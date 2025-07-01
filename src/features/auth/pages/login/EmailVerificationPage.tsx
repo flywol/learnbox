@@ -2,7 +2,7 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { authApi } from "../../api/authApi";
+import { authApiClient } from "../../api/authApiClient";
 import OtpVerification from "../../components/OtpVerification";
 
 const EmailVerificationPage = () => {
@@ -19,8 +19,8 @@ const EmailVerificationPage = () => {
 		setPasswordResetStep,
 	} = useAuthStore();
 
-	// Get user data and tokens from navigation state
-	const { user, tokens, from } = location.state || {};
+	// Get user data from navigation state
+	const { user } = location.state || {};
 
 	// Redirect if no email or user data
 	useEffect(() => {
@@ -37,10 +37,13 @@ const EmailVerificationPage = () => {
 			}
 
 			// Verify the OTP
-			await authApi.verifyOtp(passwordResetEmail, otp);
+			await authApiClient.verifyOtp({
+				email: passwordResetEmail,
+				otp,
+			});
 
 			// Clear password reset state since we're done
-			setPasswordResetEmail('');
+			setPasswordResetEmail("");
 			setPasswordResetStep(null);
 
 			// Complete the login now that email is verified
@@ -75,7 +78,7 @@ const EmailVerificationPage = () => {
 		if (!passwordResetEmail) {
 			throw new Error("Email is required for resending verification code");
 		}
-		await authApi.resendOtp(passwordResetEmail);
+		await authApiClient.resendOtp(passwordResetEmail);
 	}, [passwordResetEmail]);
 
 	// Error handling callback

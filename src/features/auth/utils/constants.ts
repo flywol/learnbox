@@ -1,5 +1,5 @@
-// src/features/auth/utils/constants.ts
-import { Role } from "../types/user.types";
+import { Role } from "../types/auth.types";
+
 
 // API Endpoints (will be replaced with actual endpoints)
 export const AUTH_ENDPOINTS = {

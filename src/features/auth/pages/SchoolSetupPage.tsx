@@ -23,35 +23,20 @@ const schoolSetupSchema = z.object({
 		),
 });
 
-const validateSchoolApi = (
-	url: string
-): Promise<{ isValid: boolean; schoolName?: string }> => {
-	console.log(`Validating school URL: ${url}`);
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			// For now, accept any valid URL format and return success
-			// TODO: Replace with real API call to validate school exists
-			resolve({
-				isValid: true,
-				schoolName: "Sample School", // This would come from the API
-			});
-		}, 1500); // Simulate network delay
-	});
-};
-
 type SchoolSetupFormValues = z.infer<typeof schoolSetupSchema>;
 
 const SchoolSetupPage = () => {
 	const navigate = useNavigate();
-	const { selectedRole, setSchoolDomain } = useAuthStore();
+	const { selectedRole, setSchoolDomain, verifySchoolDomain } = useAuthStore();
 	const [isValidating, setIsValidating] = useState(false);
+	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showSignupFlow, setShowSignupFlow] = useState(false);
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
-		setError,
+		getValues,
 	} = useForm<SchoolSetupFormValues>({
 		resolver: zodResolver(schoolSetupSchema),
 	});
@@ -64,25 +49,26 @@ const SchoolSetupPage = () => {
 
 	const onSubmit = async (data: SchoolSetupFormValues) => {
 		setIsValidating(true);
+		setValidationError(null);
 
 		try {
-			const { isValid } = await validateSchoolApi(data.schoolUrl);
+			// All roles (including ADMIN) need to verify the school domain first
+			const isValid = await verifySchoolDomain(data.schoolUrl);
 
 			if (isValid) {
 				setSchoolDomain(data.schoolUrl);
+				// Navigate to login page after successful verification for ALL roles
 				navigate("/login");
 			} else {
-				setError("schoolUrl", {
-					type: "manual",
-					message: "School not found. Please check the URL and try again.",
-				});
+				setValidationError(
+					"School not found. Please check the URL and try again."
+				);
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("School validation failed:", error);
-			setError("schoolUrl", {
-				type: "manual",
-				message: "Unable to validate school. Please try again.",
-			});
+			const errorMessage =
+				error.message || "Unable to validate school. Please try again.";
+			setValidationError(errorMessage);
 		} finally {
 			setIsValidating(false);
 		}
@@ -103,11 +89,18 @@ const SchoolSetupPage = () => {
 		<AuthPageWrapper>
 			<div className="space-y-6">
 				<div className="text-center">
-					<h1 className="text-3xl font-bold tracking-tight">Sign In</h1>
+					<h1 className="text-3xl font-bold tracking-tight">School Setup</h1>
 					<p className="mt-2 text-muted-foreground">
-						Sign in to stay connected.
+						Enter your school domain to continue.
 					</p>
 				</div>
+
+				{/* Error message */}
+				{validationError && (
+					<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+						{validationError}
+					</div>
+				)}
 
 				<form
 					onSubmit={handleSubmit(onSubmit)}
@@ -139,18 +132,33 @@ const SchoolSetupPage = () => {
 					<button
 						type="submit"
 						disabled={isValidating}
-						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-						{isValidating ? "Validating..." : "Next"}
+						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center">
+						{isValidating ? (
+							<>
+								<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+								Validating...
+							</>
+						) : (
+							"Next"
+						)}
 					</button>
 				</form>
 
 				{/* Show Create Account link only for ADMIN role */}
 				{selectedRole === "ADMIN" && (
 					<div className="text-center">
+						<p className="text-sm text-gray-600 mb-2">School not found?</p>
 						<button
 							type="button"
-							onClick={() => setShowSignupFlow(true)}
-							className="text-sm text-gray-500 hover:text-gray-700"
+							onClick={() => {
+								// Set the domain they entered and go to signup
+								const currentUrl = getValues("schoolUrl");
+								if (currentUrl) {
+									setSchoolDomain(currentUrl);
+								}
+								setShowSignupFlow(true);
+							}}
+							className="text-sm text-orange-600 hover:text-orange-700 font-medium"
 							disabled={isValidating}>
 							Create your school
 						</button>

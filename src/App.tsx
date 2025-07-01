@@ -1,12 +1,13 @@
-// src/App.tsx
+// src/App.tsx - Updated with DashboardLayout
 import { Routes, Route } from "react-router-dom";
-import { useAuthStore } from "./features/auth/store/authStore";
+import { HydrationGate } from "./components/HydrationGate";
+
+// Layout
 
 // Guards
 import { AuthGuard } from "./features/auth/components/guards/AuthGuard";
 import { FlowGuard } from "./features/auth/components/guards/FlowGuard";
 import { ProtectedRoute } from "./features/auth/components/guards/FirstTimeLoginGuard";
-import { HydrationGate } from "./components/HydrationGate";
 
 // Pages
 import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
@@ -19,7 +20,7 @@ import ResetPasswordPage from "./features/auth/pages/password/ResetPassword";
 import EmailVerificationPage from "./features/auth/pages/login/EmailVerificationPage";
 import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
 import CompleteSetupPage from "./features/dashboard/school-setup/pages/CompleteSetupPage";
-import { useEffect } from "react";
+import DashboardLayout from "./common/layout/DashboardLayout";
 
 const UnauthorizedPage = () => (
 	<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -47,26 +48,21 @@ const NotFoundPage = () => (
 				The page you're looking for doesn't exist.
 			</p>
 			<a
-				href="/"
+				href="/dashboard"
 				className="text-orange-500 hover:underline">
-				Go back to home
+				Go back to dashboard
 			</a>
 		</div>
 	</div>
 );
 
 export default function App() {
-	const { checkAuthStatus } = useAuthStore();
-
-	// Check auth status
-	useEffect(() => {
-		checkAuthStatus();
-	}, [checkAuthStatus]);
+	console.log("🚀 App component rendering");
 
 	return (
 		<HydrationGate>
 			<Routes>
-				{/* Public Routes */}
+				{/* Public Routes - Guest Only */}
 				<Route
 					path="/"
 					element={
@@ -75,6 +71,7 @@ export default function App() {
 						</AuthGuard>
 					}
 				/>
+
 				<Route
 					path="/school-setup"
 					element={
@@ -85,6 +82,7 @@ export default function App() {
 						</AuthGuard>
 					}
 				/>
+
 				<Route
 					path="/signup"
 					element={
@@ -97,6 +95,7 @@ export default function App() {
 						</AuthGuard>
 					}
 				/>
+
 				<Route
 					path="/login"
 					element={
@@ -109,10 +108,7 @@ export default function App() {
 						</AuthGuard>
 					}
 				/>
-				<Route
-					path="/verify-email"
-					element={<EmailVerificationPage />}
-				/>
+
 				<Route
 					path="/forgot-password"
 					element={
@@ -121,12 +117,19 @@ export default function App() {
 						</AuthGuard>
 					}
 				/>
+
+				{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
+				<Route
+					path="/verify-email"
+					element={<EmailVerificationPage />}
+				/>
+
 				<Route
 					path="/reset-password"
 					element={<ResetPasswordPage />}
 				/>
 
-				{/* Protected Routes */}
+				{/* Protected Routes - Authentication Required */}
 				<Route
 					path="/onboarding"
 					element={
@@ -135,24 +138,34 @@ export default function App() {
 						</ProtectedRoute>
 					}
 				/>
+
+				{/* Dashboard Routes - Wrapped with DashboardLayout */}
 				<Route
 					path="/dashboard"
 					element={
 						<ProtectedRoute>
-							<AdminDashboard />
+							<DashboardLayout />
 						</ProtectedRoute>
-					}
-				/>
-				<Route
-					path="/dashboard/complete-school-setup"
-					element={
-						<ProtectedRoute>
-							<CompleteSetupPage />
-						</ProtectedRoute>
-					}
-				/>
+					}>
+					{/* Nested dashboard routes */}
+					<Route
+						index
+						element={<AdminDashboard />}
+					/>
+					<Route
+						path="complete-school-setup"
+						element={<CompleteSetupPage />}
+					/>
+					{/* Add more dashboard routes here as needed */}
+					{/* 
+					<Route path="students" element={<StudentsPage />} />
+					<Route path="teachers" element={<TeachersPage />} />
+					<Route path="classes" element={<ClassesPage />} />
+					<Route path="settings" element={<SettingsPage />} />
+					*/}
+				</Route>
 
-				{/* Errors */}
+				{/* Error Routes */}
 				<Route
 					path="/unauthorized"
 					element={<UnauthorizedPage />}

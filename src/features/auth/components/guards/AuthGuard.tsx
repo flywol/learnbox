@@ -9,27 +9,48 @@ interface AuthGuardProps {
 	redirectTo?: string;
 }
 
-/**
- * AuthGuard - Protects routes that require authentication
- *
- * Features:
- * - Redirects unauthenticated users to login
- * - Handles first-time login redirects to password reset
- * - Preserves intended destination for post-login redirect
- * - Supports inverse logic for auth-only pages (login, signup)
- */
 export const AuthGuard = ({
 	children,
 	requiresAuth = true,
 	redirectTo = "/",
 }: AuthGuardProps) => {
 	const location = useLocation();
-	const { isAuthenticated, loginContext, setIntendedDestination } =
-		useAuthStore();
+	const {
+		isAuthenticated,
+		loginContext,
+		setIntendedDestination,
+		hasHydrated,
+		user,
+	} = useAuthStore();
+
+	console.log("🛡️ AuthGuard check:", {
+		pathname: location.pathname,
+		requiresAuth,
+		isAuthenticated,
+		hasHydrated,
+		hasUser: !!user,
+		requiresPasswordReset: loginContext.requiresPasswordReset,
+	});
+
+	// Don't render anything until hydration is complete
+	if (!hasHydrated) {
+		console.log("⏳ Waiting for hydration...");
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-gray-50">
+				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+			</div>
+		);
+	}
 
 	useEffect(() => {
-		// Save the intended destination if user is trying to access protected route
-		if (requiresAuth && !isAuthenticated && location.pathname !== "/") {
+		// Save intended destination for protected routes
+		if (
+			requiresAuth &&
+			!isAuthenticated &&
+			location.pathname !== "/" &&
+			location.pathname !== "/login"
+		) {
+			console.log("💾 Saving intended destination:", location.pathname);
 			setIntendedDestination(location.pathname);
 		}
 	}, [
@@ -39,10 +60,10 @@ export const AuthGuard = ({
 		setIntendedDestination,
 	]);
 
-	// Check if user needs to reset password (first-time login)
-	if (isAuthenticated && loginContext.requiresPasswordReset) {
-		// Only redirect to reset password if we're not already there
-		if (!location.pathname.includes("/reset-password")) {
+	// Handle password reset requirement (highest priority)
+	if (isAuthenticated && user && loginContext.requiresPasswordReset) {
+		if (location.pathname !== "/reset-password") {
+			console.log("🔄 Redirecting to password reset");
 			return (
 				<Navigate
 					to="/reset-password"
@@ -53,8 +74,9 @@ export const AuthGuard = ({
 		}
 	}
 
-	// For protected routes
-	if (requiresAuth && !isAuthenticated) {
+	// Handle unauthenticated users trying to access protected routes
+	if (requiresAuth && (!isAuthenticated || !user)) {
+		console.log("🚫 Unauthenticated user, redirecting to:", redirectTo);
 		return (
 			<Navigate
 				to={redirectTo}
@@ -64,10 +86,19 @@ export const AuthGuard = ({
 		);
 	}
 
-	// For guest-only routes (login, signup, etc.)
-	if (!requiresAuth && isAuthenticated) {
-		// If user doesn't need password reset, redirect to dashboard
-		if (!loginContext.requiresPasswordReset) {
+	// Handle authenticated users trying to access guest-only routes
+	if (
+		!requiresAuth &&
+		isAuthenticated &&
+		user &&
+		!loginContext.requiresPasswordReset
+	) {
+		// Allow certain pages even when authenticated
+		const allowedGuestPages = ["/reset-password", "/verify-email"];
+		if (!allowedGuestPages.includes(location.pathname)) {
+			console.log(
+				"✅ Authenticated user on guest route, redirecting to dashboard"
+			);
 			return (
 				<Navigate
 					to="/dashboard"
@@ -77,5 +108,6 @@ export const AuthGuard = ({
 		}
 	}
 
+	console.log("✅ AuthGuard passed, rendering children");
 	return <>{children}</>;
 };

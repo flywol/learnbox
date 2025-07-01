@@ -1,32 +1,61 @@
-// src/features/school-setup/components/steps/SchoolInfoStep.tsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useSchoolSetupStore } from "../../store/schoolSetupStore";
 import FileUploadZone from "../FileUploadZone";
+import schoolSetupApiClient from "@/features/dashboard/api/dashboardApiClient";
+import { completeSchoolInfoSchema } from "@/features/dashboard/schema/dashboardSchema";
 
-const schoolInfoSchema = z.object({
-	name: z.string().min(1, "School name is required"),
-	shortName: z.string().min(1, "School short name is required"),
-	principal: z.string().min(1, "Principal name is required"),
-	schoolType: z.string().min(1, "Please select school type"),
-	motto: z.string().optional(),
-	address: z.string().min(1, "School address is required"),
-	country: z.string().min(1, "Country is required"),
-	state: z.string().min(1, "State/Province is required"),
-	schoolUrl: z.string(),
-	website: z.string().url().optional().or(z.literal("")),
-	phoneNumber: z.string().min(1, "Phone number is required"),
-	email: z.string().email("Invalid email address"),
-});
+type SchoolInfoFormData = z.infer<typeof completeSchoolInfoSchema>;
 
-type SchoolInfoFormData = z.infer<typeof schoolInfoSchema>;
+// Nigerian states list
+const NIGERIAN_STATES = [
+	"Abia",
+	"Adamawa",
+	"Akwa Ibom",
+	"Anambra",
+	"Bauchi",
+	"Bayelsa",
+	"Benue",
+	"Borno",
+	"Cross River",
+	"Delta",
+	"Ebonyi",
+	"Edo",
+	"Ekiti",
+	"Enugu",
+	"Gombe",
+	"Imo",
+	"Jigawa",
+	"Kaduna",
+	"Kano",
+	"Katsina",
+	"Kebbi",
+	"Kogi",
+	"Kwara",
+	"Lagos",
+	"Nasarawa",
+	"Niger",
+	"Ogun",
+	"Ondo",
+	"Osun",
+	"Oyo",
+	"Plateau",
+	"Rivers",
+	"Sokoto",
+	"Taraba",
+	"Yobe",
+	"Zamfara",
+	"FCT",
+];
 
 export default function SchoolInfoStep() {
-	const { user } = useAuthStore();
+	const { user, schoolDomain: authSchoolDomain } = useAuthStore();
 	const { schoolInfo, updateSchoolInfo, nextStep } = useSchoolSetupStore();
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [apiError, setApiError] = useState<string | null>(null);
 
 	const {
 		register,
@@ -34,42 +63,81 @@ export default function SchoolInfoStep() {
 		setValue,
 		formState: { errors, isValid },
 	} = useForm<SchoolInfoFormData>({
-		resolver: zodResolver(schoolInfoSchema),
+		resolver: zodResolver(completeSchoolInfoSchema),
 		mode: "onChange",
 		defaultValues: {
-			name: schoolInfo.name || "",
-			shortName: schoolInfo.shortName || "",
-			principal: schoolInfo.principal || "",
-			schoolType: schoolInfo.schoolType || "",
-			motto: schoolInfo.motto || "",
-			address: schoolInfo.address || "",
-			country: schoolInfo.country || "Nigeria",
-			state: schoolInfo.state || "",
-			schoolUrl: schoolInfo.schoolUrl || "",
-			website: schoolInfo.website || "",
-			phoneNumber: schoolInfo.phoneNumber || "",
-			email: schoolInfo.email || user?.email || "",
+			schoolName: schoolInfo.schoolName,
+			schoolShortName: schoolInfo.schoolShortName,
+			schoolPrincipal: schoolInfo.schoolPrincipal,
+			schoolType: schoolInfo.schoolType,
+			schoolMotto: schoolInfo.schoolMotto,
+			schoolAddress: schoolInfo.schoolAddress,
+			country: "Nigeria",
+			state: schoolInfo.state,
+			schoolDomain: schoolInfo.learnboxUrl ?? authSchoolDomain ?? undefined,
+			schoolWebsite: schoolInfo.schoolWebsite,
+			schoolPhoneNumber: schoolInfo.schoolPhoneNumber,
+			schoolEmail: schoolInfo.schoolEmail || user?.email,
 		},
 	});
 
-	// Set prefilled values from signup
+	// Set prefilled values from auth store and signup data
 	useEffect(() => {
-		// These would come from the auth store or API
-		// For now, using placeholder values
-		if (!schoolInfo.name) {
-			setValue("name", "Lakebridge Mountain High School");
-			setValue("shortName", "Lakebridgers");
-			setValue("schoolUrl", "https://lakebridge.learnbox.com");
-		}
-	}, [setValue, schoolInfo]);
+		console.log("🔧 Setting prefilled values:", {
+			authSchoolDomain,
+			userEmail: user?.email,
+			schoolInfoName: schoolInfo.schoolName,
+		});
 
-	const onSubmit = (data: SchoolInfoFormData) => {
-		updateSchoolInfo(data);
-		nextStep();
+		// Set school domain from auth store if available
+		if (authSchoolDomain && !schoolInfo.learnboxUrl) {
+			setValue("schoolDomain", authSchoolDomain);
+			updateSchoolInfo({ learnboxUrl: authSchoolDomain });
+		}
+
+		// Set other prefilled values if not already set
+		if (!schoolInfo.schoolName) {
+			// Remove the prefilled demo values - let user input their own
+			// setValue("name", "Lakebridge Mountain High School");
+			// setValue("schoolShortName", "Lakebridgers");
+		}
+
+		// Set user email if available
+		if (user?.email && !schoolInfo.schoolEmail) {
+			setValue("schoolEmail", user.email);
+		}
+	}, [setValue, schoolInfo, authSchoolDomain, user, updateSchoolInfo]);
+
+	const onSubmit = async (data: SchoolInfoFormData) => {
+		setIsSubmitting(true);
+		setApiError(null);
+
+		try {
+			// Update local store first
+			updateSchoolInfo(data);
+
+			// Call API to save school information
+			await schoolSetupApiClient.updateSchoolInfo({
+				...schoolInfo,
+				...data,
+			});
+
+			console.log("✅ School information saved successfully");
+
+			// Move to next step
+			nextStep();
+		} catch (error: any) {
+			console.error("❌ Failed to save school information:", error);
+			setApiError(
+				error.message || "Failed to save school information. Please try again."
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	const handleLogoUpload = (file: File) => {
-		updateSchoolInfo({ logo: file });
+		updateSchoolInfo({ schoolLogo: file });
 	};
 
 	const handleSignatureUpload = (file: File) => {
@@ -83,6 +151,13 @@ export default function SchoolInfoStep() {
 			<div className="bg-white rounded-lg shadow p-6">
 				<h2 className="text-xl font-semibold mb-6">School Information</h2>
 
+				{/* API Error */}
+				{apiError && (
+					<div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+						{apiError}
+					</div>
+				)}
+
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{/* School name */}
 					<div>
@@ -91,12 +166,13 @@ export default function SchoolInfoStep() {
 						</label>
 						<input
 							type="text"
-							{...register("name")}
+							{...register("schoolName")}
+							placeholder="Enter school name"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-							readOnly
+							disabled={isSubmitting}
 						/>
-						{errors.name && (
-							<p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+						{errors.schoolName && (
+							<p className="mt-1 text-sm text-red-600">{errors.schoolName.message}</p>
 						)}
 					</div>
 
@@ -107,33 +183,38 @@ export default function SchoolInfoStep() {
 						</label>
 						<input
 							type="text"
-							{...register("shortName")}
+							{...register("schoolShortName")}
+							placeholder="Enter school short name"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-							readOnly
+							disabled={isSubmitting}
 						/>
-						{errors.shortName && (
+						{errors.schoolShortName && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.shortName.message}
+								{errors.schoolShortName.message}
 							</p>
 						)}
 					</div>
 
-					{/* School principal */}
+					{/* School schoolPrincipal */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							School principal *
+							School schoolPrincipal *
 						</label>
 						<input
 							type="text"
-							{...register("principal")}
+							{...register("schoolPrincipal")}
 							placeholder="Gabriel Davidson"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}
 						/>
-						{errors.principal && (
+						{errors.schoolPrincipal && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.principal.message}
+								{errors.schoolPrincipal.message}
 							</p>
 						)}
+						<p className="mt-1 text-xs text-yellow-600">
+							Note: This field is not yet synced with backend
+						</p>
 					</div>
 
 					{/* School type */}
@@ -143,7 +224,8 @@ export default function SchoolInfoStep() {
 						</label>
 						<select
 							{...register("schoolType")}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}>
 							<option value="">Select type</option>
 							<option value="primary">Primary School</option>
 							<option value="secondary">Secondary School</option>
@@ -156,35 +238,43 @@ export default function SchoolInfoStep() {
 								{errors.schoolType.message}
 							</p>
 						)}
+						<p className="mt-1 text-xs text-yellow-600">
+							Note: This field is not yet synced with backend
+						</p>
 					</div>
 
-					{/* School motto */}
-					<div className="md:col-span-2">
+					{/* School schoolMotto */}
+					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							School motto
+							School schoolMotto
 						</label>
 						<input
 							type="text"
-							{...register("motto")}
-							placeholder="Enter school motto (optional)"
+							{...register("schoolMotto")}
+							placeholder="Enter school schoolMotto (optional)"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}
 						/>
+						<p className="mt-1 text-xs text-yellow-600">
+							Note: This field is not yet synced with backend
+						</p>
 					</div>
 
 					{/* School address */}
-					<div className="md:col-span-2">
+					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							School address *
 						</label>
 						<input
 							type="text"
-							{...register("address")}
+							{...register("schoolAddress")}
 							placeholder="Enter school address"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}
 						/>
-						{errors.address && (
+						{errors.schoolAddress && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.address.message}
+								{errors.schoolAddress.message}
 							</p>
 						)}
 					</div>
@@ -196,11 +286,9 @@ export default function SchoolInfoStep() {
 						</label>
 						<select
 							{...register("country")}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={true}>
 							<option value="Nigeria">Nigeria</option>
-							<option value="Ghana">Ghana</option>
-							<option value="Kenya">Kenya</option>
-							<option value="South Africa">South Africa</option>
 						</select>
 						{errors.country && (
 							<p className="mt-1 text-sm text-red-600">
@@ -216,13 +304,16 @@ export default function SchoolInfoStep() {
 						</label>
 						<select
 							{...register("state")}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}>
 							<option value="">Select state</option>
-							<option value="Lagos">Lagos</option>
-							<option value="Abuja">Abuja</option>
-							<option value="Rivers">Rivers</option>
-							<option value="Oyo">Oyo</option>
-							{/* Add more states */}
+							{NIGERIAN_STATES.map((state) => (
+								<option
+									key={state}
+									value={state}>
+									{state}
+								</option>
+							))}
 						</select>
 						{errors.state && (
 							<p className="mt-1 text-sm text-red-600">
@@ -238,7 +329,7 @@ export default function SchoolInfoStep() {
 						</label>
 						<input
 							type="text"
-							{...register("schoolUrl")}
+							{...register("schoolDomain")}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-orange-600"
 							readOnly
 						/>
@@ -251,13 +342,14 @@ export default function SchoolInfoStep() {
 						</label>
 						<input
 							type="text"
-							{...register("website")}
+							{...register("schoolWebsite")}
 							placeholder="www.yourschool.edu.ng (optional)"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							disabled={isSubmitting}
 						/>
-						{errors.website && (
+						{errors.schoolWebsite && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.website.message}
+								{errors.schoolWebsite.message}
 							</p>
 						)}
 					</div>
@@ -274,14 +366,15 @@ export default function SchoolInfoStep() {
 							</div>
 							<input
 								type="tel"
-								{...register("phoneNumber")}
+								{...register("schoolPhoneNumber")}
 								placeholder="801 3567 245"
 								className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+								disabled={isSubmitting}
 							/>
 						</div>
-						{errors.phoneNumber && (
+						{errors.schoolPhoneNumber && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.phoneNumber.message}
+								{errors.schoolPhoneNumber.message}
 							</p>
 						)}
 					</div>
@@ -293,13 +386,13 @@ export default function SchoolInfoStep() {
 						</label>
 						<input
 							type="email"
-							{...register("email")}
+							{...register("schoolEmail")}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 							readOnly
 						/>
-						{errors.email && (
+						{errors.schoolEmail && (
 							<p className="mt-1 text-sm text-red-600">
-								{errors.email.message}
+								{errors.schoolEmail.message}
 							</p>
 						)}
 					</div>
@@ -315,7 +408,7 @@ export default function SchoolInfoStep() {
 							onFileSelect={handleLogoUpload}
 							accept="image/*"
 							maxSize={5 * 1024 * 1024} // 5MB
-							currentFile={schoolInfo.logo}
+							currentFile={schoolInfo.schoolLogo}
 						/>
 					</div>
 
@@ -336,13 +429,16 @@ export default function SchoolInfoStep() {
 				<div className="flex justify-end mt-8">
 					<button
 						type="submit"
-						disabled={!isValid}
-						className={`px-8 py-3 rounded-lg font-medium transition-colors ${
-							isValid
+						disabled={!isValid || isSubmitting}
+						className={`px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+							isValid && !isSubmitting
 								? "bg-orange-500 text-white hover:bg-orange-600"
 								: "bg-gray-200 text-gray-400 cursor-not-allowed"
 						}`}>
-						Save changes
+						{isSubmitting && (
+							<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+						)}
+						{isSubmitting ? "Saving..." : "Save changes"}
 					</button>
 				</div>
 			</div>

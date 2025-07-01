@@ -1,20 +1,25 @@
 // src/features/school-setup/components/steps/AddClassArmsStep.tsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSchoolSetupStore } from "../../store/schoolSetupStore";
 import { Trash2 } from "lucide-react";
 import CustomArmModal from "../CustomArmModal";
+import schoolSetupApiClient from "@/features/dashboard/api/dashboardApiClient";
 
 interface ClassArmsProps {
 	onComplete?: () => void;
 }
 
 export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
+	const navigate = useNavigate();
 	const {
 		selectedClassLevels,
 		classArms,
 		updateClassArms,
 		addCustomArm,
 		previousStep,
+		markAsCompleted,
+		saveDraft,
 	} = useSchoolSetupStore();
 
 	const [showCustomModal, setShowCustomModal] = useState(false);
@@ -23,6 +28,8 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 	const [editingArms, setEditingArms] = useState<{ [key: string]: string[] }>(
 		{}
 	);
+	const [isCompleting, setIsCompleting] = useState(false);
+	const [apiError, setApiError] = useState<string | null>(null);
 
 	// Get only selected class levels
 	const activeClassLevels = selectedClassLevels.filter(
@@ -77,9 +84,47 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 		};
 	};
 
-	const handleComplete = () => {
-		if (onComplete) {
-			onComplete();
+	// Validate that all classes have at least one arm selected
+	const validateClassArms = () => {
+		return activeClassLevels.every((level) => {
+			const classArmData = classArms.find((ca) => ca.classId === level.id);
+			const arms = classArmData?.arms || [];
+			return arms.length > 0;
+		});
+	};
+
+	const handleComplete = async () => {
+		if (!validateClassArms()) {
+			setApiError("Please select at least one arm for each class");
+			return;
+		}
+
+		setIsCompleting(true);
+		setApiError(null);
+
+		try {
+			// Create classes with arms via API
+			await schoolSetupApiClient.createClasses(selectedClassLevels, classArms);
+
+			console.log("✅ Classes created successfully");
+
+			// Mark setup as completed
+			saveDraft();
+			markAsCompleted();
+
+			// Navigate to dashboard
+			navigate("/dashboard");
+
+			if (onComplete) {
+				onComplete();
+			}
+		} catch (error: any) {
+			console.error("❌ Failed to create classes:", error);
+			setApiError(
+				error.message || "Failed to create classes. Please try again."
+			);
+		} finally {
+			setIsCompleting(false);
 		}
 	};
 
@@ -90,6 +135,13 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 				<p className="text-gray-600 mb-8">
 					Select or customize arms for each class level
 				</p>
+
+				{/* API Error */}
+				{apiError && (
+					<div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+						{apiError}
+					</div>
+				)}
 
 				<div className="space-y-6">
 					{activeClassLevels.map((level) => {
@@ -125,6 +177,7 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 													checked={isSelected}
 													onChange={() => handleArmToggle(level.id, arm)}
 													className="sr-only"
+													disabled={isCompleting}
 												/>
 												<span className="font-medium">{arm}</span>
 												{isCustom && (
@@ -133,7 +186,8 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 															e.preventDefault();
 															// Remove custom arm logic here if needed
 														}}
-														className="ml-2 text-red-500 hover:text-red-700">
+														className="ml-2 text-red-500 hover:text-red-700"
+														disabled={isCompleting}>
 														<Trash2 className="w-3 h-3" />
 													</button>
 												)}
@@ -144,7 +198,8 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 									<button
 										type="button"
 										onClick={() => handleCustomArmClick(level.id)}
-										className="flex items-center gap-2 px-4 py-2 text-orange-500 hover:text-orange-600">
+										className="flex items-center gap-2 px-4 py-2 text-orange-500 hover:text-orange-600"
+										disabled={isCompleting}>
 										<span>Customize your class arms</span>
 									</button>
 								</div>
@@ -164,14 +219,23 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 					<button
 						type="button"
 						onClick={previousStep}
-						className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+						className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+						disabled={isCompleting}>
 						Back
 					</button>
 					<button
 						type="button"
 						onClick={handleComplete}
-						className="px-8 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
-						Complete
+						disabled={isCompleting || !validateClassArms()}
+						className={`px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+							!isCompleting && validateClassArms()
+								? "bg-orange-500 text-white hover:bg-orange-600"
+								: "bg-gray-200 text-gray-400 cursor-not-allowed"
+						}`}>
+						{isCompleting && (
+							<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+						)}
+						{isCompleting ? "Creating Classes..." : "Complete Setup"}
 					</button>
 				</div>
 			</div>

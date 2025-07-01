@@ -1,3 +1,4 @@
+// src/features/auth/pages/signup/AdminSignupFlow.tsx
 import {
 	SchoolInfoFormData,
 	PersonalInfoFormData,
@@ -5,7 +6,7 @@ import {
 import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { authApi } from "../../api/authApi";
+import { authApiClient } from "../../api/authApiClient";
 import OtpVerification from "../../components/OtpVerification";
 import PersonalInfoStep from "./components/PersonalInfoStep";
 import SchoolInfoStep from "./components/SchoolInfoStep";
@@ -41,9 +42,9 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 		(info: SchoolInfoFormData, url: string) => {
 			// Save school info to store
 			updateSignupData({
-				schoolName: info.name,
+				schoolName: info.schoolName,
 				schoolWebsite: info.website,
-				schoolShortName: info.shortName,
+				schoolShortName: info.schoolShortName,
 				learnboxUrl: url,
 			});
 
@@ -73,19 +74,18 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 
 			try {
 				// Call the register endpoint with all collected data
-				await authApi.register({
-					fullName: info.fullName,
+				await authApiClient.register({
 					email: info.email,
 					password: info.password,
-					schoolName: signupData.schoolName,
-					schoolWebsite: signupData.schoolWebsite || "",
-					schoolShortName: signupData.schoolShortName || "",
-					learnboxUrl: signupData.learnboxUrl || "",
+					fullName: info.fullName.split(" ")[0] || info.fullName,
 					phoneNumber: `+234${info.phoneNumber}`,
+					learnboxUrl: signupData.learnboxUrl || "",
+					schoolName: signupData.schoolName || "",
+					schoolShortName: signupData.schoolShortName || "",
 				});
 
 				// Registration successful, now send OTP
-				await authApi.resendOtp(info.email);
+				await authApiClient.resendOtp(info.email);
 
 				// Move to OTP step
 				setSignupStep("otp");
@@ -93,7 +93,7 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 			} catch (error: any) {
 				console.error("Registration failed:", error);
 				updateSignupData({
-					error: error.response?.data?.message || "Failed to create account",
+					error: error.message || "Failed to create account",
 				});
 				setSignupStep("error");
 				setLoadingState("error");
@@ -108,7 +108,11 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 			if (!signupData?.email) {
 				throw new Error("Email is required for OTP verification");
 			}
-			await authApi.verifyOtp(signupData.email, otp);
+
+			await authApiClient.verifyOtp({
+				email: signupData.email,
+				otp,
+			});
 
 			// Mark OTP as verified
 			updateSignupData({ otpVerified: true });
@@ -129,7 +133,7 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 		if (!signupData?.email) {
 			throw new Error("Email is required for resending OTP");
 		}
-		await authApi.resendOtp(signupData.email);
+		await authApiClient.resendOtp(signupData.email);
 	}, [signupData?.email]);
 
 	// OTP error callback
@@ -181,9 +185,9 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 						initialData={
 							signupData
 								? {
-										name: signupData.schoolName || "",
+										schoolName: signupData.schoolName || "",
 										website: signupData.schoolWebsite || "",
-										shortName: signupData.schoolShortName || "",
+										schoolShortName: signupData.schoolShortName || "",
 								  }
 								: undefined
 						}

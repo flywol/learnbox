@@ -5,10 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "../../store/authStore";
-import { authApi } from "../../api/authApi";
-import { loginSchema, SchoolSetupFormData, schoolSetupSchema } from "../../schemas/authSchema";
-
-
+import {
+	loginSchema,
+	SchoolSetupFormData,
+	schoolSetupSchema,
+} from "../../schemas/authSchema";
+import { authApiClient } from "../../api/authApiClient";
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -41,6 +43,7 @@ const CombinedSchoolLoginPage = () => {
 		setIntendedDestination,
 		setPasswordResetEmail,
 		setPasswordResetStep,
+		verifySchoolDomain,
 	} = useAuthStore();
 
 	// School setup form
@@ -75,31 +78,31 @@ const CombinedSchoolLoginPage = () => {
 	}, [schoolDomain]); // Don't include currentStep to avoid infinite loop
 
 	const handleSchoolSubmit = async (data: SchoolSetupFormData) => {
-		// Skip validation for admin signup
-		if (selectedRole === "ADMIN") {
-			setSchoolDomain(data.schoolUrl);
-			navigate("/signup");
-			return;
-		}
-
 		setIsValidating(true);
 		setLoginError(null);
 
 		try {
-			const response = await authApi.verifyDomain(data.schoolUrl);
-			if (response.data) {
+			// All roles need to verify the school domain
+			const isValid = await verifySchoolDomain(data.schoolUrl);
+
+			if (isValid) {
 				setSchoolDomain(data.schoolUrl);
 				// Wait a brief moment then slide to login
 				setTimeout(() => {
 					setCurrentStep("login");
 				}, 300);
+			} else {
+				schoolForm.setError("schoolUrl", {
+					type: "manual",
+					message: "School not found. Please check the URL and try again.",
+				});
 			}
 		} catch (error: any) {
+			console.error("School validation failed:", error);
 			schoolForm.setError("schoolUrl", {
 				type: "manual",
 				message:
-					error.response?.data?.message ||
-					"School not found. Please check the URL and try again.",
+					error.message || "Unable to validate school. Please try again.",
 			});
 		} finally {
 			setIsValidating(false);
@@ -111,71 +114,113 @@ const CombinedSchoolLoginPage = () => {
 
 		setIsLoggingIn(true);
 		setLoginError(null);
+		console.log("🔐 Starting login process...");
 
 		try {
-			const response = await authApi.login(
-				data.email,
-				data.password,
+			// Call API using new auth client
+			const response = await authApiClient.login(
+				{
+					email: data.email,
+					password: data.password,
+				},
 				data.rememberMe || false
 			);
-			const { user, tokens } = response.data;
 
-			// Check if user needs email verification
-			if (!user.isVerified) {
-				// Don't complete login yet - user needs to verify email
-				setPasswordResetEmail(user.email);
+			console.log("✅ Login API successful:", {
+				hasUser: !!response.data.user,
+				hasTokens: !!(response.data.accessToken && response.data.refreshToken),
+				userVerified: response.data.user.isVerified,
+			});
+
+			// Transform API user data to internal User type
+			const userId = response.data.user.id || response.data.user.id;
+			if (!userId) {
+				throw new Error("User ID is required");
+			}
+
+			const transformedUser = {
+				id: userId,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString(),
+				deleted_at: "",
+				fullName:
+					response.data.user.firstName && response.data.user.lastName
+						? `${response.data.user.firstName} ${response.data.user.lastName}`
+						: response.data.user.fullName || "",
+				phoneNumber:
+					response.data.user.phone || response.data.user.phoneNumber || "",
+				email: response.data.user.email,
+				role: response.data.user.role,
+				isVerified: response.data.user.isVerified ?? true,
+				isActive: response.data.user.isActive ?? true,
+				isDeleted: false,
+				otp: "",
+				otpExpiration: "",
+				resetPasswordToken: response.data.user.resetPasswordToken || "",
+				resetPasswordExpires: "",
+			};
+
+			// Handle unverified users
+			if (!transformedUser.isVerified) {
+				console.log("📧 User needs email verification");
+				setPasswordResetEmail(transformedUser.email);
 				setPasswordResetStep("otp");
-
-				// Navigate to email verification
 				navigate("/verify-email", {
 					state: {
-						user: user,
-						tokens: tokens,
+						user: transformedUser,
 						from: intendedDestination || "/dashboard",
 					},
 				});
 				return;
 			}
 
-			// Check if this is a first-time login (backend should indicate this)
-			// For now, we'll assume if user has a certain flag or pattern
-			// TODO: Update this based on actual backend response
-			const isFirstTimeLogin = false; // Backend should provide this
-
-			// Set login context for first-time users
+			// Check for first-time login
+			const isFirstTimeLogin = !!(
+				transformedUser.resetPasswordToken &&
+				transformedUser.resetPasswordToken.length > 0
+			);
 			if (isFirstTimeLogin) {
-				setFirstTimeLogin(true, tokens.accessToken);
+				console.log("🆕 First-time login detected");
+				setFirstTimeLogin(true, response.data.accessToken);
 			}
 
-			// Log the user in
-			loginAction(user);
+			// Authenticate user in store
+			console.log("🔐 Authenticating user in store...");
+			loginAction(transformedUser);
 
-			// Navigation logic for verified users
-			if (isFirstTimeLogin) {
-				// First-time users go to password reset
-				navigate("/reset-password", {
-					state: {
-						resetToken: tokens.accessToken,
-						email: user.email,
-						from: intendedDestination || "/dashboard",
-					},
-				});
-			} else if (intendedDestination) {
-				// Go to intended destination
-				const destination = intendedDestination;
-				setIntendedDestination(null); // Clear it
-				navigate(destination);
-			} else if (hasSeenOnboarding) {
-				// Regular users who've completed onboarding
-				navigate("/dashboard");
-			} else {
-				// New users who need onboarding
-				navigate("/onboarding");
-			}
+			// Small delay to ensure state propagation
+			setTimeout(() => {
+				// Navigate based on user state
+				if (isFirstTimeLogin) {
+					console.log("➡️ Redirecting to password reset");
+					navigate("/reset-password", {
+						state: {
+							resetToken: response.data.accessToken,
+							email: transformedUser.email,
+							from: intendedDestination || "/dashboard",
+						},
+						replace: true,
+					});
+				} else if (intendedDestination) {
+					console.log(
+						"➡️ Redirecting to intended destination:",
+						intendedDestination
+					);
+					const destination = intendedDestination;
+					setIntendedDestination(null);
+					navigate(destination, { replace: true });
+				} else if (hasSeenOnboarding) {
+					console.log("➡️ Redirecting to dashboard");
+					navigate("/dashboard", { replace: true });
+				} else {
+					console.log("➡️ Redirecting to onboarding");
+					navigate("/onboarding", { replace: true });
+				}
+			}, 100);
 		} catch (error: any) {
+			console.error("❌ Login failed:", error);
 			setLoginError(
-				error.response?.data?.message ||
-					"Login failed. Please check your credentials."
+				error.message || "Login failed. Please check your credentials."
 			);
 		} finally {
 			setIsLoggingIn(false);
@@ -250,23 +295,7 @@ const CombinedSchoolLoginPage = () => {
 						</button>
 					</form>
 
-					{/* Show Create Account link only for ADMIN role */}
-					{selectedRole === "ADMIN" && (
-						<div className="text-center">
-							<button
-								type="button"
-								onClick={() => {
-									if (schoolForm.getValues("schoolUrl")) {
-										setSchoolDomain(schoolForm.getValues("schoolUrl"));
-									}
-									navigate("/signup");
-								}}
-								className="text-sm text-gray-500 hover:text-gray-700"
-								disabled={isValidating}>
-								Create your school
-							</button>
-						</div>
-					)}
+					{/* No admin-specific logic needed here anymore - handled in SchoolSetupPage */}
 				</div>
 
 				{/* Login Form */}

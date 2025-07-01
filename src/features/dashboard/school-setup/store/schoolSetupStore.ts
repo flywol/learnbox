@@ -1,23 +1,7 @@
-// src/features/school-setup/store/schoolSetupStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { SchoolInfo } from "../../types/dashboard.types";
 
-export interface SchoolInfo {
-	name: string;
-	shortName: string;
-	principal: string;
-	schoolType: string;
-	motto: string;
-	address: string;
-	country: string;
-	state: string;
-	schoolUrl: string;
-	website?: string;
-	phoneNumber: string;
-	email: string;
-	logo?: File | string;
-	principalSignature?: File | string;
-}
 
 export interface Term {
 	name: string;
@@ -66,9 +50,11 @@ interface SchoolSetupState {
 	selectedClassLevels: ClassLevel[];
 	classArms: ClassArm[];
 
-	// Draft saving
+	// Draft saving and API state
 	lastSavedAt: Date | null;
 	hasUnsavedChanges: boolean;
+	isSubmitting: boolean;
+	apiError: string | null;
 
 	// Actions
 	setCurrentStep: (step: number) => void;
@@ -89,10 +75,19 @@ interface SchoolSetupState {
 	updateClassArms: (classId: string, arms: string[]) => void;
 	addCustomArm: (classId: string, armName: string) => void;
 
+	// API state management
+	setSubmitting: (submitting: boolean) => void;
+	setApiError: (error: string | null) => void;
+	clearApiError: () => void;
+
 	// Utility actions
 	saveDraft: () => void;
 	resetSetup: () => void;
 	markAsCompleted: () => void;
+
+	// Validation helpers
+	validateCurrentStep: () => boolean;
+	getStepCompletionStatus: () => { [key: number]: boolean };
 }
 
 // Initial class levels data
@@ -167,7 +162,7 @@ const initialClassLevels: ClassLevel[] = [
 
 export const useSchoolSetupStore = create<SchoolSetupState>()(
 	persist(
-		(set) => ({
+		(set, get) => ({
 			// Initial state
 			currentStep: 1,
 			totalSteps: 4,
@@ -184,6 +179,8 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 			classArms: [],
 			lastSavedAt: null,
 			hasUnsavedChanges: false,
+			isSubmitting: false,
+			apiError: null,
 
 			// Step navigation
 			setCurrentStep: (step) => set({ currentStep: step }),
@@ -281,6 +278,67 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 					return state;
 				}),
 
+			// API state management
+			setSubmitting: (submitting) => set({ isSubmitting: submitting }),
+			setApiError: (error) => set({ apiError: error }),
+			clearApiError: () => set({ apiError: null }),
+
+			// Validation helpers
+			validateCurrentStep: () => {
+				const state = get();
+				switch (state.currentStep) {
+					case 1: // School Info
+						return !!(
+							state.schoolInfo.schoolName &&
+							state.schoolInfo.schoolShortName &&
+							state.schoolInfo.schoolAddress &&
+							state.schoolInfo.schoolPhoneNumber &&
+							state.schoolInfo.schoolEmail
+						);
+					case 2: // Session
+						return !!(
+							state.session.name &&
+							state.session.terms?.first.startDate &&
+							state.session.terms?.first.endDate &&
+							state.session.terms?.second.startDate &&
+							state.session.terms?.second.endDate &&
+							state.session.terms?.third.startDate &&
+							state.session.terms?.third.endDate
+						);
+					case 3: // Class Levels
+						return state.selectedClassLevels.some((level) => level.selected);
+					case 4: // Class Arms
+						const selectedLevels = state.selectedClassLevels.filter(
+							(level) => level.selected
+						);
+						return selectedLevels.every((level) => {
+							const classArm = state.classArms.find(
+								(ca) => ca.classId === level.id
+							);
+							return classArm && classArm.arms.length > 0;
+						});
+					default:
+						return false;
+				}
+			},
+
+			getStepCompletionStatus: () => {
+				const state = get();
+				const status: { [key: number]: boolean } = {};
+
+				// Check each step completion
+				for (let step = 1; step <= state.totalSteps; step++) {
+					const originalStep = state.currentStep;
+					// Temporarily set step to check validation
+					set({ currentStep: step });
+					status[step] = get().validateCurrentStep();
+					// Restore original step
+					set({ currentStep: originalStep });
+				}
+
+				return status;
+			},
+
 			// Utility actions
 			saveDraft: () =>
 				set({
@@ -304,12 +362,15 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 					classArms: [],
 					lastSavedAt: null,
 					hasUnsavedChanges: false,
+					isSubmitting: false,
+					apiError: null,
 				}),
 
 			markAsCompleted: () =>
 				set({
 					isCompleted: true,
 					hasUnsavedChanges: false,
+					lastSavedAt: new Date(),
 				}),
 		}),
 		{

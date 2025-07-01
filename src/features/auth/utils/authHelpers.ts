@@ -1,5 +1,5 @@
-// src/features/auth/utils/authHelpers.ts
-import { Role } from "../types/user.types";
+
+import { Role } from "../types/auth.types";
 
 /**
  * Check if a password meets strength requirements

@@ -8,7 +8,7 @@ import {
 	ResetPasswordFormData,
 } from "../../schemas/authSchema";
 import { useAuthStore } from "../../store/authStore";
-import { authApi } from "../../api/authApi";
+import { authApiClient } from "../../api/authApiClient";
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -87,11 +87,11 @@ const ResetPasswordPage = () => {
 		setError(null);
 
 		try {
-			await authApi.resetPassword(
-				userEmail,
-				data.password,
-				data.confirmPassword
-			);
+			await authApiClient.resetPassword({
+				password: data.password,
+				confirmPassword: data.confirmPassword,
+				email: userEmail,
+			});
 
 			// Clear the password reset state
 			completePasswordReset();
@@ -110,10 +110,7 @@ const ResetPasswordPage = () => {
 				navigate("/login");
 			}
 		} catch (error: any) {
-			setError(
-				error.response?.data?.message ||
-					"Failed to reset password. Please try again."
-			);
+			setError(error.message || "Failed to reset password. Please try again.");
 		} finally {
 			setIsResetting(false);
 		}

@@ -1,18 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { schoolInfoSchema } from "@/features/auth/schemas";
 
-const schoolInfoSchema = z.object({
-	name: z.string().min(1, "School name is required"),
-	shortName: z
-		.string()
-		.min(1, "School short name is required")
-		.regex(/^[a-zA-Z0-9]+$/, "Only letters and numbers allowed"),
-	website: z
-		.string()
-		.min(1, "School website is required")
-		.url("Please enter a valid URL"),
-});
+
 
 type SchoolInfoFormData = z.infer<typeof schoolInfoSchema>;
 
@@ -34,13 +25,13 @@ export default function SchoolInfoStep({
 		resolver: zodResolver(schoolInfoSchema),
 		mode: "onChange",
 		defaultValues: initialData || {
-			name: "",
-			shortName: "",
+			schoolShortName: "",
+			schoolName: "",
 			website: "",
 		},
 	});
 
-	const shortName = watch("shortName");
+	const shortName = watch("schoolShortName");
 	const generatedUrl = `https://${
 		shortName?.toLowerCase().replace(/\s+/g, "") || "yourschool"
 	}.learnbox.com`;
@@ -52,6 +43,7 @@ export default function SchoolInfoStep({
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(generatedUrl);
 	};
+
 	return (
 		<div className="min-h-screen bg-white px-4 py-12">
 			<div className="max-w-3xl mx-auto">
@@ -75,14 +67,14 @@ export default function SchoolInfoStep({
 							<input
 								type="text"
 								placeholder="School name *"
-								{...register("name")}
+								{...register("schoolName")}
 								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
-									errors.name ? "border-red-500" : "border-gray-300"
+									errors.schoolName ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
-							{errors.name && (
+							{errors.schoolName && (
 								<p className="text-red-500 text-xs mt-1">
-									{errors.name.message}
+									{errors.schoolName.message}
 								</p>
 							)}
 						</div>
@@ -91,14 +83,14 @@ export default function SchoolInfoStep({
 							<input
 								type="text"
 								placeholder="School short name *"
-								{...register("shortName")}
+								{...register("schoolShortName")}
 								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
-									errors.shortName ? "border-red-500" : "border-gray-300"
+									errors.schoolShortName ? "border-red-500" : "border-gray-300"
 								}`}
 							/>
-							{errors.shortName && (
+							{errors.schoolShortName && (
 								<p className="text-red-500 text-xs mt-1">
-									{errors.shortName.message}
+									{errors.schoolShortName.message}
 								</p>
 							)}
 						</div>
@@ -135,7 +127,7 @@ export default function SchoolInfoStep({
 						<div>
 							<input
 								type="text"
-								placeholder="School website *"
+								placeholder="School website (optional)"
 								{...register("website")}
 								className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-orange-500 ${
 									errors.website ? "border-red-500" : "border-gray-300"

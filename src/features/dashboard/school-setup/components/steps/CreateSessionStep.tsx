@@ -1,4 +1,4 @@
-// src/features/school-setup/components/steps/CreateSessionStep.tsx
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -86,7 +86,6 @@ export default function CreateSessionStep() {
 		register,
 		handleSubmit,
 		formState: { errors, isValid },
-		setError,
 	} = useForm<SessionFormData>({
 		resolver: zodResolver(sessionSchema),
 		mode: "onChange",
@@ -105,17 +104,17 @@ export default function CreateSessionStep() {
 		nextStep();
 	};
 
-	const formatDate = (dateString: string) => {
-		if (!dateString) return "";
-		const date = new Date(dateString);
-		return date
-			.toLocaleDateString("en-GB", {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric",
-			})
-			.replace(/\//g, "/");
-	};
+	// const formatDate = (dateString: string) => {
+	// 	if (!dateString) return "";
+	// 	const date = new Date(dateString);
+	// 	return date
+	// 		.toLocaleDateString("en-GB", {
+	// 			day: "2-digit",
+	// 			month: "2-digit",
+	// 			year: "numeric",
+	// 		})
+	// 		.replace(/\//g, "/");
+	// };
 
 	return (
 		<form

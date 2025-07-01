@@ -7,10 +7,10 @@ import {
 	forgotPasswordSchema,
 	ForgotPasswordFormData,
 } from "../../schemas/authSchema";
-import { authApi } from "../../api/authApi";
 import { useAuthStore } from "../../store/authStore";
 import OtpVerification from "../../components/OtpVerification";
 import { AuthPageWrapper } from "../../components/ui/AuthPageWrapper";
+import { authApiClient } from "../../api/authApiClient";
 
 const ForgotPasswordPage = () => {
 	const navigate = useNavigate();
@@ -52,14 +52,13 @@ const ForgotPasswordPage = () => {
 			setLoadingState("submitting");
 
 			try {
-				await authApi.forgotPassword(data.email);
+				await authApiClient.forgotPassword({ email: data.email });
 				setPasswordResetEmail(data.email);
 				setPasswordResetStep("otp");
 				setLoadingState("success");
 			} catch (err: any) {
 				const errorMessage =
-					err.response?.data?.message ||
-					"Failed to send reset email. Please try again.";
+					err.message || "Failed to send reset email. Please try again.";
 				setError("email", { message: errorMessage });
 				setLoadingState("error");
 			}
@@ -74,7 +73,10 @@ const ForgotPasswordPage = () => {
 				throw new Error("Email is required for OTP verification");
 			}
 
-			await authApi.verifyForgotPasswordOtp(passwordResetEmail, otp);
+			await authApiClient.verifyForgotPasswordOtp({
+				email: passwordResetEmail,
+				otp,
+			});
 
 			// Move to success step briefly, then redirect to reset password
 			setPasswordResetStep("newPassword");
@@ -97,7 +99,7 @@ const ForgotPasswordPage = () => {
 		if (!passwordResetEmail) {
 			throw new Error("Email is required for resending OTP");
 		}
-		await authApi.forgotPassword(passwordResetEmail);
+		await authApiClient.forgotPassword({ email: passwordResetEmail });
 	}, [passwordResetEmail]);
 
 	// OTP error callback

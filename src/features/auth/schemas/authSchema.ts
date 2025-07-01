@@ -37,23 +37,27 @@ export const otpSchema = z.object({
 // ===== LOGIN SCHEMAS =====
 
 export const loginSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
-    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-    rememberMe: z.boolean()
+	email: z.string().email({ message: "Please enter a valid email address" }),
+	password: z
+		.string()
+		.min(6, { message: "Password must be at least 6 characters" }),
+	rememberMe: z.boolean(),
 });
 
 // ===== SIGNUP SCHEMAS =====
 
 export const schoolInfoSchema = z.object({
-	name: z.string().min(1, "School name is required"),
-	shortName: z
+	schoolName: z.string().min(1, "School name is required"),
+	schoolShortName: z
 		.string()
 		.min(1, "School short name is required")
 		.regex(/^[a-zA-Z0-9]+$/, "Only letters and numbers allowed"),
 	website: z
 		.string()
-		.min(1, "School website is required")
-		.url("Please enter a valid URL"),
+		.optional()
+		.refine((val) => !val || z.string().url().safeParse(val).success, {
+			message: "Please enter a valid URL",
+		}),
 });
 
 export const personalInfoSchema = z.object({
