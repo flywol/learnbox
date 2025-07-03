@@ -1,5 +1,5 @@
 // src/App.tsx - Updated with HashRouter and Device Restriction
-import { Routes, Route, HashRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { HydrationGate } from "./components/HydrationGate";
 
 // Security Components
