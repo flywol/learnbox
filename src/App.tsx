@@ -1,6 +1,10 @@
-// src/App.tsx - Updated with DashboardLayout
+// src/App.tsx - Updated with Device Restriction
 import { Routes, Route } from "react-router-dom";
 import { HydrationGate } from "./components/HydrationGate";
+
+// Security Components
+import { SecurityWrapper } from "./common/security/SecurityWrapper";
+import { DeviceRestrictedPage } from "./common/security/DeviceRestrictedPage";
 
 // Layout
 
@@ -60,121 +64,129 @@ export default function App() {
 	console.log("🚀 App component rendering");
 
 	return (
-		<HydrationGate>
-			<Routes>
-				{/* Public Routes - Guest Only */}
-				<Route
-					path="/"
-					element={
-						<AuthGuard requiresAuth={false}>
-							<RoleSelectionPage />
-						</AuthGuard>
-					}
-				/>
-
-				<Route
-					path="/school-setup"
-					element={
-						<AuthGuard requiresAuth={false}>
-							<FlowGuard requiresRole>
-								<SchoolSetupPage />
-							</FlowGuard>
-						</AuthGuard>
-					}
-				/>
-
-				<Route
-					path="/signup"
-					element={
-						<AuthGuard requiresAuth={false}>
-							<FlowGuard
-								requiresRole
-								allowedRoles={["ADMIN"]}>
-								<SignupFlow />
-							</FlowGuard>
-						</AuthGuard>
-					}
-				/>
-
-				<Route
-					path="/login"
-					element={
-						<AuthGuard requiresAuth={false}>
-							<FlowGuard
-								requiresRole
-								requiresSchool>
-								<LoginPage />
-							</FlowGuard>
-						</AuthGuard>
-					}
-				/>
-
-				<Route
-					path="/forgot-password"
-					element={
-						<AuthGuard requiresAuth={false}>
-							<ForgotPasswordPage />
-						</AuthGuard>
-					}
-				/>
-
-				{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
-				<Route
-					path="/verify-email"
-					element={<EmailVerificationPage />}
-				/>
-
-				<Route
-					path="/reset-password"
-					element={<ResetPasswordPage />}
-				/>
-
-				{/* Protected Routes - Authentication Required */}
-				<Route
-					path="/onboarding"
-					element={
-						<ProtectedRoute>
-							<OnboardingPage />
-						</ProtectedRoute>
-					}
-				/>
-
-				{/* Dashboard Routes - Wrapped with DashboardLayout */}
-				<Route
-					path="/dashboard"
-					element={
-						<ProtectedRoute>
-							<DashboardLayout />
-						</ProtectedRoute>
-					}>
-					{/* Nested dashboard routes */}
+		<SecurityWrapper>
+			<HydrationGate>
+				<Routes>
+					{/* Device Restriction Route */}
 					<Route
-						index
-						element={<AdminDashboard />}
+						path="/device-restricted"
+						element={<DeviceRestrictedPage />}
+					/>
+
+					{/* Public Routes - Guest Only */}
+					<Route
+						path="/"
+						element={
+							<AuthGuard requiresAuth={false}>
+								<RoleSelectionPage />
+							</AuthGuard>
+						}
+					/>
+
+					<Route
+						path="/school-setup"
+						element={
+							<AuthGuard requiresAuth={false}>
+								<FlowGuard requiresRole>
+									<SchoolSetupPage />
+								</FlowGuard>
+							</AuthGuard>
+						}
+					/>
+
+					<Route
+						path="/signup"
+						element={
+							<AuthGuard requiresAuth={false}>
+								<FlowGuard
+									requiresRole
+									allowedRoles={["ADMIN"]}>
+									<SignupFlow />
+								</FlowGuard>
+							</AuthGuard>
+						}
+					/>
+
+					<Route
+						path="/login"
+						element={
+							<AuthGuard requiresAuth={false}>
+								<FlowGuard
+									requiresRole
+									requiresSchool>
+									<LoginPage />
+								</FlowGuard>
+							</AuthGuard>
+						}
+					/>
+
+					<Route
+						path="/forgot-password"
+						element={
+							<AuthGuard requiresAuth={false}>
+								<ForgotPasswordPage />
+							</AuthGuard>
+						}
+					/>
+
+					{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
+					<Route
+						path="/verify-email"
+						element={<EmailVerificationPage />}
+					/>
+
+					<Route
+						path="/reset-password"
+						element={<ResetPasswordPage />}
+					/>
+
+					{/* Protected Routes - Authentication Required */}
+					<Route
+						path="/onboarding"
+						element={
+							<ProtectedRoute>
+								<OnboardingPage />
+							</ProtectedRoute>
+						}
+					/>
+
+					{/* Dashboard Routes - Wrapped with DashboardLayout */}
+					<Route
+						path="/dashboard"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout />
+							</ProtectedRoute>
+						}>
+						{/* Nested dashboard routes */}
+						<Route
+							index
+							element={<AdminDashboard />}
+						/>
+						<Route
+							path="complete-school-setup"
+							element={<CompleteSetupPage />}
+						/>
+						{/* Add more dashboard routes here as needed */}
+						{/* 
+						<Route path="students" element={<StudentsPage />} />
+						<Route path="teachers" element={<TeachersPage />} />
+						<Route path="classes" element={<ClassesPage />} />
+						<Route path="settings" element={<SettingsPage />} />
+						*/}
+					</Route>
+
+					{/* Error Routes */}
+					<Route
+						path="/unauthorized"
+						element={<UnauthorizedPage />}
 					/>
 					<Route
-						path="complete-school-setup"
-						element={<CompleteSetupPage />}
+						path="*"
+						element={<NotFoundPage />}
 					/>
-					{/* Add more dashboard routes here as needed */}
-					{/* 
-					<Route path="students" element={<StudentsPage />} />
-					<Route path="teachers" element={<TeachersPage />} />
-					<Route path="classes" element={<ClassesPage />} />
-					<Route path="settings" element={<SettingsPage />} />
-					*/}
-				</Route>
-
-				{/* Error Routes */}
-				<Route
-					path="/unauthorized"
-					element={<UnauthorizedPage />}
-				/>
-				<Route
-					path="*"
-					element={<NotFoundPage />}
-				/>
-			</Routes>
-		</HydrationGate>
+				</Routes>
+			</HydrationGate>
+		</SecurityWrapper>
 	);
 }
