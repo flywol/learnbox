@@ -1,5 +1,5 @@
-// src/App.tsx - Updated with Device Restriction
-import { Routes, Route } from "react-router-dom";
+// src/App.tsx - Updated with HashRouter and Device Restriction
+import { Routes, Route, HashRouter } from "react-router-dom";
 import { HydrationGate } from "./components/HydrationGate";
 
 // Security Components
@@ -34,7 +34,7 @@ const UnauthorizedPage = () => (
 				You don't have permission to access this page.
 			</p>
 			<a
-				href="/"
+				href="#/"
 				className="text-orange-500 hover:underline">
 				Go back to home
 			</a>
@@ -52,7 +52,7 @@ const NotFoundPage = () => (
 				The page you're looking for doesn't exist.
 			</p>
 			<a
-				href="/dashboard"
+				href="#/dashboard"
 				className="text-orange-500 hover:underline">
 				Go back to dashboard
 			</a>
@@ -65,128 +65,130 @@ export default function App() {
 
 	return (
 		<SecurityWrapper>
-			<HydrationGate>
-				<Routes>
-					{/* Device Restriction Route */}
-					<Route
-						path="/device-restricted"
-						element={<DeviceRestrictedPage />}
-					/>
-
-					{/* Public Routes - Guest Only */}
-					<Route
-						path="/"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<RoleSelectionPage />
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/school-setup"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard requiresRole>
-									<SchoolSetupPage />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/signup"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard
-									requiresRole
-									allowedRoles={["ADMIN"]}>
-									<SignupFlow />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/login"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard
-									requiresRole
-									requiresSchool>
-									<LoginPage />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/forgot-password"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<ForgotPasswordPage />
-							</AuthGuard>
-						}
-					/>
-
-					{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
-					<Route
-						path="/verify-email"
-						element={<EmailVerificationPage />}
-					/>
-
-					<Route
-						path="/reset-password"
-						element={<ResetPasswordPage />}
-					/>
-
-					{/* Protected Routes - Authentication Required */}
-					<Route
-						path="/onboarding"
-						element={
-							<ProtectedRoute>
-								<OnboardingPage />
-							</ProtectedRoute>
-						}
-					/>
-
-					{/* Dashboard Routes - Wrapped with DashboardLayout */}
-					<Route
-						path="/dashboard"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout />
-							</ProtectedRoute>
-						}>
-						{/* Nested dashboard routes */}
+			<HashRouter>
+				<HydrationGate>
+					<Routes>
+						{/* Device Restriction Route */}
 						<Route
-							index
-							element={<AdminDashboard />}
+							path="/device-restricted"
+							element={<DeviceRestrictedPage />}
+						/>
+
+						{/* Public Routes - Guest Only */}
+						<Route
+							path="/"
+							element={
+								<AuthGuard requiresAuth={false}>
+									<RoleSelectionPage />
+								</AuthGuard>
+							}
+						/>
+
+						<Route
+							path="/school-setup"
+							element={
+								<AuthGuard requiresAuth={false}>
+									<FlowGuard requiresRole>
+										<SchoolSetupPage />
+									</FlowGuard>
+								</AuthGuard>
+							}
+						/>
+
+						<Route
+							path="/signup"
+							element={
+								<AuthGuard requiresAuth={false}>
+									<FlowGuard
+										requiresRole
+										allowedRoles={["ADMIN"]}>
+										<SignupFlow />
+									</FlowGuard>
+								</AuthGuard>
+							}
+						/>
+
+						<Route
+							path="/login"
+							element={
+								<AuthGuard requiresAuth={false}>
+									<FlowGuard
+										requiresRole
+										requiresSchool>
+										<LoginPage />
+									</FlowGuard>
+								</AuthGuard>
+							}
+						/>
+
+						<Route
+							path="/forgot-password"
+							element={
+								<AuthGuard requiresAuth={false}>
+									<ForgotPasswordPage />
+								</AuthGuard>
+							}
+						/>
+
+						{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
+						<Route
+							path="/verify-email"
+							element={<EmailVerificationPage />}
+						/>
+
+						<Route
+							path="/reset-password"
+							element={<ResetPasswordPage />}
+						/>
+
+						{/* Protected Routes - Authentication Required */}
+						<Route
+							path="/onboarding"
+							element={
+								<ProtectedRoute>
+									<OnboardingPage />
+								</ProtectedRoute>
+							}
+						/>
+
+						{/* Dashboard Routes - Wrapped with DashboardLayout */}
+						<Route
+							path="/dashboard"
+							element={
+								<ProtectedRoute>
+									<DashboardLayout />
+								</ProtectedRoute>
+							}>
+							{/* Nested dashboard routes */}
+							<Route
+								index
+								element={<AdminDashboard />}
+							/>
+							<Route
+								path="complete-school-setup"
+								element={<CompleteSetupPage />}
+							/>
+							{/* Add more dashboard routes here as needed */}
+							{/* 
+							<Route path="students" element={<StudentsPage />} />
+							<Route path="teachers" element={<TeachersPage />} />
+							<Route path="classes" element={<ClassesPage />} />
+							<Route path="settings" element={<SettingsPage />} />
+							*/}
+						</Route>
+
+						{/* Error Routes */}
+						<Route
+							path="/unauthorized"
+							element={<UnauthorizedPage />}
 						/>
 						<Route
-							path="complete-school-setup"
-							element={<CompleteSetupPage />}
+							path="*"
+							element={<NotFoundPage />}
 						/>
-						{/* Add more dashboard routes here as needed */}
-						{/* 
-						<Route path="students" element={<StudentsPage />} />
-						<Route path="teachers" element={<TeachersPage />} />
-						<Route path="classes" element={<ClassesPage />} />
-						<Route path="settings" element={<SettingsPage />} />
-						*/}
-					</Route>
-
-					{/* Error Routes */}
-					<Route
-						path="/unauthorized"
-						element={<UnauthorizedPage />}
-					/>
-					<Route
-						path="*"
-						element={<NotFoundPage />}
-					/>
-				</Routes>
-			</HydrationGate>
+					</Routes>
+				</HydrationGate>
+			</HashRouter>
 		</SecurityWrapper>
 	);
 }
