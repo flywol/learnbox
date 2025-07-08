@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useSchoolSetupStore } from "../../store/schoolSetupStore";
 import FileUploadZone from "../FileUploadZone";
-import schoolSetupApiClient from "@/features/dashboard/api/dashboardApiClient";
+import schoolSetupApiClient from "@/features/dashboard/api/schoolSetupApiClient";
 import { completeSchoolInfoSchema } from "@/features/dashboard/schema/dashboardSchema";
 
 type SchoolInfoFormData = z.infer<typeof completeSchoolInfoSchema>;
@@ -52,7 +52,7 @@ const NIGERIAN_STATES = [
 ];
 
 export default function SchoolInfoStep() {
-	const { user, schoolDomain: authSchoolDomain } = useAuthStore();
+	const { user, schoolDomain: authSchoolDomain, signupData } = useAuthStore();
 	const { schoolInfo, updateSchoolInfo, nextStep } = useSchoolSetupStore();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [apiError, setApiError] = useState<string | null>(null);
@@ -66,18 +66,18 @@ export default function SchoolInfoStep() {
 		resolver: zodResolver(completeSchoolInfoSchema),
 		mode: "onChange",
 		defaultValues: {
-			schoolName: schoolInfo.schoolName,
-			schoolShortName: schoolInfo.schoolShortName,
-			schoolPrincipal: schoolInfo.schoolPrincipal,
+			schoolName: schoolInfo.schoolName || signupData?.schoolName || "",
+			schoolShortName: schoolInfo.schoolShortName || signupData?.schoolShortName || "",
+			schoolPrincipal: schoolInfo.schoolPrincipal || signupData?.fullName || user?.fullName || "",
 			schoolType: schoolInfo.schoolType,
 			schoolMotto: schoolInfo.schoolMotto,
 			schoolAddress: schoolInfo.schoolAddress,
 			country: "Nigeria",
 			state: schoolInfo.state,
-			schoolDomain: schoolInfo.learnboxUrl ?? authSchoolDomain ?? undefined,
-			schoolWebsite: schoolInfo.schoolWebsite,
-			schoolPhoneNumber: schoolInfo.schoolPhoneNumber,
-			schoolEmail: schoolInfo.schoolEmail || user?.email,
+			schoolDomain: schoolInfo.learnboxUrl ?? signupData?.learnboxUrl ?? authSchoolDomain ?? undefined,
+			schoolWebsite: schoolInfo.schoolWebsite || signupData?.schoolWebsite || "",
+			schoolPhoneNumber: schoolInfo.schoolPhoneNumber || signupData?.phoneNumber || user?.phoneNumber || "",
+			schoolEmail: schoolInfo.schoolEmail || signupData?.email || user?.email || "",
 		},
 	});
 
@@ -87,26 +87,53 @@ export default function SchoolInfoStep() {
 			authSchoolDomain,
 			userEmail: user?.email,
 			schoolInfoName: schoolInfo.schoolName,
+			signupData,
 		});
 
-		// Set school domain from auth store if available
-		if (authSchoolDomain && !schoolInfo.learnboxUrl) {
-			setValue("schoolDomain", authSchoolDomain);
-			updateSchoolInfo({ learnboxUrl: authSchoolDomain });
+		// Set school domain from auth store or signup data if available
+		const domainToUse = authSchoolDomain || signupData?.learnboxUrl;
+		if (domainToUse && !schoolInfo.learnboxUrl) {
+			setValue("schoolDomain", domainToUse);
+			updateSchoolInfo({ learnboxUrl: domainToUse });
 		}
 
-		// Set other prefilled values if not already set
-		if (!schoolInfo.schoolName) {
-			// Remove the prefilled demo values - let user input their own
-			// setValue("name", "Lakebridge Mountain High School");
-			// setValue("schoolShortName", "Lakebridgers");
+		// Pre-fill from signup data if fields are empty
+		if (signupData && !schoolInfo.schoolName) {
+			if (signupData.schoolName) {
+				setValue("schoolName", signupData.schoolName);
+			}
+			if (signupData.schoolShortName) {
+				setValue("schoolShortName", signupData.schoolShortName);
+			}
+			if (signupData.schoolWebsite) {
+				setValue("schoolWebsite", signupData.schoolWebsite);
+			}
 		}
 
-		// Set user email if available
-		if (user?.email && !schoolInfo.schoolEmail) {
-			setValue("schoolEmail", user.email);
+		// Set principal name from signup data or user data
+		if (!schoolInfo.schoolPrincipal) {
+			const principalName = signupData?.fullName || user?.fullName;
+			if (principalName) {
+				setValue("schoolPrincipal", principalName);
+			}
 		}
-	}, [setValue, schoolInfo, authSchoolDomain, user, updateSchoolInfo]);
+
+		// Set contact info from signup data or user data
+		if (!schoolInfo.schoolPhoneNumber) {
+			const phoneNumber = signupData?.phoneNumber || user?.phoneNumber;
+			if (phoneNumber) {
+				setValue("schoolPhoneNumber", phoneNumber);
+			}
+		}
+
+		// Set email from signup data or user data
+		if (!schoolInfo.schoolEmail) {
+			const email = signupData?.email || user?.email;
+			if (email) {
+				setValue("schoolEmail", email);
+			}
+		}
+	}, [setValue, schoolInfo, authSchoolDomain, user, signupData, updateSchoolInfo]);
 
 	const onSubmit = async (data: SchoolInfoFormData) => {
 		setIsSubmitting(true);
@@ -203,7 +230,7 @@ export default function SchoolInfoStep() {
 						<input
 							type="text"
 							{...register("schoolPrincipal")}
-							placeholder="Gabriel Davidson"
+							placeholder="Enter principal's name"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 							disabled={isSubmitting}
 						/>
@@ -246,7 +273,7 @@ export default function SchoolInfoStep() {
 					{/* School schoolMotto */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							School schoolMotto
+							School Motto
 						</label>
 						<input
 							type="text"

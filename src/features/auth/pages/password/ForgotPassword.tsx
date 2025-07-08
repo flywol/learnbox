@@ -104,12 +104,13 @@ const ForgotPasswordPage = () => {
 
 	// OTP error callback
 	const handleOtpError = useCallback(
-		(_error: string) => {
-			// Show error and go back to email step
-			setPasswordResetStep("email");
-			setLoadingState("error");
+		(error: string) => {
+			// Show the error and stay on the OTP page to allow retry
+			console.error("OTP verification error:", error);
+			// The error will be displayed by the OtpVerification component
+			// No need to redirect, just let the user try again
 		},
-		[setPasswordResetStep, setLoadingState]
+		[]
 	);
 
 	const handleBackToLogin = useCallback(() => {

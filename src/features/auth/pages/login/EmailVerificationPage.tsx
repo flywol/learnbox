@@ -84,19 +84,12 @@ const EmailVerificationPage = () => {
 	// Error handling callback
 	const handleEmailError = useCallback(
 		(error: string) => {
-			// For email verification errors, we could:
-			// 1. Show the error and stay on the page
-			// 2. Or redirect back to login
-
-			// For now, let's redirect back to login with the error
-			navigate("/login", {
-				state: {
-					error: error,
-					email: passwordResetEmail,
-				},
-			});
+			// Show the error and stay on the page to allow retry
+			console.error("Email verification error:", error);
+			// The error will be displayed by the OtpVerification component
+			// No need to redirect, just let the user try again
 		},
-		[navigate, passwordResetEmail]
+		[]
 	);
 
 	// Show loading if we don't have the required data yet

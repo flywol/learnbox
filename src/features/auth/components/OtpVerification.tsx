@@ -34,6 +34,7 @@ export default function OtpVerification({
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 	const [resendCooldown, setResendCooldown] = useState(0);
+	const [apiError, setApiError] = useState<string | null>(null);
 
 	const {
 		setValue,
@@ -67,13 +68,18 @@ export default function OtpVerification({
 	const handleOtpChange = useCallback(
 		(otp: string) => {
 			setValue("otp", otp, { shouldValidate: true });
+			// Clear API error when user starts typing
+			if (apiError) {
+				setApiError(null);
+			}
 		},
-		[setValue]
+		[setValue, apiError]
 	);
 
 	const handleFormSubmit = useCallback(
 		async (data: OtpFormData) => {
 			setIsVerifying(true);
+			setApiError(null); // Clear any previous API errors
 
 			try {
 				await onVerify(data.otp);
@@ -91,6 +97,9 @@ export default function OtpVerification({
 					setResendCooldown(0);
 				}
 
+				// Display the error in the UI
+				setApiError(errorMessage);
+
 				// Notify parent of error
 				onError(errorMessage);
 			} finally {
@@ -104,6 +113,7 @@ export default function OtpVerification({
 		if (resendCooldown > 0 || isResending) return;
 
 		setIsResending(true);
+		setApiError(null); // Clear any previous API errors
 
 		try {
 			await onResend();
@@ -116,6 +126,9 @@ export default function OtpVerification({
 				error.response?.data?.message ||
 				error.message ||
 				"Failed to resend verification code";
+			
+			// Display the error in the UI
+			setApiError(errorMessage);
 			onError(errorMessage);
 		} finally {
 			setIsResending(false);
@@ -170,14 +183,16 @@ export default function OtpVerification({
 					<OtpInput
 						ref={otpRef}
 						onChange={handleOtpChange}
-						error={!!errors.otp}
+						error={!!errors.otp || !!apiError}
 						autoFocus
 						disabled={isVerifying}
 						className="mb-6"
 					/>
 
-					{errors.otp && (
-						<p className="text-sm text-red-500 mb-3">{errors.otp.message}</p>
+					{(errors.otp || apiError) && (
+						<p className="text-sm text-red-500 mb-3">
+							{errors.otp?.message || apiError}
+						</p>
 					)}
 
 					<button

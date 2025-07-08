@@ -1,4 +1,5 @@
 import BaseApiClient, { ApiErrorResponse } from "@/common/api/baseApiClient";
+import { storageManager } from "@/common/storage/StorageManager";
 import type {
 	LoginRequest,
 	LoginResponse,
@@ -19,7 +20,6 @@ import type {
 } from "../types/auth.types";
 
 class AuthApiClient extends BaseApiClient {
-	private userDataKey = "learnbox_user_data";
 
 	constructor() {
 		super();
@@ -133,13 +133,8 @@ class AuthApiClient extends BaseApiClient {
 	performLogout(): void {
 		console.log("🧹 Clearing auth data and redirecting...");
 
-		// Clear tokens and user data
-		this.clearTokens();
-		this.clearUserData();
-
-		// Clear the Zustand store persistence
-		localStorage.removeItem("learnbox-auth-storage");
-		sessionStorage.removeItem("learnbox-auth-storage");
+		// Use StorageManager for complete cleanup
+		storageManager.clearAllAppData(true); // Keep remember me preference
 
 		// Redirect to login
 		window.location.href = "/";
@@ -280,9 +275,8 @@ class AuthApiClient extends BaseApiClient {
 
 	// User data management
 	getUserData(): UserData | null {
-		const userDataString = this.isRememberMe()
-			? localStorage.getItem(this.userDataKey)
-			: sessionStorage.getItem(this.userDataKey);
+		const keys = storageManager.getStorageKeys();
+		const userDataString = storageManager.getItem(keys.userProfile);
 
 		try {
 			return userDataString ? JSON.parse(userDataString) : null;
@@ -294,14 +288,14 @@ class AuthApiClient extends BaseApiClient {
 	}
 
 	private setUserData(userData: UserData): void {
+		const keys = storageManager.getStorageKeys();
 		const userDataString = JSON.stringify(userData);
-		const storage = this.isRememberMe() ? localStorage : sessionStorage;
-		storage.setItem(this.userDataKey, userDataString);
+		storageManager.setItem(keys.userProfile, userDataString);
 	}
 
 	private clearUserData(): void {
-		sessionStorage.removeItem(this.userDataKey);
-		localStorage.removeItem(this.userDataKey);
+		const keys = storageManager.getStorageKeys();
+		storageManager.removeItem(keys.userProfile);
 	}
 
 	// Check if user needs password change (if applicable)

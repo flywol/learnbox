@@ -11,6 +11,7 @@ import {
 	schoolSetupSchema,
 } from "../../schemas/authSchema";
 import { authApiClient } from "../../api/authApiClient";
+import PasswordInput from "@/features/auth/components/PasswordInput";
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -343,13 +344,13 @@ const CombinedSchoolLoginPage = () => {
 						</div>
 
 						<div className="space-y-2">
-							<input
+							<PasswordInput
 								id="password"
-								type="password"
-								{...loginForm.register("password")}
-								className="w-full p-3 border rounded-md"
+								name="password"
+								register={loginForm.register}
 								placeholder="Password"
 								disabled={isLoggingIn}
+								error={!!loginForm.formState.errors.password}
 							/>
 							{loginForm.formState.errors.password && (
 								<p className="text-red-500 text-sm mt-1">

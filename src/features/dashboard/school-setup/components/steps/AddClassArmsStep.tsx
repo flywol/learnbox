@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSchoolSetupStore } from "../../store/schoolSetupStore";
 import { Trash2 } from "lucide-react";
 import CustomArmModal from "../CustomArmModal";
-import schoolSetupApiClient from "@/features/dashboard/api/dashboardApiClient";
+import schoolSetupApiClient from "@/features/dashboard/api/schoolSetupApiClient";
 
 interface ClassArmsProps {
 	onComplete?: () => void;
@@ -17,6 +17,8 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 		classArms,
 		updateClassArms,
 		addCustomArm,
+		removeCustomArm,
+		deleteDefaultArm,
 		previousStep,
 		markAsCompleted,
 		saveDraft,
@@ -57,28 +59,56 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 		updateClassArms(classId, newArms);
 	};
 
+	const handleDeleteArm = (classId: string, armToDelete: string) => {
+		const classArm = classArms.find((ca) => ca.classId === classId);
+		const customArms = classArm?.customArms || [];
+		const allDefaultArms = getDefaultArms(classId);
+		
+		// If it's a custom arm, remove it completely
+		if (customArms.includes(armToDelete)) {
+			removeCustomArm(classId, armToDelete);
+		} 
+		// If it's a default arm, mark it as deleted
+		else if (allDefaultArms.includes(armToDelete)) {
+			deleteDefaultArm(classId, armToDelete);
+		}
+	};
+
 	const handleCustomArmClick = (classId: string) => {
 		setSelectedClassForCustom(classId);
 		setShowCustomModal(true);
 	};
 
-	const handleAddCustomArm = (armName: string) => {
+	const handleAddCustomArm = (armNames: string[]) => {
 		if (selectedClassForCustom) {
-			addCustomArm(selectedClassForCustom, armName);
-			// Also add it to current arms
 			const currentArms =
 				editingArms[selectedClassForCustom] ||
 				classArms.find((ca) => ca.classId === selectedClassForCustom)?.arms ||
 				[];
-			updateClassArms(selectedClassForCustom, [...currentArms, armName]);
+			
+			// Add each custom arm to the store
+			armNames.forEach((armName) => {
+				addCustomArm(selectedClassForCustom, armName);
+			});
+			
+			// Also add them to current arms
+			const newArms = [...currentArms, ...armNames];
+			updateClassArms(selectedClassForCustom, newArms);
+			setEditingArms((prev) => ({ ...prev, [selectedClassForCustom]: newArms }));
 		}
 		setShowCustomModal(false);
 	};
 
 	const getClassArms = (classId: string) => {
 		const classArm = classArms.find((ca) => ca.classId === classId);
+		const allDefaultArms = getDefaultArms(classId);
+		const deletedDefaultArms = classArm?.deletedDefaultArms || [];
+		const availableDefaultArms = allDefaultArms.filter(
+			(arm) => !deletedDefaultArms.includes(arm)
+		);
+		
 		return {
-			defaultArms: getDefaultArms(classId),
+			defaultArms: availableDefaultArms,
 			selectedArms: editingArms[classId] || classArm?.arms || [],
 			customArms: classArm?.customArms || [],
 		};
@@ -159,7 +189,6 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 								<div className="flex flex-wrap gap-3">
 									{allArms.map((arm) => {
 										const isSelected = selectedArms.includes(arm);
-										const isCustom = customArms.includes(arm);
 
 										return (
 											<label
@@ -180,17 +209,16 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 													disabled={isCompleting}
 												/>
 												<span className="font-medium">{arm}</span>
-												{isCustom && (
-													<button
-														onClick={(e) => {
-															e.preventDefault();
-															// Remove custom arm logic here if needed
-														}}
-														className="ml-2 text-red-500 hover:text-red-700"
-														disabled={isCompleting}>
-														<Trash2 className="w-3 h-3" />
-													</button>
-												)}
+												<button
+													onClick={(e) => {
+														e.preventDefault();
+														handleDeleteArm(level.id, arm);
+													}}
+													className="ml-2 text-red-500 hover:text-red-700"
+													disabled={isCompleting}
+													type="button">
+													<Trash2 className="w-3 h-3" />
+												</button>
 											</label>
 										);
 									})}

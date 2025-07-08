@@ -5,6 +5,7 @@ import axios, {
 	AxiosRequestConfig,
 	AxiosResponse,
 } from "axios";
+import { storageManager } from "../storage/StorageManager";
 
 export interface ApiErrorResponse {
 	message: string;
@@ -14,9 +15,7 @@ export interface ApiErrorResponse {
 
 export class BaseApiClient {
 	protected api: AxiosInstance;
-	protected tokenKey = "learnbox_access_token";
-	protected refreshTokenKey = "learnbox_refresh_token";
-	protected rememberMeKey = "learnbox_remember_me";
+	protected storageManager = storageManager;
 
 	constructor(baseURL?: string) {
 		this.api = axios.create({
@@ -48,6 +47,14 @@ export class BaseApiClient {
 					originalRequest &&
 					!(originalRequest as any)._retry
 				) {
+					// Check if this is a validation error (not a token expiry)
+					const isValidationError = this.isValidationError(error, originalRequest);
+					
+					if (isValidationError) {
+						// For validation errors, don't try to refresh tokens - just return the error
+						return Promise.reject(this.normalizeError(error));
+					}
+
 					(originalRequest as any)._retry = true;
 
 					const refreshToken = this.getRefreshToken();
@@ -82,60 +89,74 @@ export class BaseApiClient {
 		);
 	}
 
+	// Helper method to determine if a 401 error is a validation error vs token expiry
+	private isValidationError(_error: AxiosError, originalRequest: any): boolean {
+		const url = originalRequest?.url || '';
+		
+		// List of endpoints that return 401 for validation errors, not token expiry
+		const validationEndpoints = [
+			'/auth/login',           // Wrong email/password
+			'/auth/verify-otp',      // Wrong OTP
+			'/auth/resend-otp',      // OTP-related errors
+			'/auth/forgot-password', // Email not found
+			'/auth/reset-password',  // Invalid reset token
+			'/school/verify-domain', // School domain not found
+		];
+		
+		// Check if this is a validation endpoint
+		const isValidationEndpoint = validationEndpoints.some(endpoint => 
+			url.includes(endpoint)
+		);
+		
+		return isValidationEndpoint;
+	}
+
 	// Access Token Management
 	protected getToken(): string | null {
-		const rememberMe = this.isRememberMe();
-		const storage = rememberMe ? localStorage : sessionStorage;
-		return storage.getItem(this.tokenKey);
+		const keys = this.storageManager.getStorageKeys();
+		return this.storageManager.getItem(keys.accessToken);
 	}
 
 	protected setToken(token: string): void {
-		const rememberMe = this.isRememberMe();
-		const storage = rememberMe ? localStorage : sessionStorage;
-		storage.setItem(this.tokenKey, token);
+		const keys = this.storageManager.getStorageKeys();
+		this.storageManager.setItem(keys.accessToken, token);
 	}
 
 	protected clearToken(): void {
-		sessionStorage.removeItem(this.tokenKey);
-		localStorage.removeItem(this.tokenKey);
+		const keys = this.storageManager.getStorageKeys();
+		this.storageManager.removeItem(keys.accessToken);
 	}
 
 	// Refresh Token Management
 	protected getRefreshToken(): string | null {
-		const rememberMe = this.isRememberMe();
-		const storage = rememberMe ? localStorage : sessionStorage;
-		return storage.getItem(this.refreshTokenKey);
+		const keys = this.storageManager.getStorageKeys();
+		return this.storageManager.getItem(keys.refreshToken);
 	}
 
 	protected setRefreshToken(token: string): void {
-		const rememberMe = this.isRememberMe();
-		const storage = rememberMe ? localStorage : sessionStorage;
-		storage.setItem(this.refreshTokenKey, token);
+		const keys = this.storageManager.getStorageKeys();
+		this.storageManager.setItem(keys.refreshToken, token);
 	}
 
 	protected clearRefreshToken(): void {
-		sessionStorage.removeItem(this.refreshTokenKey);
-		localStorage.removeItem(this.refreshTokenKey);
+		const keys = this.storageManager.getStorageKeys();
+		this.storageManager.removeItem(keys.refreshToken);
 	}
 
 	// Remember Me Management
 	protected setRememberMe(remember: boolean): void {
-		if (remember) {
-			localStorage.setItem(this.rememberMeKey, "true");
-		} else {
-			localStorage.removeItem(this.rememberMeKey);
-		}
+		this.storageManager.setRememberMe(remember);
 	}
 
 	protected isRememberMe(): boolean {
-		return localStorage.getItem(this.rememberMeKey) === "true";
+		return this.storageManager.isRememberMe();
 	}
 
 	// Clear all tokens and preferences
 	protected clearAllTokens(): void {
 		this.clearToken();
 		this.clearRefreshToken();
-		localStorage.removeItem(this.rememberMeKey);
+		this.storageManager.setRememberMe(false);
 	}
 
 	// Set tokens with remember me preference

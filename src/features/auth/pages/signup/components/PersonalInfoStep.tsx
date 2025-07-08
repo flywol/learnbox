@@ -2,6 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import PasswordInput from "@/features/auth/components/PasswordInput";
 
 const personalInfoSchema = z.object({
 	fullName: z
@@ -153,14 +154,13 @@ export default function PersonalInfoStep({
 						</div>
 
 						<div>
-							<input
-								type="password"
+							<PasswordInput
+								name="password"
 								placeholder="Password *"
-								{...register("password")}
+								register={register}
 								disabled={isSubmitting}
-								className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-									errors.password ? "border-red-500" : "border-gray-300"
-								} ${isSubmitting ? "bg-gray-100" : ""}`}
+								error={!!errors.password}
+								className={`px-4 py-3 ${isSubmitting ? "bg-gray-100" : ""}`}
 							/>
 							<p
 								className={`text-sm mt-1 ${

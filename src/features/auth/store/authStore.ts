@@ -1,6 +1,7 @@
 // src/features/auth/store/authStore.ts - UPDATED to use new API clients and types
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { storageManager } from "@/common/storage/StorageManager";
 import type {
 	User,
 	Role,
@@ -194,45 +195,10 @@ export const useAuthStore = create<AuthState>()(
 					);
 				}
 
-				// Clear ALL storage data related to auth
+				// Use StorageManager for complete cleanup
 				try {
-					// Clear localStorage
-					localStorage.removeItem("learnbox-auth-storage");
-					localStorage.removeItem("learnbox_user_data");
-					localStorage.removeItem("access_token");
-					localStorage.removeItem("refresh_token");
-					localStorage.removeItem("remember_me");
-
-					// Clear sessionStorage
-					sessionStorage.removeItem("learnbox-auth-storage");
-					sessionStorage.removeItem("learnbox_user_data");
-					sessionStorage.removeItem("access_token");
-					sessionStorage.removeItem("refresh_token");
-
-					// Clear any other auth-related storage
-					Object.keys(localStorage).forEach((key) => {
-						if (
-							key.includes("auth") ||
-							key.includes("token") ||
-							key.includes("user") ||
-							key.includes("learnbox")
-						) {
-							localStorage.removeItem(key);
-						}
-					});
-
-					Object.keys(sessionStorage).forEach((key) => {
-						if (
-							key.includes("auth") ||
-							key.includes("token") ||
-							key.includes("user") ||
-							key.includes("learnbox")
-						) {
-							sessionStorage.removeItem(key);
-						}
-					});
-
-					console.log("✅ All storage cleared");
+					storageManager.clearAllAppData(true); // Keep remember me preference
+					console.log("✅ All storage cleared via StorageManager");
 				} catch (error) {
 					console.error("❌ Error clearing storage:", error);
 				}
@@ -330,34 +296,43 @@ export const useAuthStore = create<AuthState>()(
 				console.log("🚀 Initializing auth system...");
 				set({ isInitializing: true });
 
-				const isAuthenticated = authApiClient.isAuthenticated();
+				try {
+					// Run migration for existing users
+					console.log("🔄 Running storage migration...");
+					storageManager.migrateExistingData();
 
-				// If we have a user in state but no token, clear state
-				if (state.user && !isAuthenticated) {
-					console.log("⚠️ User in state but no token - clearing state");
-					set({
-						user: null,
-						isAuthenticated: false,
-						loginContext: initialLoginContext,
-					});
-				}
+					const isAuthenticated = authApiClient.isAuthenticated();
 
-				// If we have token but no user, try to restore
-				else if (isAuthenticated && !state.user) {
-					console.log("🔄 Token exists, attempting session restoration...");
-					await state.restoreSession();
-				}
-
-				// If we have both, verify consistency
-				else if (isAuthenticated && state.user) {
-					console.log("✅ Both token and user exist - verifying consistency");
-					if (!state.isAuthenticated) {
-						set({ isAuthenticated: true });
+					// If we have a user in state but no token, clear state
+					if (state.user && !isAuthenticated) {
+						console.log("⚠️ User in state but no token - clearing state");
+						set({
+							user: null,
+							isAuthenticated: false,
+							loginContext: initialLoginContext,
+						});
 					}
-				}
 
-				set({ isInitializing: false });
-				console.log("✅ Auth initialization completed");
+					// If we have token but no user, try to restore
+					else if (isAuthenticated && !state.user) {
+						console.log("🔄 Token exists, attempting session restoration...");
+						await state.restoreSession();
+					}
+
+					// If we have both, verify consistency
+					else if (isAuthenticated && state.user) {
+						console.log("✅ Both token and user exist - verifying consistency");
+						if (!state.isAuthenticated) {
+							set({ isAuthenticated: true });
+						}
+					}
+
+					console.log("✅ Auth initialization completed");
+				} catch (error) {
+					console.error("❌ Auth initialization failed:", error);
+				} finally {
+					set({ isInitializing: false });
+				}
 			},
 
 			// Auth status checker
@@ -460,7 +435,7 @@ export const useAuthStore = create<AuthState>()(
 				})),
 		}),
 		{
-			name: "learnbox-auth-storage",
+			name: storageManager.getStorageKeys().auth,
 			partialize: (state) => ({
 				user: state.user,
 				isAuthenticated: state.isAuthenticated,

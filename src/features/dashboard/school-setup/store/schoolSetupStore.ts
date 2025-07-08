@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { storageManager } from "@/common/storage/StorageManager";
 import { SchoolInfo } from "../../types/dashboard.types";
 
 
@@ -36,6 +37,7 @@ export interface ClassArm {
 	className: string;
 	arms: string[];
 	customArms?: string[];
+	deletedDefaultArms?: string[];
 }
 
 interface SchoolSetupState {
@@ -74,6 +76,8 @@ interface SchoolSetupState {
 	// Class arms actions
 	updateClassArms: (classId: string, arms: string[]) => void;
 	addCustomArm: (classId: string, armName: string) => void;
+	removeCustomArm: (classId: string, armName: string) => void;
+	deleteDefaultArm: (classId: string, armName: string) => void;
 
 	// API state management
 	setSubmitting: (submitting: boolean) => void;
@@ -253,6 +257,7 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 									className: classLevel.name,
 									arms,
 									customArms: [],
+									deletedDefaultArms: [],
 								},
 							],
 							hasUnsavedChanges: true,
@@ -274,6 +279,66 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 							customArms: [...customArms, armName],
 						};
 						return { classArms: newClassArms, hasUnsavedChanges: true };
+					}
+					return state;
+				}),
+
+			removeCustomArm: (classId, armName) =>
+				set((state) => {
+					const classArmIndex = state.classArms.findIndex(
+						(ca) => ca.classId === classId
+					);
+					if (classArmIndex >= 0) {
+						const newClassArms = [...state.classArms];
+						const customArms = newClassArms[classArmIndex].customArms || [];
+						const arms = newClassArms[classArmIndex].arms || [];
+						
+						newClassArms[classArmIndex] = {
+							...newClassArms[classArmIndex],
+							customArms: customArms.filter((arm) => arm !== armName),
+							arms: arms.filter((arm) => arm !== armName), // Also remove from selected arms
+						};
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					}
+					return state;
+				}),
+
+			deleteDefaultArm: (classId, armName) =>
+				set((state) => {
+					const classArmIndex = state.classArms.findIndex(
+						(ca) => ca.classId === classId
+					);
+					if (classArmIndex >= 0) {
+						const newClassArms = [...state.classArms];
+						const deletedDefaultArms = newClassArms[classArmIndex].deletedDefaultArms || [];
+						const arms = newClassArms[classArmIndex].arms || [];
+						
+						newClassArms[classArmIndex] = {
+							...newClassArms[classArmIndex],
+							deletedDefaultArms: [...deletedDefaultArms, armName],
+							arms: arms.filter((arm) => arm !== armName), // Also remove from selected arms
+						};
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					} else {
+						// If no class arm entry exists, create one with just the deleted default arm
+						const classLevel = state.selectedClassLevels.find(
+							(cl) => cl.id === classId
+						);
+						if (classLevel) {
+							return {
+								classArms: [
+									...state.classArms,
+									{
+										classId,
+										className: classLevel.name,
+										arms: [],
+										customArms: [],
+										deletedDefaultArms: [armName],
+									},
+								],
+								hasUnsavedChanges: true,
+							};
+						}
 					}
 					return state;
 				}),
@@ -374,7 +439,7 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 				}),
 		}),
 		{
-			name: "school-setup-storage",
+			name: storageManager.getStorageKeys().schoolSetup,
 			partialize: (state) => ({
 				currentStep: state.currentStep,
 				schoolInfo: state.schoolInfo,

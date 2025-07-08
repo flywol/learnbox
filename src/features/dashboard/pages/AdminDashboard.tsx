@@ -12,9 +12,11 @@ import {
 	BookOpen,
 	Heart,
 	Award,
+	RefreshCw,
 } from "lucide-react";
 import SchoolSetupPromptModal from "../school-setup/components/SchoolSetupPromptModal";
 import { useSchoolSetupStore } from "../school-setup/store/schoolSetupStore";
+import { useDashboardStats } from "../hooks/useDashboardStats";
 
 // Updated Stat Card Component to match design
 const StatCard = ({
@@ -23,12 +25,14 @@ const StatCard = ({
 	value,
 	subtext,
 	iconColor,
+	loading = false,
 }: {
 	icon: any;
 	label: string;
-	value: string;
+	value: string | number;
 	subtext?: string;
 	iconColor: string;
+	loading?: boolean;
 }) => (
 	<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
 		<div className="flex items-center justify-between">
@@ -37,7 +41,14 @@ const StatCard = ({
 					<Icon className={`w-5 h-5 ${iconColor}`} />
 					<p className="text-sm text-gray-600">{label}</p>
 				</div>
-				<p className="text-2xl font-bold text-gray-900">{value}</p>
+				{loading ? (
+					<div className="flex items-center gap-2">
+						<div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+						<div className="w-12 h-6 bg-gray-200 rounded animate-pulse"></div>
+					</div>
+				) : (
+					<p className="text-2xl font-bold text-gray-900">{value}</p>
+				)}
 				{subtext && <p className="text-xs text-gray-500 mt-1">{subtext}</p>}
 			</div>
 		</div>
@@ -69,6 +80,7 @@ export default function AdminDashboard() {
 	const { user } = useAuthStore();
 	const { isCompleted: isSchoolSetupCompleted } = useSchoolSetupStore();
 	const [showSetupPrompt, setShowSetupPrompt] = useState(false);
+	const { stats, loading, error, refetch } = useDashboardStats();
 
 	useEffect(() => {
 		// Show setup prompt if school setup is not completed
@@ -81,10 +93,26 @@ export default function AdminDashboard() {
 		<div className="p-6 bg-gray-50 min-h-full">
 			{/* Header */}
 			<div className="mb-6">
-				<h1 className="text-2xl font-semibold text-gray-900">
-					Welcome {user?.fullName?.split(" ")[0]},{" "}
-					{!isSchoolSetupCompleted && "complete your school registration."}
-				</h1>
+				<div className="flex items-center justify-between">
+					<h1 className="text-2xl font-semibold text-gray-900">
+						Welcome {user?.fullName?.split(" ")[0]},{" "}
+						{!isSchoolSetupCompleted && "complete your school registration."}
+					</h1>
+					<div className="flex items-center gap-3">
+						{error && (
+							<div className="text-sm text-red-600 bg-red-50 px-3 py-1 rounded-lg">
+								Failed to load statistics
+							</div>
+						)}
+						<button
+							onClick={refetch}
+							disabled={loading}
+							className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+							<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+							Refresh
+						</button>
+					</div>
+				</div>
 			</div>
 
 			{/* Main Content Grid */}
@@ -155,42 +183,48 @@ export default function AdminDashboard() {
 								<StatCard
 									icon={Users}
 									label="Total users"
-									value="--"
+									value={stats?.totalUsers ?? "--"}
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 								<StatCard
 									icon={UserCheck}
 									label="Active users"
-									value="--"
+									value={stats?.activeUsers ?? "--"}
 									subtext="(last 7 days)"
 									iconColor="text-green-500"
+									loading={loading}
 								/>
 								<StatCard
 									icon={GraduationCap}
 									label="Total students"
-									value="--"
+									value={stats?.totalStudents ?? "--"}
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
 								<StatCard
 									icon={Users}
 									label="Total teachers"
-									value="--"
+									value={stats?.totalTeachers ?? "--"}
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 								<StatCard
 									icon={Heart}
 									label="Total parents"
-									value="--"
+									value={stats?.totalParents ?? "--"}
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 								<StatCard
 									icon={UserPlus}
 									label="New registration"
-									value="--"
+									value={stats?.newRegistrations ?? "--"}
 									subtext="(last 30 days)"
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 							</div>
 						</div>
@@ -204,15 +238,17 @@ export default function AdminDashboard() {
 								<StatCard
 									icon={BookOpen}
 									label="Total classes"
-									value="--"
+									value={stats?.totalClasses ?? "--"}
 									iconColor="text-red-500"
+									loading={loading}
 								/>
 								<StatCard
 									icon={Users}
 									label="Active learners"
-									value="--"
+									value={stats?.activeLearners ?? "--"}
 									subtext="(last 7 days)"
 									iconColor="text-green-500"
+									loading={loading}
 								/>
 							</div>
 						</div>

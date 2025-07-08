@@ -11,7 +11,7 @@ export interface SchoolInfo {
 	country: string;
 	principalSignature: string | File;
 	schoolPrincipal: string;
-	schoolMotto: string;
+	schoolMotto?: string;
 	schoolType: string;
 	state: string;
 }

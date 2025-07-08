@@ -5,7 +5,7 @@ import { X, Plus, Minus } from "lucide-react";
 interface CustomArmModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSubmit: (armName: string) => void;
+	onSubmit: (armNames: string[]) => void;
 	className: string;
 }
 
@@ -16,11 +16,9 @@ export default function CustomArmModal({
 	className,
 }: CustomArmModalProps) {
 	const [arms, setArms] = useState([
-		{ id: 1, name: "Flower" },
-		{ id: 2, name: "Sunshine" },
-		{ id: 3, name: "Rainbow" },
+		{ id: 1, name: "" },
 	]);
-	const [nextId, setNextId] = useState(4);
+	const [nextId, setNextId] = useState(2);
 
 	if (!isOpen) return null;
 
@@ -38,21 +36,21 @@ export default function CustomArmModal({
 	};
 
 	const handleSubmit = () => {
-		arms.forEach((arm) => {
-			if (arm.name.trim()) {
-				onSubmit(arm.name.trim());
-			}
-		});
+		const validArms = arms
+			.map((arm) => arm.name.trim())
+			.filter((name) => name.length > 0);
+		
+		if (validArms.length > 0) {
+			onSubmit(validArms);
+		}
 		onClose();
 	};
 
 	const handleCancel = () => {
 		setArms([
-			{ id: 1, name: "Flower" },
-			{ id: 2, name: "Sunshine" },
-			{ id: 3, name: "Rainbow" },
+			{ id: 1, name: "" },
 		]);
-		setNextId(4);
+		setNextId(2);
 		onClose();
 	};
 
@@ -91,8 +89,9 @@ export default function CustomArmModal({
 								type="text"
 								value={arm.name}
 								onChange={(e) => handleArmNameChange(arm.id, e.target.value)}
-								placeholder="Enter arm name"
+								placeholder="Write the arm name"
 								className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+								autoFocus={index === 0}
 							/>
 							<button
 								onClick={() => handleRemoveArm(arm.id)}

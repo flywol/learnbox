@@ -1,6 +1,7 @@
 // src/features/school-setup/components/SchoolSetupPromptModal.tsx
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { useAuthStore } from "@/features/auth/store/authStore";
 
 interface SchoolSetupPromptModalProps {
 	isOpen: boolean;
@@ -12,6 +13,7 @@ export default function SchoolSetupPromptModal({
 	onClose,
 }: SchoolSetupPromptModalProps) {
 	const navigate = useNavigate();
+	const { user } = useAuthStore();
 
 	if (!isOpen) return null;
 
@@ -55,7 +57,7 @@ export default function SchoolSetupPromptModal({
 
 					{/* Content */}
 					<h2 className="text-2xl font-bold text-gray-900 mb-3">
-						Welcome Gabriel, complete your school registration.
+						Welcome {user?.fullName || 'Admin'}, complete your school registration.
 					</h2>
 
 					<p className="text-gray-600 mb-8">
