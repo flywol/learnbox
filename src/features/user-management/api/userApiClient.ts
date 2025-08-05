@@ -1,5 +1,6 @@
 import BaseApiClient from "@/common/api/baseApiClient";
-import type { CreateUserData, ClassLevelData, ClassArmData, UserListItem, DetailedUser } from "../types/user.types";
+import type { ClassLevelData, ClassArmData, UserListItem, DetailedUser } from "../types/user.types";
+import type { CreateUserFormData } from "../schemas/userSchema";
 
 class UserApiClient extends BaseApiClient {
   constructor() {
@@ -7,16 +8,16 @@ class UserApiClient extends BaseApiClient {
   }
 
   // Create a new user
-  async createUser(userData: CreateUserData): Promise<{ message: string }> {
+  async createUser(userData: CreateUserFormData): Promise<{ message: string }> {
     try {
       console.log("📡 API: createUser called", userData);
       
       // Transform data to match API expectations  
-      const { password, assignedClassArms, ...dataWithoutPassword } = userData as any;
+      const { assignedClassArms, ...transformData } = userData as any;
       
       // Handle field transformations
       let transformedData: any = {
-        ...dataWithoutPassword,
+        ...transformData,
         role: userData.role.toLowerCase() // Convert to lowercase for API
       };
 

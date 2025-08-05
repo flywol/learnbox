@@ -44,7 +44,7 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
   };
 
   const getClassArmName = (classArmId: string) => {
-    return classArms.find(arm => arm.id === classArmId)?.name || classArmId;
+    return classArms.find(arm => arm.id === classArmId)?.armName || classArmId;
   };
 
   // If no class arms from API, show text input for manual entry
@@ -168,7 +168,7 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
                     onChange={() => handleClassArmToggle(classArm.id)}
                     className="mr-3 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                   />
-                  <span className="text-sm text-gray-900">{classArm.name}</span>
+                  <span className="text-sm text-gray-900">{classArm.armName}</span>
                 </label>
               ))
             )}

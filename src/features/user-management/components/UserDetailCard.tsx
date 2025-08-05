@@ -1,4 +1,3 @@
-import { Calendar, Mail, User as UserIcon } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import type { DetailedUser } from "../types/user.types";
 

@@ -23,7 +23,7 @@ export default function UserListPage() {
   } = useUserUIStore();
 
   // Client-side filtering and pagination
-  const { paginatedUsers, totalItems, totalPages } = useMemo(() => {
+  const { paginatedUsers, totalItems } = useMemo(() => {
     const filteredUsers = filterUsers(users, filters);
     return paginateUsers(filteredUsers, currentPage, itemsPerPage);
   }, [users, filters, currentPage, itemsPerPage]);

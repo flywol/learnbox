@@ -1,13 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { profileApiClient } from '../api/profileApiClient'
 import type { 
-  AdminProfile, 
-  SchoolInformation, 
   UpdatePersonalInfoDto, 
   UpdateSchoolInfoDto,
-  SessionConfiguration,
-  UpdateSessionConfigDto,
-  ClassLevel
+  UpdateSessionConfigDto
 } from '../types/profile.types'
 
 // Query keys

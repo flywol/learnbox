@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit, ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useAdminProfile } from "../hooks/useProfile";
 import UserAvatar from "../../user-management/components/UserAvatar";
 import { useAuthStore } from "../../auth/store/authStore";

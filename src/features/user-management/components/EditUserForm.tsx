@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import UserAvatar from "./UserAvatar";
 import type { DetailedUser } from "../types/user.types";
@@ -104,10 +104,6 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
     }
   };
 
-  const formatDateForInput = (dateString: string) => {
-    if (!dateString) return "";
-    return dateString.split('T')[0]; // Convert ISO string to YYYY-MM-DD format
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -196,11 +192,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="text"
               {...register("classLevel")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.classLevel ? 'border-red-300' : 'border-gray-300'
+                (errors as any).classLevel ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.classLevel && (
-              <p className="text-sm text-red-600 mt-1">{errors.classLevel.message}</p>
+            {(errors as any).classLevel && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).classLevel.message}</p>
             )}
           </div>
           <div>
@@ -209,11 +205,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="text"
               {...register("classArm")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.classArm ? 'border-red-300' : 'border-gray-300'
+                (errors as any).classArm ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.classArm && (
-              <p className="text-sm text-red-600 mt-1">{errors.classArm.message}</p>
+            {(errors as any).classArm && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).classArm.message}</p>
             )}
           </div>
           <div>
@@ -222,11 +218,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="text"
               {...register("admissionNumber")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.admissionNumber ? 'border-red-300' : 'border-gray-300'
+                (errors as any).admissionNumber ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.admissionNumber && (
-              <p className="text-sm text-red-600 mt-1">{errors.admissionNumber.message}</p>
+            {(errors as any).admissionNumber && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).admissionNumber.message}</p>
             )}
           </div>
           <div>
@@ -235,11 +231,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="text"
               {...register("parentName")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.parentName ? 'border-red-300' : 'border-gray-300'
+                (errors as any).parentName ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.parentName && (
-              <p className="text-sm text-red-600 mt-1">{errors.parentName.message}</p>
+            {(errors as any).parentName && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).parentName.message}</p>
             )}
           </div>
           <div>
@@ -264,11 +260,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="date"
               {...register("dateOfBirth")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'
+                (errors as any).dateOfBirth ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.dateOfBirth && (
-              <p className="text-sm text-red-600 mt-1">{errors.dateOfBirth.message}</p>
+            {(errors as any).dateOfBirth && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).dateOfBirth.message}</p>
             )}
           </div>
         </div>
@@ -299,11 +295,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="tel"
               {...register("phoneNumber")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.phoneNumber ? 'border-red-300' : 'border-gray-300'
+                (errors as any).phoneNumber ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.phoneNumber && (
-              <p className="text-sm text-red-600 mt-1">{errors.phoneNumber.message}</p>
+            {(errors as any).phoneNumber && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).phoneNumber.message}</p>
             )}
           </div>
           <div>
@@ -311,15 +307,15 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
             <select
               {...register("employmentStatus")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.employmentStatus ? 'border-red-300' : 'border-gray-300'
+                (errors as any).employmentStatus ? 'border-red-300' : 'border-gray-300'
               }`}
             >
               {employmentStatuses.map((status) => (
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
-            {errors.employmentStatus && (
-              <p className="text-sm text-red-600 mt-1">{errors.employmentStatus.message}</p>
+            {(errors as any).employmentStatus && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).employmentStatus.message}</p>
             )}
           </div>
           <div>
@@ -328,11 +324,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="date"
               {...register("dateOfBirth")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'
+                (errors as any).dateOfBirth ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.dateOfBirth && (
-              <p className="text-sm text-red-600 mt-1">{errors.dateOfBirth.message}</p>
+            {(errors as any).dateOfBirth && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).dateOfBirth.message}</p>
             )}
           </div>
         </div>
@@ -347,11 +343,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="text"
               {...register("relationshipToStudent")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.relationshipToStudent ? 'border-red-300' : 'border-gray-300'
+                (errors as any).relationshipToStudent ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.relationshipToStudent && (
-              <p className="text-sm text-red-600 mt-1">{errors.relationshipToStudent.message}</p>
+            {(errors as any).relationshipToStudent && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).relationshipToStudent.message}</p>
             )}
           </div>
           <div>
@@ -376,11 +372,11 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
               type="tel"
               {...register("phoneNumber")}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.phoneNumber ? 'border-red-300' : 'border-gray-300'
+                (errors as any).phoneNumber ? 'border-red-300' : 'border-gray-300'
               }`}
             />
-            {errors.phoneNumber && (
-              <p className="text-sm text-red-600 mt-1">{errors.phoneNumber.message}</p>
+            {(errors as any).phoneNumber && (
+              <p className="text-sm text-red-600 mt-1">{(errors as any).phoneNumber.message}</p>
             )}
           </div>
         </div>

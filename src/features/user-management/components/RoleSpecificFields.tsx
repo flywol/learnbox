@@ -131,8 +131,8 @@ export default function RoleSpecificFields({ control, register, setValue, errors
             >
               <option value="">Select class arm</option>
               {classArms.map((arm) => (
-                <option key={arm.id} value={arm.name}>
-                  {arm.name}
+                <option key={arm.id} value={arm.armName}>
+                  {arm.armName}
                 </option>
               ))}
             </select>
