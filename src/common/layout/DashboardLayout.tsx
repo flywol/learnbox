@@ -9,11 +9,17 @@ interface Props {
 
 export default function DashboardLayout({ children }: Props) {
 	return (
-		<div className="flex h-screen bg-gray-50">
-			<Sidebar />
-			<div className="flex-1 flex flex-col">
-				<Header />
-				<main className="flex-1 overflow-auto">{children || <Outlet />}</main>
+		<div className="h-screen bg-gray-50 flex flex-col">
+			{/* Full width header */}
+			<Header />
+			{/* Sidebar and main content below header */}
+			<div className="flex flex-1 overflow-hidden">
+				<Sidebar />
+				<main className="flex-1 overflow-auto">
+					<div className="p-6">
+						{children || <Outlet />}
+					</div>
+				</main>
 			</div>
 		</div>
 	);

@@ -36,6 +36,7 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
     setSubmitting,
     setApiError,
     clearApiError,
+    clearStorageAfterSubmission,
   } = useSessionStore();
 
   const {
@@ -75,6 +76,9 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
       
       // Update store with successful data
       updateSessionData(data);
+      
+      // Clear storage after successful submission to avoid crowding storage
+      clearStorageAfterSubmission();
       
       // Call completion callback
       if (onComplete) {

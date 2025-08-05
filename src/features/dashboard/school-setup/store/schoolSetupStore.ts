@@ -88,6 +88,7 @@ interface SchoolSetupState {
 	saveDraft: () => void;
 	resetSetup: () => void;
 	markAsCompleted: () => void;
+	clearStorageAfterCompletion: () => void;
 
 	// Validation helpers
 	validateCurrentStep: () => boolean;
@@ -437,6 +438,13 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 					hasUnsavedChanges: false,
 					lastSavedAt: new Date(),
 				}),
+
+			clearStorageAfterCompletion: () => {
+				// Clear the persisted storage since setup is complete
+				const storageKey = storageManager.getStorageKeys().schoolSetup;
+				storageManager.removeItem(storageKey);
+				console.log("🧹 Cleared school setup storage after successful completion");
+			},
 		}),
 		{
 			name: storageManager.getStorageKeys().schoolSetup,

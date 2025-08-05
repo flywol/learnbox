@@ -21,6 +21,7 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 		deleteDefaultArm,
 		previousStep,
 		markAsCompleted,
+		clearStorageAfterCompletion,
 		saveDraft,
 	} = useSchoolSetupStore();
 
@@ -141,6 +142,9 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 			// Mark setup as completed
 			saveDraft();
 			markAsCompleted();
+
+			// Clear storage after successful completion to avoid crowding storage
+			clearStorageAfterCompletion();
 
 			// Navigate to dashboard
 			navigate("/dashboard");

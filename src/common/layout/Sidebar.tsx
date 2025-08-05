@@ -21,10 +21,10 @@ const menuItems = [
 		color: "text-orange-500",
 	},
 	{ label: "Classroom", icon: BookOpen, path: "/dashboard/classroom" },
-	{ label: "Users", icon: Users, path: "/dashboard/users" },
+	{ label: "Users", icon: Users, path: "/user-management" },
 	{ label: "School payments", icon: CreditCard, path: "/dashboard/payments" },
 	{ label: "LearnBox library", icon: Library, path: "/dashboard/library" },
-	{ label: "Profile", icon: User, path: "/dashboard/profile" },
+	{ label: "Profile", icon: User, path: "/profile" },
 ];
 
 export default function Sidebar() {
@@ -42,7 +42,7 @@ export default function Sidebar() {
 
 	return (
 		<aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-			<div className="p-6 border-b border-gray-200">
+			<div className="p-6">
 				<h1 className="text-2xl font-bold">
 					Learn<span className="text-orange-500">Box</span>
 				</h1>

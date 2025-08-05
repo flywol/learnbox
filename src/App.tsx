@@ -25,6 +25,15 @@ import EmailVerificationPage from "./features/auth/pages/login/EmailVerification
 import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
 import CompleteSetupPage from "./features/dashboard/school-setup/pages/CompleteSetupPage";
 import DashboardLayout from "./common/layout/DashboardLayout";
+import NotificationsPage from "./features/notifications/pages/NotificationsPage";
+import CreateUserPage from "./features/user-management/pages/CreateUserPage";
+import UserListPage from "./features/user-management/pages/UserListPage";
+import UserDetailPage from "./features/user-management/pages/UserDetailPage";
+import EditUserPage from "./features/user-management/pages/EditUserPage";
+import AdminProfilePage from "./features/profile/pages/AdminProfilePage";
+import EditPersonalInfoPage from "./features/profile/pages/EditPersonalInfoPage";
+import EditSchoolInfoPage from "./features/profile/pages/EditSchoolInfoPage";
+import SessionConfigPage from "./features/profile/pages/SessionConfigPage";
 
 const UnauthorizedPage = () => (
 	<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -146,6 +155,106 @@ export default function App() {
 						element={
 							<ProtectedRoute>
 								<OnboardingPage />
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/notifications"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<NotificationsPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/user-management"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<UserListPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/user-management/create"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<CreateUserPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/user-management/:id"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<UserDetailPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/user-management/:id/edit"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<EditUserPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					{/* Profile Routes */}
+					<Route
+						path="/profile"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<AdminProfilePage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/profile/edit-personal"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<EditPersonalInfoPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/profile/edit-school"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<EditSchoolInfoPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/profile/session-config"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<SessionConfigPage />
+								</DashboardLayout>
 							</ProtectedRoute>
 						}
 					/>

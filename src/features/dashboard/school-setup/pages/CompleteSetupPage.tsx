@@ -24,6 +24,7 @@ export default function CompleteSetupPage() {
 		hasUnsavedChanges,
 		lastSavedAt,
 		markAsCompleted,
+		clearStorageAfterCompletion,
 		saveDraft,
 	} = useSchoolSetupStore();
 
@@ -50,6 +51,10 @@ export default function CompleteSetupPage() {
 		// This is called from the final step (AddClassArmsStep)
 		// The API calls are handled there
 		markAsCompleted();
+		
+		// Clear storage after successful completion to avoid crowding storage
+		clearStorageAfterCompletion();
+		
 		navigate("/dashboard");
 	};
 

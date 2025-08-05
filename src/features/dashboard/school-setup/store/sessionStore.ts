@@ -15,6 +15,7 @@ export interface SessionState {
   // Actions
   updateSessionData: (data: Partial<CreateSessionRequest>) => void;
   clearSessionData: () => void;
+  clearStorageAfterSubmission: () => void;
   setSubmitting: (submitting: boolean) => void;
   setApiError: (error: string | null) => void;
   clearApiError: () => void;
@@ -52,6 +53,12 @@ export const useSessionStore = create<SessionState>()(
 
       clearSessionData: () =>
         set({ sessionData: initialSessionData }),
+
+      clearStorageAfterSubmission: () => {
+        const storageKey = "session-setup-storage";
+        storageManager.removeItem(storageKey);
+        console.log("🧹 Cleared session setup storage after successful submission");
+      },
 
       // API state management
       setSubmitting: (submitting) => set({ isSubmitting: submitting }),

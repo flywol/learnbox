@@ -34,11 +34,13 @@ const StatCard = ({
 	iconColor: string;
 	loading?: boolean;
 }) => (
-	<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+	<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
 		<div className="flex items-center justify-between">
 			<div className="flex-1">
-				<div className="flex items-center gap-3 mb-2">
-					<Icon className={`w-5 h-5 ${iconColor}`} />
+				<div className="flex items-center gap-3 mb-3">
+					<div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+						<Icon className={`w-4 h-4 ${iconColor}`} />
+					</div>
 					<p className="text-sm text-gray-600">{label}</p>
 				</div>
 				{loading ? (
@@ -67,8 +69,12 @@ const EmptyState = ({
 }) => (
 	<div className="flex flex-col items-center justify-center py-8">
 		{illustration && (
-			<div className="w-24 h-24 mb-4 bg-gradient-to-br from-red-100 to-orange-100 rounded-2xl flex items-center justify-center">
-				<span className="text-2xl">{illustration}</span>
+			<div className="w-32 h-24 mx-auto mb-4">
+				<img 
+					src={illustration} 
+					alt={title} 
+					className="w-full h-full object-contain"
+				/>
 			</div>
 		)}
 		<h3 className="text-base font-medium text-gray-900 mb-2">{title}</h3>
@@ -90,13 +96,12 @@ export default function AdminDashboard() {
 	}, [isSchoolSetupCompleted, user]);
 
 	return (
-		<div className="p-6 bg-gray-50 min-h-full">
-			{/* Header */}
-			<div className="mb-6">
-				<div className="flex items-center justify-between">
-					<h1 className="text-2xl font-semibold text-gray-900">
-						Welcome {user?.fullName?.split(" ")[0]},{" "}
-						{!isSchoolSetupCompleted && "complete your school registration."}
+		<div className="space-y-6">
+			{/* Top Welcome/Registration Card */}
+			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+				<div className="flex items-center justify-between mb-6">
+					<h1 className="text-xl font-semibold text-gray-900">
+						Welcome {user?.fullName?.split(" ")[0]}, complete your school registration.
 					</h1>
 					<div className="flex items-center gap-3">
 						{error && (
@@ -113,40 +118,41 @@ export default function AdminDashboard() {
 						</button>
 					</div>
 				</div>
+
+				{/* Continue Registration Section */}
+				{!isSchoolSetupCompleted && (
+					<div className="bg-white rounded-lg border border-gray-200 p-4">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-4">
+								<div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+									<School className="w-6 h-6 text-white" />
+								</div>
+								<div>
+									<h3 className="font-semibold text-gray-900">
+										Continue registration
+									</h3>
+									<p className="text-sm text-gray-500">
+										Complete your school setup to access all features
+									</p>
+								</div>
+							</div>
+							<button
+								onClick={() => setShowSetupPrompt(true)}
+								className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
+								Continue
+							</button>
+						</div>
+					</div>
+				)}
 			</div>
 
 			{/* Main Content Grid */}
-			<div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-				{/* Left Column - Main Content (3/4) */}
-				<div className="xl:col-span-3 space-y-6">
-					{/* Continue Registration Card */}
-					{!isSchoolSetupCompleted && (
-						<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-4">
-									<div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
-										<School className="w-6 h-6 text-white" />
-									</div>
-									<div>
-										<h3 className="font-semibold text-gray-900">
-											Continue registration
-										</h3>
-										<p className="text-sm text-gray-500">
-											Complete your school setup to access all features
-										</p>
-									</div>
-								</div>
-								<button
-									onClick={() => setShowSetupPrompt(true)}
-									className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
-									Continue
-								</button>
-							</div>
-						</div>
-					)}
+			<div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+				{/* Left Column - Main Content (7/10) */}
+				<div className="lg:col-span-7">
 
 					{/* Overview Section */}
-					<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+					<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 						<h2 className="text-lg font-semibold text-gray-900 mb-6">
 							Overview
 						</h2>
@@ -255,28 +261,34 @@ export default function AdminDashboard() {
 					</div>
 				</div>
 
-				{/* Right Column - Activity Sidebar (1/4) */}
-				<div className="space-y-6">
+				{/* Right Column - Activity Sidebar (3/10) */}
+				<div className="lg:col-span-3 space-y-6">
 					{/* Recent Activities */}
-					<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-						<h2 className="text-lg font-semibold text-gray-900 mb-4">
-							Recent activities
-						</h2>
-						<EmptyState
-							title="No recent activities yet"
-							description="Activities will appear here once your school is fully set up"
-							illustration="⚡"
-						/>
+					<div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[400px] flex flex-col">
+						<div className="p-4 border-b border-gray-200">
+							<h2 className="text-lg font-semibold text-gray-900">Recent activities</h2>
+						</div>
+						<div className="p-4 flex-1 flex items-center justify-center">
+							<EmptyState
+								title="No recent activities yet"
+								description=""
+								illustration="/assets/activity-empty.svg"
+							/>
+						</div>
 					</div>
 
 					{/* Events */}
-					<div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-						<h2 className="text-lg font-semibold text-gray-900 mb-4">Events</h2>
-						<EmptyState
-							title="No upcoming event"
-							description="School events and important dates will be shown here"
-							illustration="📅"
-						/>
+					<div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[400px] flex flex-col">
+						<div className="p-4 border-b border-gray-200">
+							<h2 className="text-lg font-semibold text-gray-900">Events</h2>
+						</div>
+						<div className="p-4 flex-1 flex items-center justify-center">
+							<EmptyState
+								title="No upcoming event"
+								description=""
+								illustration="/assets/events-empty.svg"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
