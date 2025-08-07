@@ -34,6 +34,8 @@ import AdminProfilePage from "./features/profile/pages/AdminProfilePage";
 import EditPersonalInfoPage from "./features/profile/pages/EditPersonalInfoPage";
 import EditSchoolInfoPage from "./features/profile/pages/EditSchoolInfoPage";
 import SessionConfigPage from "./features/profile/pages/SessionConfigPage";
+import SchoolPaymentsPage from "./features/payments/pages/SchoolPaymentsPage";
+import ClassPaymentDetailPage from "./features/payments/pages/ClassPaymentDetailPage";
 
 const UnauthorizedPage = () => (
 	<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -254,6 +256,29 @@ export default function App() {
 							<ProtectedRoute>
 								<DashboardLayout>
 									<SessionConfigPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					{/* Payments Routes */}
+					<Route
+						path="/payments"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<SchoolPaymentsPage />
+								</DashboardLayout>
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path="/payments/:classId"
+						element={
+							<ProtectedRoute>
+								<DashboardLayout>
+									<ClassPaymentDetailPage />
 								</DashboardLayout>
 							</ProtectedRoute>
 						}

@@ -15,52 +15,72 @@ export function PaginationSection({
     const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
+    // Generate page numbers to show
+    const getVisiblePages = () => {
+        const pages = [];
+        const maxPages = 5; // Show up to 5 page numbers
+        
+        if (totalPages <= maxPages) {
+            // Show all pages if we have 5 or fewer
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Calculate range around current page
+            let start = Math.max(1, currentPage - 2);
+            let end = Math.min(totalPages, currentPage + 2);
+            
+            // Adjust if we're near the beginning or end
+            if (end - start + 1 < maxPages) {
+                if (start === 1) {
+                    end = Math.min(totalPages, start + maxPages - 1);
+                } else if (end === totalPages) {
+                    start = Math.max(1, end - maxPages + 1);
+                }
+            }
+            
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+        }
+        
+        return pages;
+    };
+
+    const visiblePages = getVisiblePages();
+
     return (
-        <div className="flex items-center justify-between border-t p-4">
-            <div className="text-sm text-gray-500">
-                Showing {startItem}-{endItem} of {totalItems}
+        <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
+            <div className="text-sm text-gray-700">
+                Showing {startItem} to {endItem} of {totalItems} entries
             </div>
             {totalPages > 1 && (
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                     <button
-                        className="rounded border px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         onClick={() => onPageChange(currentPage - 1)}
                         disabled={currentPage === 1}>
-                        Previous
+                        ‹
                     </button>
                     <div className="flex gap-1">
-                        {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                            let pageNum = currentPage;
-
-                            if (totalPages <= 3) {
-                                pageNum = i + 1;
-                            } else if (currentPage === totalPages) {
-                                pageNum = totalPages - 2 + i;
-                            } else if (currentPage === 1) {
-                                pageNum = i + 1;
-                            } else {
-                                pageNum = currentPage - 1 + i;
-                            }
-
-                            return (
-                                <button
-                                    key={pageNum}
-                                    onClick={() => onPageChange(pageNum)}
-                                    className={`rounded px-3 py-1 text-sm transition-colors ${
-                                        pageNum === currentPage
-                                            ? "bg-orange-600 text-white"
-                                            : "border hover:bg-gray-50"
-                                    }`}>
-                                    {pageNum}
-                                </button>
-                            );
-                        })}
+                        {visiblePages.map((pageNum) => (
+                            <button
+                                key={pageNum}
+                                onClick={() => onPageChange(pageNum)}
+                                className={`px-3 py-1 text-sm border rounded transition-colors ${
+                                    pageNum === currentPage
+                                        ? "bg-orange-500 text-white border-orange-500"
+                                        : "border-gray-300 hover:bg-gray-50"
+                                }`}>
+                                {pageNum}
+                            </button>
+                        ))}
                     </div>
                     <button
-                        className="rounded border px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}>
-                        Next
+                        ›
                     </button>
                 </div>
             )}

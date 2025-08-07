@@ -1,5 +1,6 @@
 // src/features/dashboard/pages/AdminDashboard.tsx - Redesigned to match target design
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import {
 	Users,
@@ -8,15 +9,45 @@ import {
 	UserPlus,
 	Calendar,
 	TrendingUp,
-	School,
 	BookOpen,
 	Heart,
 	Award,
-	RefreshCw,
+	Building2,
 } from "lucide-react";
 import SchoolSetupPromptModal from "../school-setup/components/SchoolSetupPromptModal";
 import { useSchoolSetupStore } from "../school-setup/store/schoolSetupStore";
 import { useDashboardStats } from "../hooks/useDashboardStats";
+
+// Action Card Component for top suggestions
+const ActionCard = ({
+	iconSrc,
+	title,
+	description,
+	onClick,
+}: {
+	iconSrc: string;
+	title: string;
+	description: string;
+	onClick: () => void;
+}) => (
+	<div 
+		className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+		onClick={onClick}
+	>
+		<div className="flex items-start gap-3 mb-3">
+			<div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+				<img src={iconSrc} alt={title} className="w-5 h-5" />
+			</div>
+			<div className="flex-1 min-w-0">
+				<h3 className="font-medium text-gray-900 mb-1">{title}</h3>
+				<p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+			</div>
+		</div>
+		<button className="w-full py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors">
+			Start
+		</button>
+	</div>
+);
 
 // Updated Stat Card Component to match design
 const StatCard = ({
@@ -83,10 +114,11 @@ const EmptyState = ({
 );
 
 export default function AdminDashboard() {
+	const navigate = useNavigate();
 	const { user } = useAuthStore();
 	const { isCompleted: isSchoolSetupCompleted } = useSchoolSetupStore();
 	const [showSetupPrompt, setShowSetupPrompt] = useState(false);
-	const { stats, loading, error, refetch } = useDashboardStats();
+	const { stats, loading } = useDashboardStats();
 
 	useEffect(() => {
 		// Show setup prompt if school setup is not completed
@@ -97,49 +129,61 @@ export default function AdminDashboard() {
 
 	return (
 		<div className="space-y-6">
-			{/* Top Welcome/Registration Card */}
+			{/* Top Welcome Card */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-				<div className="flex items-center justify-between mb-6">
-					<h1 className="text-xl font-semibold text-gray-900">
-						Welcome {user?.fullName?.split(" ")[0]}, complete your school registration.
-					</h1>
-					<div className="flex items-center gap-3">
-						{error && (
-							<div className="text-sm text-red-600 bg-red-50 px-3 py-1 rounded-lg">
-								Failed to load statistics
-							</div>
-						)}
-						<button
-							onClick={refetch}
-							disabled={loading}
-							className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-							<RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-							Refresh
-						</button>
-					</div>
-				</div>
+				<h1 className="text-xl font-semibold text-gray-900 mb-6">
+					Welcome {user?.fullName?.split(" ")[0]}, what do you want to do today?
+				</h1>
 
-				{/* Continue Registration Section */}
-				{!isSchoolSetupCompleted && (
-					<div className="bg-white rounded-lg border border-gray-200 p-4">
+				{/* Action Cards */}
+				{isSchoolSetupCompleted ? (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+						<ActionCard
+							iconSrc="/assets/add-new.svg"
+							title="Add new user"
+							description="Add students, teachers, or parents to your school"
+							onClick={() => navigate("/user-management/create")}
+						/>
+						<ActionCard
+							iconSrc="/assets/add-new2.svg"
+							title="Add new subject"
+							description="Add subjects and assign them to classes"
+							onClick={() => {/* TODO: Implement add subject */}}
+						/>
+						<ActionCard
+							iconSrc="/assets/add-new.svg"
+							title="School payments"
+							description="Manage fees, transactions, and payment records"
+							onClick={() => navigate("/payments")}
+						/>
+						<ActionCard
+							iconSrc="/assets/add-new2.svg"
+							title="Session config"
+							description="Set up academic sessions and terms"
+							onClick={() => navigate("/profile/session-config")}
+						/>
+					</div>
+				) : (
+					/* Registration Prompt */
+					<div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-4">
 								<div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
-									<School className="w-6 h-6 text-white" />
+									<Building2 className="w-6 h-6 text-white" />
 								</div>
 								<div>
 									<h3 className="font-semibold text-gray-900">
-										Continue registration
+										Complete your school registration
 									</h3>
-									<p className="text-sm text-gray-500">
-										Complete your school setup to access all features
+									<p className="text-sm text-gray-600">
+										Set up your school profile, classes, and academic sessions
 									</p>
 								</div>
 							</div>
 							<button
 								onClick={() => setShowSetupPrompt(true)}
 								className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
-								Continue
+								Continue Setup
 							</button>
 						</div>
 					</div>

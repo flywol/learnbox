@@ -22,7 +22,7 @@ const menuItems = [
 	},
 	{ label: "Classroom", icon: BookOpen, path: "/dashboard/classroom" },
 	{ label: "Users", icon: Users, path: "/user-management" },
-	{ label: "School payments", icon: CreditCard, path: "/dashboard/payments" },
+	{ label: "School payments", icon: CreditCard, path: "/payments" },
 	{ label: "LearnBox library", icon: Library, path: "/dashboard/library" },
 	{ label: "Profile", icon: User, path: "/profile" },
 ];

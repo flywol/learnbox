@@ -12,9 +12,9 @@ export default function SchoolBranding() {
     return "S"; // Default fallback
   };
 
-  // Get display name (short name if available, otherwise full name)
+  // Get display name (full name preferred, fallback to short name)
   const getDisplayName = () => {
-    return schoolInfo?.schoolShortName || schoolInfo?.schoolName || "School";
+    return schoolInfo?.schoolName || schoolInfo?.schoolShortName || "School";
   };
 
   return (

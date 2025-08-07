@@ -1,32 +1,9 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, Plus } from "lucide-react";
-import { useUsers, filterUsers, paginateUsers } from "../hooks/useUsers";
-import { useUserUIStore } from "../store/userUIStore";
-import UserFilters from "../components/UserFilters";
-import UserTable from "../components/UserTable";
-import { PaginationSection } from "../components/PaginationSection";
+import { UserTableSection } from "../components/UserTableSection";
 
 export default function UserListPage() {
   const navigate = useNavigate();
-  
-  // Fetch users with TanStack Query
-  const { data: users = [], isLoading, error, isError } = useUsers();
-  
-  // UI state from Zustand
-  const {
-    filters,
-    currentPage,
-    itemsPerPage,
-    setFilters,
-    setCurrentPage,
-  } = useUserUIStore();
-
-  // Client-side filtering and pagination
-  const { paginatedUsers, totalItems } = useMemo(() => {
-    const filteredUsers = filterUsers(users, filters);
-    return paginateUsers(filteredUsers, currentPage, itemsPerPage);
-  }, [users, filters, currentPage, itemsPerPage]);
 
   const handleBulkUpload = () => {
     // Placeholder - no functionality yet
@@ -41,7 +18,7 @@ export default function UserListPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+        <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <div className="flex items-center gap-3">
           <button
             onClick={handleBulkUpload}
@@ -60,38 +37,8 @@ export default function UserListPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <UserFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-      />
-
-      {/* Error Message */}
-      {isError && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">
-            {error?.message || "Failed to load users. Please try again."}
-          </p>
-        </div>
-      )}
-
-      {/* Users Table */}
-      <UserTable
-        users={paginatedUsers}
-        loading={isLoading}
-        currentPage={currentPage}
-        itemsPerPage={itemsPerPage}
-      />
-
-      {/* Pagination */}
-      {!isLoading && paginatedUsers.length > 0 && (
-        <PaginationSection
-          currentPage={currentPage}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      {/* Users Table Section */}
+      <UserTableSection />
     </div>
   );
 }
