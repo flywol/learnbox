@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useAdminProfile } from "../hooks/useProfile";
+import { useAdminProfile, useClassLevelsAndArms } from "../hooks/useProfile";
 import UserAvatar from "../../user-management/components/UserAvatar";
 import { useAuthStore } from "../../auth/store/authStore";
 import Modal from "../../../common/components/Modal";
@@ -15,10 +15,14 @@ export default function AdminProfilePage() {
 
   // Fetch data
   const { data: adminProfile, isLoading: profileLoading } = useAdminProfile();
+  const { data: classLevelsData, isLoading: classLevelsLoading } = useClassLevelsAndArms();
   
-  // Extract school and class information from the admin profile
+  // Extract school information from the admin profile
   const schoolInfo = adminProfile?.school;
-  const classLevels = adminProfile?.classes;
+  
+  // Extract class levels and arms from the new API
+  const classLevels = classLevelsData?.data.classLevels || [];
+  const classArms = classLevelsData?.data.classArms || [];
 
   const handleEditPersonalInfo = () => {
     navigate("/profile/edit-personal");
@@ -37,7 +41,7 @@ export default function AdminProfilePage() {
     navigate("/login");
   };
 
-  if (profileLoading) {
+  if (profileLoading || classLevelsLoading) {
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-sm border p-8">
@@ -215,13 +219,19 @@ export default function AdminProfilePage() {
                 .filter(level => level.arms.length > 0) // Only show classes with arms
                 .slice(0, 8)
                 .flatMap(level => 
-                  level.arms.map(arm => ({
-                    id: `${level.id}-${arm.id}`,
-                    className: level.className,
-                    armName: arm.armName,
-                    teacherName: arm.teacherName,
-                    totalStudents: arm.totalStudents
-                  }))
+                  level.arms.map(arm => {
+                    // Find the detailed arm data from the classArms array
+                    const armDetails = classArms.find(armDetail => armDetail.id === arm.id);
+                    const assignedTeacher = armDetails?.assignedTeachers?.[0]; // Get first assigned teacher
+                    
+                    return {
+                      id: `${level.id}-${arm.id}`,
+                      className: level.class,
+                      armName: arm.armName,
+                      teacherName: assignedTeacher?.name || null,
+                      totalStudents: armDetails?.studentCount || 0
+                    }
+                  })
                 )
                 .slice(0, 8) // Limit to 8 cards total
                 .map((classArm) => (
@@ -236,7 +246,7 @@ export default function AdminProfilePage() {
                     </h3>
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>Teacher: {classArm.teacherName || 'Not assigned'}</p>
-                      <p>Total students: {classArm.totalStudents || 0}</p>
+                      <p>Total students: {classArm.totalStudents}</p>
                     </div>
                   </div>
                 ))

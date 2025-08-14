@@ -76,7 +76,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 		schoolInfo: Partial<SchoolInfo>
 	): Promise<SchoolInfoResponse> {
 		try {
-			console.log("📡 API: updateSchoolInfo called");
 
 			// Convert files to base64 if they exist
 			let schoolLogo = "";
@@ -84,7 +83,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 
 			if (schoolInfo.schoolLogo && schoolInfo.schoolLogo instanceof File) {
 				schoolLogo = await this.fileToBase64(schoolInfo.schoolLogo);
-				console.log("✅ Converted schoolLogo to base64");
 			} else if (typeof schoolInfo.schoolLogo === "string") {
 				schoolLogo = schoolInfo.schoolLogo;
 			}
@@ -96,7 +94,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 				principalSignature = await this.fileToBase64(
 					schoolInfo.principalSignature
 				);
-				console.log("✅ Converted principalSignature to base64");
 			} else if (typeof schoolInfo.principalSignature === "string") {
 				principalSignature = schoolInfo.principalSignature;
 			}
@@ -119,23 +116,14 @@ class SchoolSetupApiClient extends BaseApiClient {
 				state: schoolInfo.state || "",
 			};
 
-			console.log("📤 Sending data to API:", {
-				...requestData,
-				schoolLogo: schoolLogo ? "base64 string (hidden)" : "empty",
-				principalSignature: principalSignature
-					? "base64 string (hidden)"
-					: "empty",
-			});
 
 			const response = await this.post<SchoolInfoResponse>(
 				"/admin/update-school-information",
 				requestData
 			);
 
-			console.log("✅ API: updateSchoolInfo success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: updateSchoolInfo failed:", error);
 			throw error;
 		}
 	}
@@ -146,7 +134,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 		classArms: ClassArm[]
 	): Promise<CreateClassesResponse> {
 		try {
-			console.log("📡 API: createClasses called");
 
 			// Transform selected class levels and arms to API format
 			const classes = classLevels
@@ -183,10 +170,8 @@ class SchoolSetupApiClient extends BaseApiClient {
 				requestData
 			);
 
-			console.log("✅ API: createClasses success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: createClasses failed:", error);
 			throw error;
 		}
 	}
@@ -197,7 +182,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 		armNames: string[]
 	): Promise<AddClassArmsResponse> {
 		try {
-			console.log("📡 API: addClassArmsLegacy called");
 
 			const requestData: AddClassArmsRequest = {
 				classId,
@@ -209,10 +193,8 @@ class SchoolSetupApiClient extends BaseApiClient {
 				requestData
 			);
 
-			console.log("✅ API: addClassArmsLegacy success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: addClassArmsLegacy failed:", error);
 			throw error;
 		}
 	}
@@ -220,17 +202,14 @@ class SchoolSetupApiClient extends BaseApiClient {
 	// Create academic session
 	async createSession(sessionData: CreateSessionRequest): Promise<CreateSessionResponse> {
 		try {
-			console.log("📡 API: createSession called");
 
 			const response = await this.post<CreateSessionResponse>(
 				"/sessions/create",
 				sessionData
 			);
 
-			console.log("✅ API: createSession success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: createSession failed:", error);
 			throw error;
 		}
 	}
@@ -238,17 +217,14 @@ class SchoolSetupApiClient extends BaseApiClient {
 	// Enhanced create classes (using the new API format)
 	async createMultipleClasses(data: CreateClassesRequest): Promise<CreateClassesResponse> {
 		try {
-			console.log("📡 API: createMultipleClasses called");
 
 			const response = await this.post<CreateClassesResponse>(
 				"/classes/create-multiple",
 				data
 			);
 
-			console.log("✅ API: createMultipleClasses success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: createMultipleClasses failed:", error);
 			throw error;
 		}
 	}
@@ -256,17 +232,14 @@ class SchoolSetupApiClient extends BaseApiClient {
 	// Add arms to existing class
 	async addClassArms(data: AddClassArmsRequest): Promise<AddClassArmsResponse> {
 		try {
-			console.log("📡 API: addClassArms called");
 
 			const response = await this.post<AddClassArmsResponse>(
 				"/classes/arms",
 				data
 			);
 
-			console.log("✅ API: addClassArms success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: addClassArms failed:", error);
 			throw error;
 		}
 	}
@@ -281,7 +254,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 		classes: CreateClassesResponse;
 	}> {
 		try {
-			console.log("📡 API: completeSchoolSetup called");
 
 			// Execute both API calls
 			const [schoolInfoResponse, classesResponse] = await Promise.all([
@@ -289,13 +261,11 @@ class SchoolSetupApiClient extends BaseApiClient {
 				this.createClasses(classLevels, classArms),
 			]);
 
-			console.log("✅ API: completeSchoolSetup success");
 			return {
 				schoolInfo: schoolInfoResponse,
 				classes: classesResponse,
 			};
 		} catch (error) {
-			console.error("❌ API: completeSchoolSetup failed:", error);
 			throw error;
 		}
 	}
@@ -312,7 +282,6 @@ class SchoolSetupApiClient extends BaseApiClient {
 		session: CreateSessionResponse;
 	}> {
 		try {
-			console.log("📡 API: completeSchoolSetupWithSession called");
 
 			// Execute all API calls in parallel
 			const [schoolInfoResponse, classesResponse, sessionResponse] = await Promise.all([
@@ -321,14 +290,12 @@ class SchoolSetupApiClient extends BaseApiClient {
 				this.createSession(sessionData),
 			]);
 
-			console.log("✅ API: completeSchoolSetupWithSession success");
 			return {
 				schoolInfo: schoolInfoResponse,
 				classes: classesResponse,
 				session: sessionResponse,
 			};
 		} catch (error) {
-			console.error("❌ API: completeSchoolSetupWithSession failed:", error);
 			throw error;
 		}
 	}

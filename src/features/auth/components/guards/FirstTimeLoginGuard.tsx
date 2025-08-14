@@ -15,15 +15,6 @@ export const FirstTimeLoginGuard = ({
 	const location = useLocation();
 	const { isAuthenticated, loginContext, user, hasHydrated } = useAuthStore();
 
-	console.log("🔐 FirstTimeLoginGuard check:", {
-		pathname: location.pathname,
-		isAuthenticated,
-		hasUser: !!user,
-		isFirstTimeLogin: loginContext.isFirstTimeLogin,
-		requiresPasswordReset: loginContext.requiresPasswordReset,
-		hasResetToken: !!loginContext.resetToken,
-		allowPasswordReset,
-	});
 
 	// Wait for hydration
 	if (!hasHydrated) {
@@ -43,12 +34,10 @@ export const FirstTimeLoginGuard = ({
 	if (needsPasswordReset && hasResetToken) {
 		// Allow password reset page
 		if (allowPasswordReset || location.pathname === "/reset-password") {
-			console.log("✅ Allowing access to password reset page");
 			return <>{children}</>;
 		}
 
 		// Block all other pages
-		console.log("🚫 Blocking access, redirecting to password reset");
 		return (
 			<Navigate
 				to="/reset-password"
@@ -62,7 +51,6 @@ export const FirstTimeLoginGuard = ({
 		);
 	}
 
-	console.log("✅ FirstTimeLoginGuard passed");
 	return <>{children}</>;
 };
 
@@ -73,16 +61,9 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated, hasHydrated, user } = useAuthStore();
 	const location = useLocation();
 
-	console.log("🛡️ ProtectedRoute check:", {
-		pathname: location.pathname,
-		isAuthenticated,
-		hasUser: !!user,
-		hasHydrated,
-	});
 
 	// Show loading while hydrating
 	if (!hasHydrated) {
-		console.log("⏳ ProtectedRoute waiting for hydration");
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gray-50">
 				<div className="text-center">
@@ -95,7 +76,6 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 	// Redirect to role selection if not authenticated
 	if (!isAuthenticated || !user) {
-		console.log("🚫 Not authenticated, redirecting to role selection");
 		return (
 			<Navigate
 				to="/"
@@ -105,7 +85,6 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 		);
 	}
 
-	console.log("✅ ProtectedRoute authenticated, applying FirstTimeLoginGuard");
 	// Apply first-time login guard
 	return <FirstTimeLoginGuard>{children}</FirstTimeLoginGuard>;
 };

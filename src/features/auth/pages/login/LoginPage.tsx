@@ -1,6 +1,6 @@
 // src/features/auth/pages/login/LoginPage.tsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,6 +32,10 @@ const CombinedSchoolLoginPage = () => {
 	const [isLoggingIn, setIsLoggingIn] = useState(false);
 	const [loginError, setLoginError] = useState<string | null>(null);
 	const navigate = useNavigate();
+	const location = useLocation();
+
+	// Get success message from navigation state
+	const { message } = location.state || {};
 
 	const {
 		selectedRole,
@@ -42,8 +46,6 @@ const CombinedSchoolLoginPage = () => {
 		setFirstTimeLogin,
 		intendedDestination,
 		setIntendedDestination,
-		setPasswordResetEmail,
-		setPasswordResetStep,
 		verifySchoolDomain,
 	} = useAuthStore();
 
@@ -99,7 +101,6 @@ const CombinedSchoolLoginPage = () => {
 				});
 			}
 		} catch (error: any) {
-			console.error("School validation failed:", error);
 			schoolForm.setError("schoolUrl", {
 				type: "manual",
 				message:
@@ -115,7 +116,6 @@ const CombinedSchoolLoginPage = () => {
 
 		setIsLoggingIn(true);
 		setLoginError(null);
-		console.log("🔐 Starting login process...");
 
 		try {
 			// Call API using new auth client
@@ -127,11 +127,6 @@ const CombinedSchoolLoginPage = () => {
 				data.rememberMe || false
 			);
 
-			console.log("✅ Login API successful:", {
-				hasUser: !!response.data.user,
-				hasTokens: !!(response.data.accessToken && response.data.refreshToken),
-				userVerified: response.data.user.isVerified,
-			});
 
 			// Transform API user data to internal User type
 			const userId = response.data.user.id || response.data.user.id;
@@ -161,18 +156,35 @@ const CombinedSchoolLoginPage = () => {
 				resetPasswordExpires: "",
 			};
 
-			// Handle unverified users
+			// Handle unverified users - redirect to OTP verification  
+			// Simply redirect without setting tokens (keeps user unauthenticated)
 			if (!transformedUser.isVerified) {
-				console.log("📧 User needs email verification");
-				setPasswordResetEmail(transformedUser.email);
-				setPasswordResetStep("otp");
-				navigate("/verify-email", {
-					state: {
-						user: transformedUser,
-						from: intendedDestination || "/dashboard",
-					},
-				});
-				return;
+				try {
+					// Auto-resend OTP for unverified users
+					await authApiClient.resendOtp({
+						email: transformedUser.email
+					});
+					
+					// Navigate to OTP verification page (no authentication, no clearing)
+					navigate("/verify-email", {
+						state: {
+							email: transformedUser.email,
+							message: "Your account is not verified. Please enter the verification code we just sent to your email.",
+							from: intendedDestination || "/dashboard",
+						},
+					});
+				} catch (otpError) {
+					// If OTP resend fails, still redirect but with error message
+					navigate("/verify-email", {
+						state: {
+							email: transformedUser.email,
+							message: "Your account is not verified. Please verify your email to continue.",
+							error: "Failed to send verification code. Please try again.",
+							from: intendedDestination || "/dashboard",
+						},
+					});
+				}
+				return; // Exit early - don't set tokens, don't authenticate
 			}
 
 			// Check for first-time login
@@ -181,19 +193,16 @@ const CombinedSchoolLoginPage = () => {
 				transformedUser.resetPasswordToken.length > 0
 			);
 			if (isFirstTimeLogin) {
-				console.log("🆕 First-time login detected");
 				setFirstTimeLogin(true, response.data.accessToken);
 			}
 
 			// Authenticate user in store
-			console.log("🔐 Authenticating user in store...");
 			loginAction(transformedUser);
 
 			// Small delay to ensure state propagation
 			setTimeout(() => {
 				// Navigate based on user state
 				if (isFirstTimeLogin) {
-					console.log("➡️ Redirecting to password reset");
 					navigate("/reset-password", {
 						state: {
 							resetToken: response.data.accessToken,
@@ -203,18 +212,12 @@ const CombinedSchoolLoginPage = () => {
 						replace: true,
 					});
 				} else if (intendedDestination) {
-					console.log(
-						"➡️ Redirecting to intended destination:",
-						intendedDestination
-					);
 					const destination = intendedDestination;
 					setIntendedDestination(null);
 					navigate(destination, { replace: true });
 				} else if (hasSeenOnboarding) {
-					console.log("➡️ Redirecting to dashboard");
 					navigate("/dashboard", { replace: true });
 				} else {
-					console.log("➡️ Redirecting to onboarding");
 					navigate("/onboarding", { replace: true });
 				}
 			}, 100);
@@ -317,6 +320,12 @@ const CombinedSchoolLoginPage = () => {
 							</p>
 						)}
 					</div>
+
+					{message && (
+						<div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
+							{message}
+						</div>
+					)}
 
 					{loginError && (
 						<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">

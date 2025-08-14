@@ -11,75 +11,60 @@ const EmailVerificationPage = () => {
 
 	const {
 		passwordResetEmail,
-		hasSeenOnboarding,
-		intendedDestination,
-		setIntendedDestination,
-		login: loginAction,
 		setPasswordResetEmail,
 		setPasswordResetStep,
 	} = useAuthStore();
 
-	// Get user data from navigation state
-	const { user } = location.state || {};
+	// Get data from navigation state (new flow)
+	const { email, message, error } = location.state || {};
+	
+	// Use email from state if available, fallback to store
+	const verificationEmail = email || passwordResetEmail;
 
-	// Redirect if no email or user data
+	// Redirect if no email available
 	useEffect(() => {
-		if (!passwordResetEmail || !user) {
+		if (!verificationEmail) {
 			navigate("/login");
 		}
-	}, [passwordResetEmail, user, navigate]);
+	}, [verificationEmail, navigate]);
 
 	// Email verification callback
 	const handleEmailVerify = useCallback(
 		async (otp: string) => {
-			if (!passwordResetEmail) {
+			if (!verificationEmail) {
 				throw new Error("Email is required for verification");
 			}
 
 			// Verify the OTP
 			await authApiClient.verifyOtp({
-				email: passwordResetEmail,
-				otp,
+				email: verificationEmail,
+				otp
 			});
 
 			// Clear password reset state since we're done
 			setPasswordResetEmail("");
 			setPasswordResetStep(null);
 
-			// Complete the login now that email is verified
-			loginAction(user);
-
-			// Navigate based on user state
-			if (intendedDestination) {
-				const destination = intendedDestination;
-				setIntendedDestination(null);
-				navigate(destination);
-			} else if (hasSeenOnboarding) {
-				navigate("/dashboard");
-			} else {
-				navigate("/onboarding");
-			}
+			// Redirect back to login page with success message
+			navigate("/login", {
+				state: {
+					message: "Email verified successfully! Please login again to continue.",
+					email: verificationEmail
+				}
+			});
 		},
-		[
-			passwordResetEmail,
-			user,
-			loginAction,
-			hasSeenOnboarding,
-			intendedDestination,
-			setIntendedDestination,
-			setPasswordResetEmail,
-			setPasswordResetStep,
-			navigate,
-		]
+		[verificationEmail, setPasswordResetEmail, setPasswordResetStep, navigate]
 	);
 
 	// Email resend callback
 	const handleEmailResend = useCallback(async () => {
-		if (!passwordResetEmail) {
+		if (!verificationEmail) {
 			throw new Error("Email is required for resending verification code");
 		}
-		await authApiClient.resendOtp(passwordResetEmail);
-	}, [passwordResetEmail]);
+		await authApiClient.resendOtp({
+			email: verificationEmail
+		});
+	}, [verificationEmail]);
 
 	// Error handling callback
 	const handleEmailError = useCallback(
@@ -93,7 +78,7 @@ const EmailVerificationPage = () => {
 	);
 
 	// Show loading if we don't have the required data yet
-	if (!passwordResetEmail || !user) {
+	if (!verificationEmail) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-[#fff6f3]">
 				<div className="text-center">
@@ -128,10 +113,12 @@ const EmailVerificationPage = () => {
 			</div>
 
 			<OtpVerification
-				email={passwordResetEmail}
+				email={verificationEmail}
 				onVerify={handleEmailVerify}
 				onResend={handleEmailResend}
 				onError={handleEmailError}
+				message={message}
+				initialError={error}
 			/>
 		</div>
 	);

@@ -57,7 +57,6 @@ export const useSessionStore = create<SessionState>()(
       clearStorageAfterSubmission: () => {
         const storageKey = "session-setup-storage";
         storageManager.removeItem(storageKey);
-        console.log("🧹 Cleared session setup storage after successful submission");
       },
 
       // API state management

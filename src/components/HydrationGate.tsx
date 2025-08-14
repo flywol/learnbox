@@ -6,7 +6,6 @@ export const HydrationGate = ({ children }: { children: ReactNode }) => {
 	const hasHydrated = useAuthStore((state) => state.hasHydrated);
 	const isAuthLoading = useAuthLoading();
 
-	console.log("💧 HydrationGate:", { hasHydrated, isAuthLoading });
 
 	// Show loading until hydrated and auth initialization is complete
 	if (!hasHydrated || isAuthLoading) {

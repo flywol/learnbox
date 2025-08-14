@@ -115,27 +115,22 @@ export const useAuthStore = create<AuthState>()(
 
 			// Hydration management
 			setHasHydrated: (value) => {
-				console.log("💧 setHasHydrated:", value);
 				set({ hasHydrated: value });
 			},
 
 			// Role and school management
 			setRole: (role) => {
-				console.log("🎭 setRole:", role);
 				set({ selectedRole: role });
 			},
 
 			setSchoolDomain: (domain) => {
 				const clean = domain.replace(/^https?:\/\//, "").replace(/\/$/, "");
-				console.log("🏫 setSchoolDomain:", clean);
 				set({ schoolDomain: clean });
 			},
 
 			// School domain verification
 			verifySchoolDomain: async (domain) => {
 				try {
-					console.log("🔍 Verifying school domain:", domain);
-
 					const response = await authApiClient.verifyDomain({
 						schoolDomain: domain,
 					});
@@ -148,14 +143,11 @@ export const useAuthStore = create<AuthState>()(
 					);
 
 					if (isVerified) {
-						console.log("✅ School domain verified", response.data.school);
 						return true;
 					} else {
-						console.log("❌ School domain not verified - no school data");
 						return false;
 					}
 				} catch (error) {
-					console.error("❌ School domain verification failed:", error);
 					// Throw the error so the calling component can handle it
 					throw error;
 				}
@@ -163,44 +155,29 @@ export const useAuthStore = create<AuthState>()(
 
 			// Core authentication
 			login: (user) => {
-				console.log("🔐 login action:", {
-					userId: user.id,
-					email: user.email,
-					role: user.role,
-					isVerified: user.isVerified,
-				});
-
 				set({
 					user,
 					isAuthenticated: true,
 					loadingState: "success",
 				});
-
-				console.log("✅ User authenticated successfully");
 			},
 
 			// Fix for authStore.ts - Complete logout with storage clearing
 
 			logout: async () => {
-				console.log("🚪 logout action called");
 
 				try {
 					// Call API logout
 					await authApiClient.logout();
-					console.log("✅ API logout successful");
 				} catch (error) {
-					console.log(
-						"⚠️ API logout failed, but continuing with local cleanup:",
-						error
-					);
+					// Continue with local cleanup even if API call fails
 				}
 
 				// Use StorageManager for complete cleanup
 				try {
 					storageManager.clearAllAppData(true); // Keep remember me preference
-					console.log("✅ All storage cleared via StorageManager");
 				} catch (error) {
-					console.error("❌ Error clearing storage:", error);
+					// Continue silently on error
 				}
 
 				// Reset all auth state
@@ -220,15 +197,12 @@ export const useAuthStore = create<AuthState>()(
 					hasHydrated: false, // Force re-hydration
 				});
 
-				console.log("✅ Logout completed - all data cleared");
 			},
 
 			// Session restoration
 			restoreSession: async () => {
-				console.log("🔄 Attempting session restoration...");
 
 				if (!authApiClient.isAuthenticated()) {
-					console.log("❌ No access token for session restoration");
 					return false;
 				}
 
@@ -238,7 +212,6 @@ export const useAuthStore = create<AuthState>()(
 					// First try to get user data from storage
 					const storedUserData = authApiClient.getUserData();
 					if (storedUserData) {
-						console.log("✅ Session restored from stored user data");
 						const user = transformUserData(storedUserData);
 						set({
 							user,
@@ -251,7 +224,6 @@ export const useAuthStore = create<AuthState>()(
 					// If no stored user data, try to fetch from API
 					try {
 						const apiUser = await authApiClient.getCurrentUser();
-						console.log("✅ Session restored from API");
 						const user = transformUserData(apiUser);
 
 						set({
@@ -262,20 +234,16 @@ export const useAuthStore = create<AuthState>()(
 
 						return true;
 					} catch (apiError) {
-						console.log("⚠️ Could not fetch user from API, but token exists");
 						set({ loadingState: "error" });
 						return false;
 					}
 				} catch (error) {
-					console.log("❌ Session restoration failed:", error);
 
 					// Clear invalid session using logout to properly clear tokens
 					try {
 						await authApiClient.logout();
 					} catch (logoutError) {
-						console.log(
-							"⚠️ Logout during session restore failed, clearing state anyway"
-						);
+						// Continue with state clearing anyway
 					}
 
 					set({
@@ -293,19 +261,16 @@ export const useAuthStore = create<AuthState>()(
 				const state = get();
 				if (state.isInitializing) return;
 
-				console.log("🚀 Initializing auth system...");
 				set({ isInitializing: true });
 
 				try {
 					// Run migration for existing users
-					console.log("🔄 Running storage migration...");
 					storageManager.migrateExistingData();
 
 					const isAuthenticated = authApiClient.isAuthenticated();
 
 					// If we have a user in state but no token, clear state
 					if (state.user && !isAuthenticated) {
-						console.log("⚠️ User in state but no token - clearing state");
 						set({
 							user: null,
 							isAuthenticated: false,
@@ -315,21 +280,17 @@ export const useAuthStore = create<AuthState>()(
 
 					// If we have token but no user, try to restore
 					else if (isAuthenticated && !state.user) {
-						console.log("🔄 Token exists, attempting session restoration...");
 						await state.restoreSession();
 					}
 
 					// If we have both, verify consistency
 					else if (isAuthenticated && state.user) {
-						console.log("✅ Both token and user exist - verifying consistency");
 						if (!state.isAuthenticated) {
 							set({ isAuthenticated: true });
 						}
 					}
 
-					console.log("✅ Auth initialization completed");
 				} catch (error) {
-					console.error("❌ Auth initialization failed:", error);
 				} finally {
 					set({ isInitializing: false });
 				}
@@ -340,18 +301,11 @@ export const useAuthStore = create<AuthState>()(
 				const state = get();
 				const isAuthenticated = authApiClient.isAuthenticated();
 
-				console.log("🔍 checkAuthStatus:", {
-					hasToken: isAuthenticated,
-					hasUser: !!state.user,
-					isAuthenticated: state.isAuthenticated,
-				});
 
 				// Quick consistency check
 				if (isAuthenticated && state.user && !state.isAuthenticated) {
-					console.log("🔧 Fixing auth flag consistency");
 					set({ isAuthenticated: true });
 				} else if (!isAuthenticated && state.isAuthenticated) {
-					console.log("🔧 Clearing auth due to missing token");
 					set({
 						isAuthenticated: false,
 						user: null,
@@ -362,13 +316,11 @@ export const useAuthStore = create<AuthState>()(
 
 			// Onboarding
 			markOnboardingComplete: () => {
-				console.log("🎓 markOnboardingComplete");
 				set({ hasSeenOnboarding: true });
 			},
 
 			// Flow management
 			resetFlow: () => {
-				console.log("🔄 resetFlow");
 				set({
 					selectedRole: null,
 					schoolDomain: null,
@@ -384,17 +336,12 @@ export const useAuthStore = create<AuthState>()(
 
 			// Login context
 			setLoginContext: (context) => {
-				console.log("🔐 setLoginContext:", context);
 				set((state) => ({
 					loginContext: { ...state.loginContext, ...context },
 				}));
 			},
 
 			setFirstTimeLogin: (isFirstTime, resetToken) => {
-				console.log("🆕 setFirstTimeLogin:", {
-					isFirstTime,
-					hasResetToken: !!resetToken,
-				});
 				set({
 					loginContext: {
 						isFirstTimeLogin: isFirstTime,
@@ -450,13 +397,7 @@ export const useAuthStore = create<AuthState>()(
 				intendedDestination: state.intendedDestination,
 			}),
 			onRehydrateStorage: () => (state) => {
-				console.log("💧 Store rehydrating...");
 				if (state) {
-					console.log("💧 Rehydrated state:", {
-						hasUser: !!state.user,
-						isAuthenticated: state.isAuthenticated,
-						selectedRole: state.selectedRole,
-					});
 
 					// Mark as hydrated
 					state.setHasHydrated(true);

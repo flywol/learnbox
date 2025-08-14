@@ -154,8 +154,7 @@ const ClassPaymentDetailPage: React.FC = () => {
     }).format(amount);
   };
 
-  const handleExport = (selectedIds: string[]) => {
-    console.log('Exporting selected students:', selectedIds);
+  const handleExport = (_selectedIds: string[]) => {
   };
 
   const handleFilterChange = (newFilter: string) => {

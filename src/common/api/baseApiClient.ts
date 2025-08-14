@@ -73,14 +73,12 @@ export class BaseApiClient {
 							}
 							return this.api(originalRequest);
 						} catch (refreshError) {
-							console.error("Token refresh failed:", refreshError);
-							this.clearAllTokens();
+								this.clearAllTokens();
 							window.location.href = "/";
 							return Promise.reject(this.normalizeError(error));
 						}
 					} else {
-						console.warn("401 Unauthorized: No refresh token available");
-						this.clearAllTokens();
+								this.clearAllTokens();
 						window.location.href = "/";
 					}
 				}
@@ -165,12 +163,6 @@ export class BaseApiClient {
 		refreshToken: string,
 		rememberMe: boolean = false
 	): void {
-		console.log("💾 Setting tokens:", {
-			hasAccessToken: !!accessToken,
-			hasRefreshToken: !!refreshToken,
-			rememberMe,
-			storage: rememberMe ? "localStorage" : "sessionStorage",
-		});
 
 		this.setRememberMe(rememberMe);
 		this.setToken(accessToken);

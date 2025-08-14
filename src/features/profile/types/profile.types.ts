@@ -122,3 +122,44 @@ export interface ProfileSettings {
     screenReader: boolean;
   };
 }
+
+// Class Levels and Arms API Response Types
+export interface ClassLevelWithArms {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  levelName: string;
+  class: string;
+  arms: ClassArmInLevel[];
+  studentCount: number;
+  teacherCount: number;
+}
+
+export interface ClassArmInLevel {
+  id: string;
+  armName: string;
+}
+
+export interface ClassArmDetails {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  armName: string;
+  studentCount: number;
+  assignedTeachers: AssignedTeacher[];
+}
+
+export interface AssignedTeacher {
+  id: string;
+  name: string;
+  // Add more teacher fields as needed
+}
+
+export interface ClassLevelsAndArmsResponse {
+  data: {
+    classLevels: ClassLevelWithArms[];
+    classArms: ClassArmDetails[];
+  };
+}

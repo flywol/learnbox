@@ -39,15 +39,6 @@ export const SecurityWrapper: React.FC<SecurityWrapperProps> = ({
 			const deviceAllowed =
 				!isMobile && !isTablet && !isWebView && !isSmallScreen;
 
-			console.log("🔒 Device Check:", {
-				userAgent: navigator.userAgent,
-				isMobile,
-				isTablet,
-				isWebView,
-				isSmallScreen,
-				screenWidth: window.innerWidth,
-				deviceAllowed,
-			});
 
 			setIsDeviceAllowed(deviceAllowed);
 			setIsLoading(false);

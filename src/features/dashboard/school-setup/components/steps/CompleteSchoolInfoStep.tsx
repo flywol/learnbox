@@ -6,6 +6,7 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 import { useSchoolSetupStore } from "../../store/schoolSetupStore";
 import FileUploadZone from "../FileUploadZone";
 import schoolSetupApiClient from "@/features/dashboard/api/schoolSetupApiClient";
+import { profileApiClient } from "@/features/profile/api/profileApiClient";
 import { completeSchoolInfoSchema } from "@/features/dashboard/schema/dashboardSchema";
 
 type SchoolInfoFormData = z.infer<typeof completeSchoolInfoSchema>;
@@ -81,58 +82,126 @@ export default function SchoolInfoStep() {
 		},
 	});
 
-	// Set prefilled values from auth store and signup data
+	// Set prefilled values from backend, auth store, and signup data
 	useEffect(() => {
-		console.log("🔧 Setting prefilled values:", {
-			authSchoolDomain,
-			userEmail: user?.email,
-			schoolInfoName: schoolInfo.schoolName,
-			signupData,
-		});
+		const loadBackendData = async () => {
+			try {
+				// First, try to fetch existing data from backend
+				const adminProfile = await profileApiClient.getAdminProfile();
+				
+				// Pre-populate form with backend data (highest priority)
+				if (adminProfile.school?.schoolName) {
+					setValue("schoolName", adminProfile.school.schoolName);
+					updateSchoolInfo({ schoolName: adminProfile.school.schoolName });
+				}
+				
+				if (adminProfile.school?.schoolShortName) {
+					setValue("schoolShortName", adminProfile.school.schoolShortName);
+					updateSchoolInfo({ schoolShortName: adminProfile.school.schoolShortName });
+				}
+				
+				if (adminProfile.school?.schoolAddress) {
+					setValue("schoolAddress", adminProfile.school.schoolAddress);
+					updateSchoolInfo({ schoolAddress: adminProfile.school.schoolAddress });
+				}
+				
+				if (adminProfile.school?.schoolWebsite) {
+					setValue("schoolWebsite", adminProfile.school.schoolWebsite);
+					updateSchoolInfo({ schoolWebsite: adminProfile.school.schoolWebsite });
+				}
+				
+				if (adminProfile.school?.schoolPhoneNumber) {
+					setValue("schoolPhoneNumber", adminProfile.school.schoolPhoneNumber);
+					updateSchoolInfo({ schoolPhoneNumber: adminProfile.school.schoolPhoneNumber });
+				}
+				
+				if (adminProfile.school?.schoolEmail) {
+					setValue("schoolEmail", adminProfile.school.schoolEmail);
+					updateSchoolInfo({ schoolEmail: adminProfile.school.schoolEmail });
+				}
+				
+				if (adminProfile.school?.country) {
+					setValue("country", adminProfile.school.country);
+					updateSchoolInfo({ country: adminProfile.school.country });
+				}
+				
+				if (adminProfile.school?.state) {
+					setValue("state", adminProfile.school.state);
+					updateSchoolInfo({ state: adminProfile.school.state });
+				}
+				
+				if (adminProfile.school?.schoolType) {
+					setValue("schoolType", adminProfile.school.schoolType);
+					updateSchoolInfo({ schoolType: adminProfile.school.schoolType });
+				}
+				
+				if (adminProfile.school?.schoolMotto) {
+					setValue("schoolMotto", adminProfile.school.schoolMotto);
+					updateSchoolInfo({ schoolMotto: adminProfile.school.schoolMotto });
+				}
+				
+				if (adminProfile.school?.schoolPrincipal) {
+					setValue("schoolPrincipal", adminProfile.school.schoolPrincipal);
+					updateSchoolInfo({ schoolPrincipal: adminProfile.school.schoolPrincipal });
+				}
+				
+				if (adminProfile.school?.learnboxUrl) {
+					setValue("schoolDomain", adminProfile.school.learnboxUrl);
+					updateSchoolInfo({ learnboxUrl: adminProfile.school.learnboxUrl });
+				}
+				
+			} catch (error) {
+				// If backend call fails, fall back to existing logic
+			}
+			
+			// Set school domain from auth store or signup data if not already set from backend
+			if (!schoolInfo.learnboxUrl) {
+				const domainToUse = authSchoolDomain || signupData?.learnboxUrl;
+				if (domainToUse) {
+					setValue("schoolDomain", domainToUse);
+					updateSchoolInfo({ learnboxUrl: domainToUse });
+				}
+			}
 
-		// Set school domain from auth store or signup data if available
-		const domainToUse = authSchoolDomain || signupData?.learnboxUrl;
-		if (domainToUse && !schoolInfo.learnboxUrl) {
-			setValue("schoolDomain", domainToUse);
-			updateSchoolInfo({ learnboxUrl: domainToUse });
-		}
+			// Pre-fill from signup data if fields are still empty (lowest priority)
+			if (signupData) {
+				if (signupData.schoolName && !schoolInfo.schoolName) {
+					setValue("schoolName", signupData.schoolName);
+				}
+				if (signupData.schoolShortName && !schoolInfo.schoolShortName) {
+					setValue("schoolShortName", signupData.schoolShortName);
+				}
+				if (signupData.schoolWebsite && !schoolInfo.schoolWebsite) {
+					setValue("schoolWebsite", signupData.schoolWebsite);
+				}
+			}
 
-		// Pre-fill from signup data if fields are empty
-		if (signupData && !schoolInfo.schoolName) {
-			if (signupData.schoolName) {
-				setValue("schoolName", signupData.schoolName);
+			// Set principal name if not already set
+			if (!schoolInfo.schoolPrincipal) {
+				const principalName = signupData?.fullName || user?.fullName;
+				if (principalName) {
+					setValue("schoolPrincipal", principalName);
+				}
 			}
-			if (signupData.schoolShortName) {
-				setValue("schoolShortName", signupData.schoolShortName);
-			}
-			if (signupData.schoolWebsite) {
-				setValue("schoolWebsite", signupData.schoolWebsite);
-			}
-		}
 
-		// Set principal name from signup data or user data
-		if (!schoolInfo.schoolPrincipal) {
-			const principalName = signupData?.fullName || user?.fullName;
-			if (principalName) {
-				setValue("schoolPrincipal", principalName);
+			// Set contact info if not already set
+			if (!schoolInfo.schoolPhoneNumber) {
+				const phoneNumber = signupData?.phoneNumber || user?.phoneNumber;
+				if (phoneNumber) {
+					setValue("schoolPhoneNumber", phoneNumber);
+				}
 			}
-		}
 
-		// Set contact info from signup data or user data
-		if (!schoolInfo.schoolPhoneNumber) {
-			const phoneNumber = signupData?.phoneNumber || user?.phoneNumber;
-			if (phoneNumber) {
-				setValue("schoolPhoneNumber", phoneNumber);
+			// Set email if not already set
+			if (!schoolInfo.schoolEmail) {
+				const email = signupData?.email || user?.email;
+				if (email) {
+					setValue("schoolEmail", email);
+				}
 			}
-		}
+		};
 
-		// Set email from signup data or user data
-		if (!schoolInfo.schoolEmail) {
-			const email = signupData?.email || user?.email;
-			if (email) {
-				setValue("schoolEmail", email);
-			}
-		}
+		loadBackendData();
 	}, [setValue, schoolInfo, authSchoolDomain, user, signupData, updateSchoolInfo]);
 
 	const onSubmit = async (data: SchoolInfoFormData) => {
@@ -149,12 +218,10 @@ export default function SchoolInfoStep() {
 				...data,
 			});
 
-			console.log("✅ School information saved successfully");
 
 			// Move to next step
 			nextStep();
 		} catch (error: any) {
-			console.error("❌ Failed to save school information:", error);
 			setApiError(
 				error.message || "Failed to save school information. Please try again."
 			);
@@ -239,9 +306,6 @@ export default function SchoolInfoStep() {
 								{errors.schoolPrincipal.message}
 							</p>
 						)}
-						<p className="mt-1 text-xs text-yellow-600">
-							Note: This field is not yet synced with backend
-						</p>
 					</div>
 
 					{/* School type */}
@@ -265,9 +329,6 @@ export default function SchoolInfoStep() {
 								{errors.schoolType.message}
 							</p>
 						)}
-						<p className="mt-1 text-xs text-yellow-600">
-							Note: This field is not yet synced with backend
-						</p>
 					</div>
 
 					{/* School schoolMotto */}
@@ -282,9 +343,6 @@ export default function SchoolInfoStep() {
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 							disabled={isSubmitting}
 						/>
-						<p className="mt-1 text-xs text-yellow-600">
-							Note: This field is not yet synced with backend
-						</p>
 					</div>
 
 					{/* School address */}

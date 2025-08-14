@@ -9,6 +9,7 @@ import type {
 	RefreshTokenResponse,
 	OtpRequest,
 	OtpResponse,
+	ResendOtpRequest,
 	ForgotPasswordRequest,
 	ForgotPasswordResponse,
 	ResetPasswordRequest,
@@ -28,15 +29,12 @@ class AuthApiClient extends BaseApiClient {
 	// Register new user
 	async register(data: RegisterRequest): Promise<RegisterResponse> {
 		try {
-			console.log("📡 API: register called");
 			const response = await this.post<RegisterResponse>(
 				"/auth/register",
 				data
 			);
-			console.log("✅ API: register success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: register failed:", error);
 			throw error;
 		}
 	}
@@ -44,19 +42,13 @@ class AuthApiClient extends BaseApiClient {
 	// Verify school domain
 	async verifyDomain(data: VerifyDomainRequest): Promise<VerifyDomainResponse> {
 		try {
-			console.log("📡 API: verifyDomain called", {
-				schoolDomain: data.schoolDomain,
-			});
-
 			const response = await this.post<VerifyDomainResponse>(
 				"/school/verify-domain",
 				data
 			);
 
-			console.log("✅ API: verifyDomain success", response);
 			return response;
 		} catch (error) {
-			console.error("❌ API: verifyDomain failed:", error);
 			throw error;
 		}
 	}
@@ -73,7 +65,6 @@ class AuthApiClient extends BaseApiClient {
 		rememberMe: boolean = false
 	): Promise<LoginResponse> {
 		try {
-			console.log("📡 API: login called", { email: data.email, rememberMe });
 			const response = await this.post<LoginResponse>("/auth/login", data);
 
 			// Store tokens and user data on successful login
@@ -88,16 +79,13 @@ class AuthApiClient extends BaseApiClient {
 					rememberMe
 				);
 				this.setUserData(response.data.user);
-				console.log("✅ API: login success - tokens and user data stored");
 			} else {
-				console.error("❌ API: login response missing tokens");
 				throw new Error("Login response missing tokens");
 			}
 
 			return response;
 		} catch (error) {
 			const apiError = error as ApiErrorResponse;
-			console.error("❌ API: login failed:", apiError);
 
 			if (apiError.status === 401) {
 				throw {
@@ -118,11 +106,9 @@ class AuthApiClient extends BaseApiClient {
 	// Logout the current user
 	async logout(): Promise<void> {
 		try {
-			console.log("📡 API: logout called");
 			await this.post<LogoutResponse>("/auth/logout");
-			console.log("✅ API: logout success");
 		} catch (error) {
-			console.log("⚠️ API: logout failed, but continuing with local cleanup");
+			// Continue with local cleanup even if API call fails
 		} finally {
 			// Always clear all auth data regardless of API response
 			this.performLogout();
@@ -131,8 +117,6 @@ class AuthApiClient extends BaseApiClient {
 
 	// Simple logout method that clears everything and redirects
 	performLogout(): void {
-		console.log("🧹 Clearing auth data and redirecting...");
-
 		// Use StorageManager for complete cleanup
 		storageManager.clearAllAppData(true); // Keep remember me preference
 
@@ -143,30 +127,26 @@ class AuthApiClient extends BaseApiClient {
 	// Refresh access token
 	async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
 		try {
-			console.log("📡 API: refreshToken called");
 			const response = await this.post<RefreshTokenResponse>(
 				"/auth/refresh-token",
 				{ refreshToken }
 			);
-			console.log("✅ API: refreshToken success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: refreshToken failed:", error);
 			throw error;
 		}
 	}
 
-	// Send OTP to email
-	async resendOtp(email: string): Promise<OtpResponse> {
+	// Send OTP to email - support both old signature and new object signature
+	async resendOtp(emailOrRequest: string | ResendOtpRequest): Promise<OtpResponse> {
 		try {
-			console.log("📡 API: resendOtp called", { email });
-			const response = await this.post<OtpResponse>("/auth/resend-otp", {
-				email,
-			});
-			console.log("✅ API: resendOtp success");
+			const requestData = typeof emailOrRequest === 'string' 
+				? { email: emailOrRequest }
+				: emailOrRequest;
+				
+			const response = await this.post<OtpResponse>("/auth/resend-otp", requestData);
 			return response;
 		} catch (error) {
-			console.error("❌ API: resendOtp failed:", error);
 			throw error;
 		}
 	}
@@ -174,12 +154,9 @@ class AuthApiClient extends BaseApiClient {
 	// Verify OTP
 	async verifyOtp(data: OtpRequest): Promise<OtpResponse> {
 		try {
-			console.log("📡 API: verifyOtp called", { email: data.email });
 			const response = await this.post<OtpResponse>("/auth/verify-otp", data);
-			console.log("✅ API: verifyOtp success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: verifyOtp failed:", error);
 			throw error;
 		}
 	}
@@ -189,16 +166,13 @@ class AuthApiClient extends BaseApiClient {
 		data: ForgotPasswordRequest
 	): Promise<ForgotPasswordResponse> {
 		try {
-			console.log("📡 API: forgotPassword called", { email: data.email });
 			const response = await this.post<ForgotPasswordResponse>(
 				"/auth/forgot-password",
 				data
 			);
-			console.log("✅ API: forgotPassword success");
 			return response;
 		} catch (error) {
 			const apiError = error as ApiErrorResponse;
-			console.error("❌ API: forgotPassword failed:", apiError);
 
 			if (apiError.status === 400) {
 				throw { message: "Invalid email address", status: 400 };
@@ -212,15 +186,12 @@ class AuthApiClient extends BaseApiClient {
 	// Resend password reset OTP
 	async resendPasswordOtp(email: string): Promise<OtpResponse> {
 		try {
-			console.log("📡 API: resendPasswordOtp called", { email });
 			const response = await this.post<OtpResponse>(
 				"/auth/resend-password-otp",
 				{ email }
 			);
-			console.log("✅ API: resendPasswordOtp success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: resendPasswordOtp failed:", error);
 			throw error;
 		}
 	}
@@ -228,17 +199,12 @@ class AuthApiClient extends BaseApiClient {
 	// Verify forgot password OTP
 	async verifyForgotPasswordOtp(data: OtpRequest): Promise<OtpResponse> {
 		try {
-			console.log("📡 API: verifyForgotPasswordOtp called", {
-				email: data.email,
-			});
 			const response = await this.post<OtpResponse>(
 				"/auth/verify-forgot-password-otp",
 				data
 			);
-			console.log("✅ API: verifyForgotPasswordOtp success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: verifyForgotPasswordOtp failed:", error);
 			throw error;
 		}
 	}
@@ -252,10 +218,8 @@ class AuthApiClient extends BaseApiClient {
 				"/auth/reset-password",
 				data
 			);
-			console.log("✅ API: resetPassword success");
 			return response;
 		} catch (error) {
-			console.error("❌ API: resetPassword failed:", error);
 			throw error;
 		}
 	}
@@ -263,12 +227,9 @@ class AuthApiClient extends BaseApiClient {
 	// Get current user data (for session restoration)
 	async getCurrentUser(): Promise<UserData> {
 		try {
-			console.log("📡 API: getCurrentUser called");
 			const response = await this.get<CurrentUserResponse>("/auth/me");
-			console.log("✅ API: getCurrentUser success");
 			return response.data.user;
 		} catch (error) {
-			console.error("❌ API: getCurrentUser failed:", error);
 			throw error;
 		}
 	}
@@ -281,7 +242,6 @@ class AuthApiClient extends BaseApiClient {
 		try {
 			return userDataString ? JSON.parse(userDataString) : null;
 		} catch (error) {
-			console.error("Error parsing user data from storage:", error);
 			this.clearUserData();
 			return null;
 		}
@@ -311,7 +271,7 @@ class AuthApiClient extends BaseApiClient {
 			// Force token cleanup by setting empty tokens
 			this.setTokens("", "", false);
 		} catch (error) {
-			console.error("Error clearing tokens:", error);
+			// Continue silently on error
 		}
 	}
 }

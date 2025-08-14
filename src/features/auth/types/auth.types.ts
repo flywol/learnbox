@@ -80,6 +80,11 @@ export interface OtpRequest {
 	otp: string;
 }
 
+export interface ResendOtpRequest {
+	email: string;
+	purpose?: "SIGNUP" | "LOGIN" | "FORGOT_PASSWORD";
+}
+
 export interface ForgotPasswordRequest {
 	email: string;
 }

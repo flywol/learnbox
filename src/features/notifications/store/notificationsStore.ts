@@ -29,7 +29,6 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
 	// Hydration management
 	setHasHydrated: (value) => {
-		console.log("💧 Notifications setHasHydrated:", value);
 		set({ hasHydrated: value });
 	},
 
@@ -39,7 +38,6 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 		if (state.isLoading) return;
 
 		try {
-			console.log("📡 Fetching notifications...");
 			set({ isLoading: true, error: null });
 
 			const response = await notificationsApiClient.getAllNotifications();
@@ -51,9 +49,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 				error: null,
 			});
 
-			console.log(`✅ Fetched ${notifications.length} notifications`);
 		} catch (error: any) {
-			console.error("❌ Failed to fetch notifications:", error);
 			set({
 				isLoading: false,
 				error: error.message || "Failed to fetch notifications",
@@ -64,7 +60,6 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 	// Mark single notification as read
 	markAsRead: async (notificationId: string) => {
 		try {
-			console.log("📡 Marking notification as read:", notificationId);
 
 			await notificationsApiClient.markAsRead(notificationId);
 
@@ -77,9 +72,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 				),
 			}));
 
-			console.log("✅ Notification marked as read");
 		} catch (error: any) {
-			console.error("❌ Failed to mark notification as read:", error);
 			set({ error: error.message || "Failed to mark notification as read" });
 		}
 	},
@@ -92,7 +85,6 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 		if (unreadNotifications.length === 0) return;
 
 		try {
-			console.log("📡 Marking all notifications as read...");
 			set({ isLoading: true, error: null });
 
 			// Mark all unread notifications as read
@@ -111,9 +103,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 				isLoading: false,
 			}));
 
-			console.log("✅ All notifications marked as read");
 		} catch (error: any) {
-			console.error("❌ Failed to mark all notifications as read:", error);
 			set({
 				isLoading: false,
 				error: error.message || "Failed to mark all notifications as read",

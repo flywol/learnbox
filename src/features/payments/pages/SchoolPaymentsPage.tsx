@@ -238,8 +238,7 @@ const SchoolPaymentsPage: React.FC = () => {
   const studentsPending = paymentsData?.overview.studentsPending || 0;
 
 
-  const handleExportTransactions = (selectedIds: string[]) => {
-    console.log('Exporting selected transactions:', selectedIds);
+  const handleExportTransactions = (_selectedIds: string[]) => {
   };
 
   const formatCurrency = (amount: number) => {

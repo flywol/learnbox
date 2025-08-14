@@ -34,7 +34,6 @@ export default function Sidebar() {
 		if (isLoggingOut) return;
 
 		setIsLoggingOut(true);
-		console.log("🚪 Logging out...");
 
 		// Just call the API client logout - it handles everything
 		await authApiClient.logout();

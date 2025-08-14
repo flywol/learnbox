@@ -443,7 +443,6 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 				// Clear the persisted storage since setup is complete
 				const storageKey = storageManager.getStorageKeys().schoolSetup;
 				storageManager.removeItem(storageKey);
-				console.log("🧹 Cleared school setup storage after successful completion");
 			},
 		}),
 		{

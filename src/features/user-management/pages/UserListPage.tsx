@@ -7,7 +7,6 @@ export default function UserListPage() {
 
   const handleBulkUpload = () => {
     // Placeholder - no functionality yet
-    console.log("Bulk upload clicked - not implemented yet");
   };
 
   const handleCreateUser = () => {

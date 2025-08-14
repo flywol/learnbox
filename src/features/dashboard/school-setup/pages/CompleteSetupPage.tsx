@@ -41,9 +41,7 @@ export default function CompleteSetupPage() {
 		try {
 			saveDraft();
 			// Could also call API to save draft here if needed
-			console.log("✅ Draft saved locally");
 		} catch (error) {
-			console.error("❌ Failed to save draft:", error);
 		}
 	};
 

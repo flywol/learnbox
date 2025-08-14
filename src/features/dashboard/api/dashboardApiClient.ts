@@ -14,12 +14,9 @@ class DashboardApiClient extends BaseApiClient {
   // Get all users statistics
   async getAllUsersStats(): Promise<AllUsersResponse> {
     try {
-      console.log("📡 API: getAllUsersStats called");
       const response = await this.get<AllUsersResponse>("/admin/all-users");
-      console.log("✅ API: getAllUsersStats success", response.data);
       return response;
     } catch (error) {
-      console.error("❌ API: getAllUsersStats failed:", error);
       throw error;
     }
   }
@@ -27,12 +24,9 @@ class DashboardApiClient extends BaseApiClient {
   // Get class information statistics
   async getClassInformation(): Promise<ClassInformationResponse> {
     try {
-      console.log("📡 API: getClassInformation called");
       const response = await this.get<ClassInformationResponse>("/admin/class-information");
-      console.log("✅ API: getClassInformation success", response.data);
       return response;
     } catch (error) {
-      console.error("❌ API: getClassInformation failed:", error);
       throw error;
     }
   }
@@ -40,7 +34,6 @@ class DashboardApiClient extends BaseApiClient {
   // Get combined dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      console.log("📡 API: getDashboardStats called");
       
       // Fetch both endpoints in parallel
       const [usersResponse, classResponse] = await Promise.all([
@@ -54,10 +47,8 @@ class DashboardApiClient extends BaseApiClient {
         ...classResponse.data
       };
 
-      console.log("✅ API: getDashboardStats combined success", stats);
       return stats;
     } catch (error) {
-      console.error("❌ API: getDashboardStats failed:", error);
       throw error;
     }
   }

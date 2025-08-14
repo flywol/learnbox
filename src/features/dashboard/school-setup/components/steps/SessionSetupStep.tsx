@@ -71,8 +71,7 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
     clearApiError();
 
     try {
-      const response = await schoolSetupApiClient.createSession(data);
-      console.log("Session created successfully:", response);
+      await schoolSetupApiClient.createSession(data);
       
       // Update store with successful data
       updateSessionData(data);
@@ -85,7 +84,6 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
         onComplete();
       }
     } catch (error: any) {
-      console.error("Failed to create session:", error);
       setApiError(error.message || "Failed to create session");
     } finally {
       setSubmitting(false);

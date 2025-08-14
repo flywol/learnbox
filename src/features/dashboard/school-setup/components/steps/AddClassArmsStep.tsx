@@ -137,7 +137,6 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 			// Create classes with arms via API
 			await schoolSetupApiClient.createClasses(selectedClassLevels, classArms);
 
-			console.log("✅ Classes created successfully");
 
 			// Mark setup as completed
 			saveDraft();
@@ -153,7 +152,6 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
 				onComplete();
 			}
 		} catch (error: any) {
-			console.error("❌ Failed to create classes:", error);
 			setApiError(
 				error.message || "Failed to create classes. Please try again."
 			);

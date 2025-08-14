@@ -10,7 +10,6 @@ class UserApiClient extends BaseApiClient {
   // Create a new user
   async createUser(userData: CreateUserFormData): Promise<{ message: string }> {
     try {
-      console.log("📡 API: createUser called", userData);
       
       // Transform data to match API expectations  
       const { assignedClassArms, ...transformData } = userData as any;
@@ -57,10 +56,8 @@ class UserApiClient extends BaseApiClient {
       }
 
       const response = await this.post<{ message: string }>(endpoint, transformedData);
-      console.log("✅ API: createUser success", response);
       return response;
     } catch (error) {
-      console.error("❌ API: createUser failed:", error);
       throw error;
     }
   }
@@ -68,12 +65,9 @@ class UserApiClient extends BaseApiClient {
   // Get all students (for parent linking)
   async getStudents(): Promise<any[]> {
     try {
-      console.log("📡 API: getStudents called");
       const response = await this.get<{ data: { students: any[] } }>("/admin/all-students");
-      console.log("✅ API: getStudents success", response);
       return response.data.students || [];
     } catch (error) {
-      console.error("❌ API: getStudents failed:", error);
       throw error;
     }
   }
@@ -81,12 +75,9 @@ class UserApiClient extends BaseApiClient {
   // Get all classes (for teacher assignment)
   async getClasses(): Promise<any[]> {
     try {
-      console.log("📡 API: getClasses called");
       const response = await this.get<{ classes: any[] }>("/classes");
-      console.log("✅ API: getClasses success", response);
       return response.classes;
     } catch (error) {
-      console.error("❌ API: getClasses failed:", error);
       throw error;
     }
   }
@@ -94,9 +85,7 @@ class UserApiClient extends BaseApiClient {
   // Get all class levels
   async getClassLevels(): Promise<any[]> {
     try {
-      console.log("📡 API: getClassLevels called");
       const response = await this.get<{ data: ClassLevelData[] }>("/classes/levels/get-all");
-      console.log("✅ API: getClassLevels success", response);
       // BaseApiClient already extracts the data, so response is the actual data object
       const levels = Array.isArray(response.data) ? response.data : [];
       
@@ -111,7 +100,6 @@ class UserApiClient extends BaseApiClient {
           : level.arms
       }));
     } catch (error) {
-      console.error("❌ API: getClassLevels failed:", error);
       throw error;
     }
   }
@@ -119,9 +107,7 @@ class UserApiClient extends BaseApiClient {
   // Get all class arms
   async getClassArms(): Promise<any[]> {
     try {
-      console.log("📡 API: getClassArms called");
       const response = await this.get<{ data: ClassArmData[] }>("/classes/arms/get-all");
-      console.log("✅ API: getClassArms success", response);
       // BaseApiClient already extracts the data, so response is the actual data object
       const arms = Array.isArray(response.data) ? response.data : [];
       
@@ -131,7 +117,6 @@ class UserApiClient extends BaseApiClient {
         name: arm.armName
       }));
     } catch (error) {
-      console.error("❌ API: getClassArms failed:", error);
       throw error;
     }
   }
@@ -139,12 +124,9 @@ class UserApiClient extends BaseApiClient {
   // Get all users list
   async getAllUsers(): Promise<UserListItem[]> {
     try {
-      console.log("📡 API: getAllUsers called");
       const response = await this.get<{ data: { users: UserListItem[] } }>("/admin/all-users-list");
-      console.log("✅ API: getAllUsers success", response);
       return response.data.users || [];
     } catch (error) {
-      console.error("❌ API: getAllUsers failed:", error);
       throw error;
     }
   }
@@ -152,12 +134,9 @@ class UserApiClient extends BaseApiClient {
   // Get user by ID
   async getUserById(userId: string): Promise<DetailedUser> {
     try {
-      console.log("📡 API: getUserById called", userId);
       const response = await this.get<{ data: { user: DetailedUser } }>(`/admin/user-by-id/${userId}`);
-      console.log("✅ API: getUserById success", response);
       return response.data.user;
     } catch (error) {
-      console.error("❌ API: getUserById failed:", error);
       throw error;
     }
   }
@@ -165,12 +144,9 @@ class UserApiClient extends BaseApiClient {
   // Update student
   async updateStudent(studentId: string, data: any): Promise<{ message: string }> {
     try {
-      console.log("📡 API: updateStudent called", studentId, data);
       const response = await this.put<{ message: string }>(`/admin/update-student/${studentId}`, data);
-      console.log("✅ API: updateStudent success", response);
       return response;
     } catch (error) {
-      console.error("❌ API: updateStudent failed:", error);
       throw error;
     }
   }
@@ -178,12 +154,9 @@ class UserApiClient extends BaseApiClient {
   // Update teacher
   async updateTeacher(teacherId: string, data: any): Promise<{ message: string }> {
     try {
-      console.log("📡 API: updateTeacher called", teacherId, data);
       const response = await this.put<{ message: string }>(`/admin/update-teacher/${teacherId}`, data);
-      console.log("✅ API: updateTeacher success", response);
       return response;
     } catch (error) {
-      console.error("❌ API: updateTeacher failed:", error);
       throw error;
     }
   }
@@ -191,12 +164,9 @@ class UserApiClient extends BaseApiClient {
   // Update parent
   async updateParent(parentId: string, data: any): Promise<{ message: string }> {
     try {
-      console.log("📡 API: updateParent called", parentId, data);
       const response = await this.put<{ message: string }>(`/admin/update-parent/${parentId}`, data);
-      console.log("✅ API: updateParent success", response);
       return response;
     } catch (error) {
-      console.error("❌ API: updateParent failed:", error);
       throw error;
     }
   }
@@ -215,7 +185,6 @@ class UserApiClient extends BaseApiClient {
           throw new Error(`Update not supported for role: ${role}`);
       }
     } catch (error) {
-      console.error("❌ API: updateUser failed:", error);
       throw error;
     }
   }

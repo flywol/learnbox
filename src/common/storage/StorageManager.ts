@@ -107,7 +107,6 @@ export class StorageManager {
    * Clear all application data (complete logout)
    */
   clearAllAppData(keepRememberMe: boolean = true): void {
-    console.log('🧹 StorageManager: Clearing all app data...');
     
     // Clear all registered keys
     Object.values(this.storageKeys).forEach(key => {
@@ -124,7 +123,6 @@ export class StorageManager {
       localStorage.setItem(this.rememberMeKey, 'true');
     }
 
-    console.log('✅ StorageManager: All app data cleared');
   }
 
   /**
@@ -144,7 +142,6 @@ export class StorageManager {
    * Migrate existing data to new storage strategy
    */
   migrateExistingData(): void {
-    console.log('🔄 StorageManager: Starting data migration...');
     
     const rememberMe = this.isRememberMe();
     const targetStorage = rememberMe ? localStorage : sessionStorage;
@@ -159,7 +156,6 @@ export class StorageManager {
       }
     });
 
-    console.log('✅ StorageManager: Data migration completed');
   }
 
   /**
@@ -196,23 +192,6 @@ export class StorageManager {
    * Debug: Log current storage state
    */
   debugStorageState(): void {
-    console.log('📊 Storage Debug Info:');
-    console.log('Remember Me:', this.isRememberMe());
-    console.log('Active Storage:', this.getStorage() === localStorage ? 'localStorage' : 'sessionStorage');
-    
-    console.log('\n📦 localStorage contents:');
-    Object.keys(localStorage).forEach(key => {
-      if (key.includes('learnbox') || key.includes('auth') || key.includes('token') || key.includes('school')) {
-        console.log(`  ${key}: ${localStorage.getItem(key)?.substring(0, 100)}...`);
-      }
-    });
-
-    console.log('\n📦 sessionStorage contents:');
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.includes('learnbox') || key.includes('auth') || key.includes('token') || key.includes('school')) {
-        console.log(`  ${key}: ${sessionStorage.getItem(key)?.substring(0, 100)}...`);
-      }
-    });
   }
 }
 

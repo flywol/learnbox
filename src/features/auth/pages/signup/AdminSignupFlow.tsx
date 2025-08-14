@@ -26,7 +26,6 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 		setSignupStep,
 		updateSignupData,
 		clearSignupData,
-		completeSignup,
 		setSchoolDomain,
 		setLoadingState,
 	} = useAuthStore();
@@ -74,6 +73,7 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 
 			try {
 				// Call the register endpoint with all collected data
+				// OTP is automatically sent by the backend after successful registration
 				await authApiClient.register({
 					email: info.email,
 					password: info.password,
@@ -84,10 +84,7 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 					schoolShortName: signupData.schoolShortName || "",
 				});
 
-				// Registration successful, now send OTP
-				await authApiClient.resendOtp(info.email);
-
-				// Move to OTP step
+				// Move to OTP step - OTP already sent automatically by backend
 				setSignupStep("otp");
 				setLoadingState("success");
 			} catch (error: any) {
@@ -111,10 +108,10 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 
 			await authApiClient.verifyOtp({
 				email: signupData.email,
-				otp,
+				otp
 			});
 
-			// Mark OTP as verified
+			// Mark OTP as verified but DON'T authenticate user yet
 			updateSignupData({ otpVerified: true });
 
 			// Set the school domain for future login
@@ -122,10 +119,16 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 				setSchoolDomain(signupData.learnboxUrl);
 			}
 
-			// Complete signup and show success
-			completeSignup();
+			// Clear signup data and redirect to login
+			clearSignupData();
+			navigate("/login", { 
+				state: { 
+					message: "Account verified successfully! Please login to continue.",
+					email: signupData.email 
+				}
+			});
 		},
-		[signupData, updateSignupData, setSchoolDomain, completeSignup]
+		[signupData, updateSignupData, setSchoolDomain, clearSignupData, navigate]
 	);
 
 	// OTP resend callback
@@ -136,13 +139,13 @@ export default function SignupFlow({ onComplete }: SignupFlowProps) {
 		await authApiClient.resendOtp(signupData.email);
 	}, [signupData?.email]);
 
-	// OTP error callback
+	// OTP error callback - stay on OTP page, don't redirect
 	const handleOtpError = useCallback(
-		(error: string) => {
-			updateSignupData({ error });
-			setSignupStep("error");
+		() => {
+			// Just log the error, OTP component will handle displaying it
+			// Don't redirect to error page - stay on OTP input page
 		},
-		[updateSignupData, setSignupStep]
+		[]
 	);
 
 	const handleComplete = useCallback(() => {

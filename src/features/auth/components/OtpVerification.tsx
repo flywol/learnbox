@@ -22,6 +22,8 @@ interface OtpVerificationProps {
 	onVerify: (otp: string) => Promise<void>;
 	onResend: () => Promise<void>;
 	onError: (error: string) => void;
+	message?: string;
+	initialError?: string;
 }
 
 export default function OtpVerification({
@@ -29,12 +31,14 @@ export default function OtpVerification({
 	onVerify,
 	onResend,
 	onError,
+	message,
+	initialError,
 }: OtpVerificationProps) {
 	const otpRef = useRef<OtpInputHandle>(null);
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 	const [resendCooldown, setResendCooldown] = useState(0);
-	const [apiError, setApiError] = useState<string | null>(null);
+	const [apiError, setApiError] = useState<string | null>(initialError || null);
 
 	const {
 		setValue,
@@ -67,9 +71,9 @@ export default function OtpVerification({
 	// Memoized handlers
 	const handleOtpChange = useCallback(
 		(otp: string) => {
-			setValue("otp", otp, { shouldValidate: true });
-			// Clear API error when user starts typing
-			if (apiError) {
+			setValue("otp", otp);
+			// Only clear API error when user is actually typing (not when input is cleared programmatically)
+			if (apiError && otp.length > 0) {
 				setApiError(null);
 			}
 		},
@@ -87,18 +91,18 @@ export default function OtpVerification({
 				const errorMessage =
 					error.response?.data?.message ||
 					error.message ||
-					"Invalid or expired verification code";
+					"Invalid OTP. Please check and enter the correct code.";
 
-				// Clear OTP input on error
+				// Display the error in the UI FIRST
+				setApiError(errorMessage);
+
+				// Clear OTP input on error (do this after setting error)
 				otpRef.current?.clear();
 
 				// If OTP is expired or invalid, allow immediate resend
 				if (errorMessage.toLowerCase().includes("expired")) {
 					setResendCooldown(0);
 				}
-
-				// Display the error in the UI
-				setApiError(errorMessage);
 
 				// Notify parent of error
 				onError(errorMessage);
@@ -171,6 +175,14 @@ export default function OtpVerification({
 				</div>
 
 				<h2 className="text-2xl font-bold mb-2">Verify OTP</h2>
+				
+				{/* Success message */}
+				{message && (
+					<div className="mb-4 p-3 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
+						<p className="text-green-700 text-sm font-medium">{message}</p>
+					</div>
+				)}
+				
 				<p className="text-gray-700 text-sm mb-1">
 					A verification code has been sent to{" "}
 					<span className="font-medium">{email}</span>.
@@ -191,7 +203,7 @@ export default function OtpVerification({
 
 					{(errors.otp || apiError) && (
 						<p className="text-sm text-red-500 mb-3">
-							{errors.otp?.message || apiError}
+							{apiError || errors.otp?.message}
 						</p>
 					)}
 

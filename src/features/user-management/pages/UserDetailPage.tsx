@@ -35,7 +35,6 @@ export default function UserDetailPage() {
 
   const handleDeleteConfirm = () => {
     // TODO: Implement delete functionality when API is ready
-    console.log("Delete user:", currentUser?.id);
     setShowDeleteModal(false);
   };
 

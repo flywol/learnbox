@@ -6,7 +6,6 @@ export default function BroadsheetTab() {
   const [selectedClass, setSelectedClass] = useState('JSS 2');
   
   const handleExport = () => {
-    console.log('Exporting broadsheet data...');
     // Mock export functionality
   };
 

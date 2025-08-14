@@ -13,6 +13,7 @@ export const profileKeys = {
   school: () => [...profileKeys.all, 'school'] as const,
   sessions: () => [...profileKeys.all, 'sessions'] as const,
   classLevels: () => [...profileKeys.all, 'classLevels'] as const,
+  classLevelsAndArms: () => [...profileKeys.all, 'classLevelsAndArms'] as const,
 }
 
 // Hook to fetch admin profile
@@ -50,6 +51,16 @@ export function useClassLevels() {
   return useQuery({
     queryKey: profileKeys.classLevels(),
     queryFn: () => profileApiClient.getClassLevels(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  })
+}
+
+// Hook to fetch class levels and arms
+export function useClassLevelsAndArms() {
+  return useQuery({
+    queryKey: profileKeys.classLevelsAndArms(),
+    queryFn: () => profileApiClient.getClassLevelsAndArms(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   })
