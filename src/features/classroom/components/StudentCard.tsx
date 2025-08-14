@@ -23,6 +23,6 @@ export default function StudentCard({ student, onClick }: StudentCardProps) {
           <p className="text-sm text-gray-500">Admission No.</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
