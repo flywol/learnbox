@@ -36,6 +36,8 @@ import EditSchoolInfoPage from "./features/profile/pages/EditSchoolInfoPage";
 import SessionConfigPage from "./features/profile/pages/SessionConfigPage";
 import SchoolPaymentsPage from "./features/payments/pages/SchoolPaymentsPage";
 import ClassPaymentDetailPage from "./features/payments/pages/ClassPaymentDetailPage";
+import ClassroomOverviewPage from "./features/classroom/pages/ClassroomOverviewPage";
+import ClassDetailPage from "./features/classroom/pages/ClassDetailPage";
 
 const UnauthorizedPage = () => (
 	<div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -301,13 +303,14 @@ export default function App() {
 							path="complete-school-setup"
 							element={<CompleteSetupPage />}
 						/>
-						{/* Add more dashboard routes here as needed */}
-						{/* 
-							<Route path="students" element={<StudentsPage />} />
-							<Route path="teachers" element={<TeachersPage />} />
-							<Route path="classes" element={<ClassesPage />} />
-							<Route path="settings" element={<SettingsPage />} />
-							*/}
+						<Route
+							path="classroom"
+							element={<ClassroomOverviewPage />}
+						/>
+						<Route
+							path="classroom/:classId"
+							element={<ClassDetailPage />}
+						/>
 					</Route>
 
 					{/* Error Routes */}
