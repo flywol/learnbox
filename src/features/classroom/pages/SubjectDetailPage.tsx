@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { TabType, Lesson } from '../types/classroom.types';
 import AssignmentTab from '../components/assignments/AssignmentTab';
 import QuizTab from '../components/quizzes/QuizTab';
+import AssessmentTab from '../components/AssessmentTab';
 import LessonContentView from '../components/subject-detail/LessonContentView';
 import SubjectHeader from '../components/subject-detail/SubjectHeader';
 import SubjectTabs from '../components/subject-detail/SubjectTabs';
@@ -77,10 +78,10 @@ export default function SubjectDetailPage() {
         )}
 
         {activeTab === 'assessment' && (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-semibold mb-2">Assessment</h3>
-            <p className="text-gray-600">Assessment content will be displayed here</p>
-          </div>
+          <AssessmentTab 
+            students={mockData.assessmentStudents}
+            summary={mockData.assessmentSummary}
+          />
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Assignment, Quiz, Lesson, ContentItem, LiveClass } from '../types/classroom.types';
+import { Assignment, Quiz, Lesson, ContentItem, LiveClass, AssessmentStudent, AssessmentSummary } from '../types/classroom.types';
 
 export const mockData = {
   subjectData: {
@@ -60,4 +60,30 @@ export const mockData = {
     { id: '4', title: 'Next Live Class', subject: 'Physics - Cancelled', status: 'cancelled' },
     { id: '5', title: 'Next Live Class', subject: 'Physics - Finished', status: 'finished' },
   ] as LiveClass[],
+
+  assessmentSummary: {
+    attendance: 12,
+    assignments: 10,
+    quizzes: 10,
+    caTest: 20,
+    exam: 60,
+    total: 100,
+    grades: 'A, B, C, D, E, F'
+  } as AssessmentSummary,
+
+  assessmentStudents: [
+    { id: '1', name: 'Jane Doe', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b134?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+    { id: '2', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'B' },
+    { id: '3', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '4', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'C' },
+    { id: '5', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+    { id: '6', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '7', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+    { id: '8', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '9', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '10', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '11', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+    { id: '12', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=40&h=40&fit=crop&crop=face', attendance: 50, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'B' },
+    { id: '13', name: 'James Doe', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face', attendance: null, assignment: null, quiz: null, caTest: null, exam: null, total: null, grade: '--' },
+  ] as AssessmentStudent[],
 };

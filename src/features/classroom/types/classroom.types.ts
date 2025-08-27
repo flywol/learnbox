@@ -90,6 +90,29 @@ export interface Student {
   grade: string;
 }
 
+export interface AssessmentStudent {
+  id: string;
+  name: string;
+  avatar: string;
+  attendance: number | null;
+  assignment: number | null;
+  quiz: number | null;
+  caTest: number | null;
+  exam: number | null;
+  total: number | null;
+  grade: string;
+}
+
+export interface AssessmentSummary {
+  attendance: number;
+  assignments: number;
+  quizzes: number;
+  caTest: number;
+  exam: number;
+  total: number;
+  grades: string;
+}
+
 export interface StudentSubmission {
   id: string;
   name: string;
