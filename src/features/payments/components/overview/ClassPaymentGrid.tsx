@@ -17,8 +17,6 @@ interface ClassPaymentGridProps {
 export default function ClassPaymentGrid({ paymentData, formatCurrency }: ClassPaymentGridProps) {
   const navigate = useNavigate();
 
-  const COLORS = ['#f97316', '#e5e7eb']; // Orange for paid, gray for pending
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paymentData.map((classData) => {
