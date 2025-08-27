@@ -1,328 +1,48 @@
-// src/App.tsx - Updated with HashRouter and Device Restriction
 import { Routes, Route } from "react-router-dom";
+import { Suspense } from "react";
 import { HydrationGate } from "./components/HydrationGate";
-
-// Security Components
 import { SecurityWrapper } from "./common/security/SecurityWrapper";
-import { DeviceRestrictedPage } from "./common/security/DeviceRestrictedPage";
-
-// Layout
-
-// Guards
-import { AuthGuard } from "./features/auth/components/guards/AuthGuard";
-import { FlowGuard } from "./features/auth/components/guards/FlowGuard";
 import { ProtectedRoute } from "./features/auth/components/guards/FirstTimeLoginGuard";
-
-// Pages
-import RoleSelectionPage from "./features/auth/pages/RoleSelectionPage";
-import SchoolSetupPage from "./features/auth/pages/SchoolSetupPage";
-import SignupFlow from "./features/auth/pages/signup/AdminSignupFlow";
-import LoginPage from "./features/auth/pages/login/LoginPage";
-import OnboardingPage from "./features/auth/pages/onboarding/OnboardingPage";
-import ForgotPasswordPage from "./features/auth/pages/password/ForgotPassword";
-import ResetPasswordPage from "./features/auth/pages/password/ResetPassword";
-import EmailVerificationPage from "./features/auth/pages/login/EmailVerificationPage";
-import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
-import CompleteSetupPage from "./features/dashboard/school-setup/pages/CompleteSetupPage";
 import DashboardLayout from "./common/layout/DashboardLayout";
-import NotificationsPage from "./features/notifications/pages/NotificationsPage";
-import CreateUserPage from "./features/user-management/pages/CreateUserPage";
-import UserListPage from "./features/user-management/pages/UserListPage";
-import UserDetailPage from "./features/user-management/pages/UserDetailPage";
-import EditUserPage from "./features/user-management/pages/EditUserPage";
-import AdminProfilePage from "./features/profile/pages/AdminProfilePage";
-import EditPersonalInfoPage from "./features/profile/pages/EditPersonalInfoPage";
-import EditSchoolInfoPage from "./features/profile/pages/EditSchoolInfoPage";
-import SessionConfigPage from "./features/profile/pages/SessionConfigPage";
-import SchoolPaymentsPage from "./features/payments/pages/SchoolPaymentsPage";
-import ClassPaymentDetailPage from "./features/payments/pages/ClassPaymentDetailPage";
-import ClassroomOverviewPage from "./features/classroom/pages/ClassroomOverviewPage";
-import ClassDetailPage from "./features/classroom/pages/ClassDetailPage";
 
-const UnauthorizedPage = () => (
-	<div className="flex min-h-screen items-center justify-center bg-gray-50">
-		<div className="text-center">
-			<h1 className="text-3xl font-bold text-gray-900 mb-2">Unauthorized</h1>
-			<p className="text-gray-600 mb-4">
-				You don't have permission to access this page.
-			</p>
-			<a
-				href="#/"
-				className="text-orange-500 hover:underline">
-				Go back to home
-			</a>
-		</div>
-	</div>
-);
+// Route components
+import { PublicRoutes } from "./routes/PublicRoutes";
+import { DashboardRoutes } from "./routes/DashboardRoutes";
+import { ClassroomRoutes } from "./routes/ClassroomRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
+import { ProfileRoutes } from "./routes/ProfileRoutes";
+import { PaymentRoutes } from "./routes/PaymentRoutes";
 
-const NotFoundPage = () => (
-	<div className="flex min-h-screen items-center justify-center bg-gray-50">
-		<div className="text-center">
-			<h1 className="text-3xl font-bold text-gray-900 mb-2">
-				404: Page Not Found
-			</h1>
-			<p className="text-gray-600 mb-4">
-				The page you're looking for doesn't exist.
-			</p>
-			<a
-				href="#/dashboard"
-				className="text-orange-500 hover:underline">
-				Go back to dashboard
-			</a>
-		</div>
-	</div>
-);
+// Error and loading components
+import { UnauthorizedPage, NotFoundPage, LoadingSpinner } from "./components/ErrorPages";
 
 export default function App() {
+  return (
+    <SecurityWrapper>
+      <HydrationGate>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {PublicRoutes()}
+            {DashboardRoutes()}
+            
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              {ClassroomRoutes()}
+              {UserRoutes()}
+              {ProfileRoutes()}
+              {PaymentRoutes()}
+            </Route>
 
-	return (
-		<SecurityWrapper>
-			<HydrationGate>
-				<Routes>
-					{/* Device Restriction Route */}
-					<Route
-						path="/device-restricted"
-						element={<DeviceRestrictedPage />}
-					/>
-
-					{/* Public Routes - Guest Only */}
-					<Route
-						path="/"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<RoleSelectionPage />
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/school-setup"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard requiresRole>
-									<SchoolSetupPage />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/signup"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard
-									requiresRole
-									allowedRoles={["ADMIN"]}>
-									<SignupFlow />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/login"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<FlowGuard
-									requiresRole
-									requiresSchool>
-									<LoginPage />
-								</FlowGuard>
-							</AuthGuard>
-						}
-					/>
-
-					<Route
-						path="/forgot-password"
-						element={
-							<AuthGuard requiresAuth={false}>
-								<ForgotPasswordPage />
-							</AuthGuard>
-						}
-					/>
-
-					{/* Special Routes - Can be accessed by authenticated or unauthenticated */}
-					<Route
-						path="/verify-email"
-						element={<EmailVerificationPage />}
-					/>
-
-					<Route
-						path="/reset-password"
-						element={<ResetPasswordPage />}
-					/>
-
-					{/* Protected Routes - Authentication Required */}
-					<Route
-						path="/onboarding"
-						element={
-							<ProtectedRoute>
-								<OnboardingPage />
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/notifications"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<NotificationsPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/user-management"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<UserListPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/user-management/create"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<CreateUserPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/user-management/:id"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<UserDetailPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/user-management/:id/edit"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<EditUserPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					{/* Profile Routes */}
-					<Route
-						path="/profile"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<AdminProfilePage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/profile/edit-personal"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<EditPersonalInfoPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/profile/edit-school"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<EditSchoolInfoPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/profile/session-config"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<SessionConfigPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					{/* Payments Routes */}
-					<Route
-						path="/payments"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<SchoolPaymentsPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					<Route
-						path="/payments/:classId"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout>
-									<ClassPaymentDetailPage />
-								</DashboardLayout>
-							</ProtectedRoute>
-						}
-					/>
-
-					{/* Dashboard Routes - Wrapped with DashboardLayout */}
-					<Route
-						path="/dashboard"
-						element={
-							<ProtectedRoute>
-								<DashboardLayout />
-							</ProtectedRoute>
-						}>
-						{/* Nested dashboard routes */}
-						<Route
-							index
-							element={<AdminDashboard />}
-						/>
-						<Route
-							path="complete-school-setup"
-							element={<CompleteSetupPage />}
-						/>
-						<Route
-							path="classroom"
-							element={<ClassroomOverviewPage />}
-						/>
-						<Route
-							path="classroom/:classId"
-							element={<ClassDetailPage />}
-						/>
-					</Route>
-
-					{/* Error Routes */}
-					<Route
-						path="/unauthorized"
-						element={<UnauthorizedPage />}
-					/>
-					<Route
-						path="*"
-						element={<NotFoundPage />}
-					/>
-				</Routes>
-			</HydrationGate>
-		</SecurityWrapper>
-	);
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </HydrationGate>
+    </SecurityWrapper>
+  );
 }

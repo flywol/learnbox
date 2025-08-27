@@ -22,7 +22,7 @@ interface AuthState {
 	hasSeenOnboarding: boolean;
 	loginContext: LoginContext;
 
-	// Password reset state
+	// Password reset state (temporary, not persisted)
 	passwordResetEmail: string | null;
 	passwordResetStep: "email" | "otp" | "newPassword" | null;
 
@@ -47,9 +47,15 @@ interface AuthState {
 	resetFlow: () => void;
 	setLoginContext: (context: Partial<LoginContext>) => void;
 	setFirstTimeLogin: (isFirstTime: boolean, resetToken?: string) => void;
-	setPasswordResetEmail: (email: string) => void;
+	
+	// Flow state management
+	clearAllFlowStates: () => void;
+	
+	// Password reset actions
+	setPasswordResetEmail: (email: string | null) => void;
 	setPasswordResetStep: (step: "email" | "otp" | "newPassword" | null) => void;
 	completePasswordReset: () => void;
+	
 	setSignupStep: (step: SignupStep) => void;
 	updateSignupData: (data: Partial<SignupData>) => void;
 	clearSignupData: () => void;
@@ -151,6 +157,14 @@ export const useAuthStore = create<AuthState>()(
 					// Throw the error so the calling component can handle it
 					throw error;
 				}
+			},
+
+			// Flow state management
+			clearAllFlowStates: () => {
+				set({
+					passwordResetEmail: null,
+					passwordResetStep: null,
+				});
 			},
 
 			// Core authentication
@@ -390,14 +404,19 @@ export const useAuthStore = create<AuthState>()(
 				schoolDomain: state.schoolDomain,
 				hasSeenOnboarding: state.hasSeenOnboarding,
 				loginContext: state.loginContext,
-				passwordResetEmail: state.passwordResetEmail,
-				passwordResetStep: state.passwordResetStep,
+				// Exclude password reset states from persistence - they should be temporary
+				// passwordResetEmail: NOT persisted - session only
+				// passwordResetStep: NOT persisted - session only
 				signupStep: state.signupStep,
 				signupData: state.signupData,
 				intendedDestination: state.intendedDestination,
 			}),
 			onRehydrateStorage: () => (state) => {
 				if (state) {
+					// Only clear flow states if they exist (avoid unnecessary updates)
+					if (state.passwordResetStep || state.passwordResetEmail) {
+						state.clearAllFlowStates();
+					}
 
 					// Mark as hydrated
 					state.setHasHydrated(true);

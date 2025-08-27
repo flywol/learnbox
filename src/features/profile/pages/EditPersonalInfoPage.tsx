@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,17 +30,32 @@ export default function EditPersonalInfoPage() {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors }
   } = useForm<PersonalInfoFormData>({
     resolver: zodResolver(personalInfoSchema),
-    values: {
-      fullName: adminProfile?.fullName || "",
-      email: adminProfile?.email || "",
-      phoneNumber: adminProfile?.phoneNumber || "",
-      gender: adminProfile?.gender || undefined,
-      position: adminProfile?.position || "",
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      gender: undefined,
+      position: "",
     }
   });
+
+  // Pre-fill form when admin profile data is loaded
+  // Use useEffect to avoid infinite loops
+  React.useEffect(() => {
+    if (adminProfile) {
+      reset({
+        fullName: adminProfile.fullName || "",
+        email: adminProfile.email || "",
+        phoneNumber: adminProfile.phoneNumber || "",
+        gender: adminProfile.gender || undefined,
+        position: adminProfile.position || "",
+      });
+    }
+  }, [adminProfile, reset]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

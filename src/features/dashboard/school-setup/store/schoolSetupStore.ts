@@ -75,9 +75,14 @@ interface SchoolSetupState {
 
 	// Class arms actions
 	updateClassArms: (classId: string, arms: string[]) => void;
+	updateClassArmsWithTemplate: (classId: string, arms: string[], applyToAll: boolean) => void;
 	addCustomArm: (classId: string, armName: string) => void;
+	addCustomArmToAllClasses: (armNames: string[]) => void;
 	removeCustomArm: (classId: string, armName: string) => void;
+	removeCustomArmWithTemplate: (classId: string, armName: string, applyToAll: boolean) => void;
 	deleteDefaultArm: (classId: string, armName: string) => void;
+	deleteDefaultArmWithTemplate: (classId: string, armName: string, applyToAll: boolean) => void;
+	deleteAllArmsForClass: (classId: string) => void;
 
 	// API state management
 	setSubmitting: (submitting: boolean) => void;
@@ -339,6 +344,199 @@ export const useSchoolSetupStore = create<SchoolSetupState>()(
 								],
 								hasUnsavedChanges: true,
 							};
+						}
+					}
+					return state;
+				}),
+
+			addCustomArmToAllClasses: (armNames) =>
+				set((state) => {
+					const newClassArms = state.classArms.map((classArm) => {
+						const existingCustomArms = classArm.customArms || [];
+						const existingArms = classArm.arms || [];
+						
+						// Filter out arms that already exist
+						const newArms = armNames.filter(armName => 
+							!existingCustomArms.includes(armName) && !existingArms.includes(armName)
+						);
+						
+						return {
+							...classArm,
+							customArms: [...existingCustomArms, ...newArms],
+							arms: [...existingArms, ...newArms], // Also add to selected arms
+						};
+					});
+
+					// Also create entries for classes that don't have class arms yet
+					const existingClassIds = state.classArms.map(ca => ca.classId);
+					const newClassArmEntries = state.selectedClassLevels
+						.filter(level => level.selected && !existingClassIds.includes(level.id))
+						.map(level => ({
+							classId: level.id,
+							className: level.name,
+							arms: [...armNames], // Select the new custom arms by default
+							customArms: [...armNames],
+							deletedDefaultArms: [],
+						}));
+
+					return { 
+						classArms: [...newClassArms, ...newClassArmEntries], 
+						hasUnsavedChanges: true 
+					};
+				}),
+
+			deleteAllArmsForClass: (classId) =>
+				set((state) => {
+					const classArmIndex = state.classArms.findIndex(
+						(ca) => ca.classId === classId
+					);
+					if (classArmIndex >= 0) {
+						const newClassArms = [...state.classArms];
+						newClassArms[classArmIndex] = {
+							...newClassArms[classArmIndex],
+							arms: [], // Clear all selected arms
+							customArms: [], // Clear all custom arms
+							deletedDefaultArms: [], // Reset deleted defaults so they appear again
+						};
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					}
+					return state;
+				}),
+
+			updateClassArmsWithTemplate: (classId, arms, applyToAll) =>
+				set((state) => {
+					if (applyToAll) {
+						// Apply to all selected classes
+						const newClassArms = [...state.classArms];
+						const selectedClassIds = state.selectedClassLevels
+							.filter(level => level.selected)
+							.map(level => level.id);
+
+						selectedClassIds.forEach((targetClassId) => {
+							const classArmIndex = newClassArms.findIndex(ca => ca.classId === targetClassId);
+							if (classArmIndex >= 0) {
+								newClassArms[classArmIndex] = {
+									...newClassArms[classArmIndex],
+									arms: [...arms],
+								};
+							} else {
+								// Create new entry if it doesn't exist
+								const classLevel = state.selectedClassLevels.find(cl => cl.id === targetClassId);
+								if (classLevel) {
+									newClassArms.push({
+										classId: targetClassId,
+										className: classLevel.name,
+										arms: [...arms],
+										customArms: [],
+										deletedDefaultArms: [],
+									});
+								}
+							}
+						});
+
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					} else {
+						// Apply to single class only
+						const classArmIndex = state.classArms.findIndex(ca => ca.classId === classId);
+						if (classArmIndex >= 0) {
+							const newClassArms = [...state.classArms];
+							newClassArms[classArmIndex] = {
+								...newClassArms[classArmIndex],
+								arms: [...arms],
+							};
+							return { classArms: newClassArms, hasUnsavedChanges: true };
+						}
+					}
+					return state;
+				}),
+
+			removeCustomArmWithTemplate: (classId, armName, applyToAll) =>
+				set((state) => {
+					if (applyToAll) {
+						// Apply to all selected classes
+						const newClassArms = state.classArms.map((classArm) => {
+							const customArms = classArm.customArms || [];
+							const arms = classArm.arms || [];
+							
+							if (customArms.includes(armName)) {
+								return {
+									...classArm,
+									customArms: customArms.filter((arm) => arm !== armName),
+									arms: arms.filter((arm) => arm !== armName),
+								};
+							}
+							return classArm;
+						});
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					} else {
+						// Apply to single class only
+						const classArmIndex = state.classArms.findIndex(ca => ca.classId === classId);
+						if (classArmIndex >= 0) {
+							const newClassArms = [...state.classArms];
+							const customArms = newClassArms[classArmIndex].customArms || [];
+							const arms = newClassArms[classArmIndex].arms || [];
+							
+							newClassArms[classArmIndex] = {
+								...newClassArms[classArmIndex],
+								customArms: customArms.filter((arm) => arm !== armName),
+								arms: arms.filter((arm) => arm !== armName),
+							};
+							return { classArms: newClassArms, hasUnsavedChanges: true };
+						}
+					}
+					return state;
+				}),
+
+			deleteDefaultArmWithTemplate: (classId, armName, applyToAll) =>
+				set((state) => {
+					if (applyToAll) {
+						// Apply to all selected classes
+						const newClassArms = [...state.classArms];
+						const selectedClassIds = state.selectedClassLevels
+							.filter(level => level.selected)
+							.map(level => level.id);
+
+						selectedClassIds.forEach((targetClassId) => {
+							const classArmIndex = newClassArms.findIndex(ca => ca.classId === targetClassId);
+							if (classArmIndex >= 0) {
+								const deletedDefaultArms = newClassArms[classArmIndex].deletedDefaultArms || [];
+								const arms = newClassArms[classArmIndex].arms || [];
+								
+								newClassArms[classArmIndex] = {
+									...newClassArms[classArmIndex],
+									deletedDefaultArms: [...deletedDefaultArms, armName],
+									arms: arms.filter((arm) => arm !== armName),
+								};
+							} else {
+								// Create new entry if it doesn't exist
+								const classLevel = state.selectedClassLevels.find(cl => cl.id === targetClassId);
+								if (classLevel) {
+									newClassArms.push({
+										classId: targetClassId,
+										className: classLevel.name,
+										arms: [],
+										customArms: [],
+										deletedDefaultArms: [armName],
+									});
+								}
+							}
+						});
+
+						return { classArms: newClassArms, hasUnsavedChanges: true };
+					} else {
+						// Apply to single class only (existing logic)
+						const classArmIndex = state.classArms.findIndex(ca => ca.classId === classId);
+						if (classArmIndex >= 0) {
+							const newClassArms = [...state.classArms];
+							const deletedDefaultArms = newClassArms[classArmIndex].deletedDefaultArms || [];
+							const arms = newClassArms[classArmIndex].arms || [];
+							
+							newClassArms[classArmIndex] = {
+								...newClassArms[classArmIndex],
+								deletedDefaultArms: [...deletedDefaultArms, armName],
+								arms: arms.filter((arm) => arm !== armName),
+							};
+							return { classArms: newClassArms, hasUnsavedChanges: true };
 						}
 					}
 					return state;

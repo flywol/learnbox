@@ -27,10 +27,11 @@ type SchoolSetupFormValues = z.infer<typeof schoolSetupSchema>;
 
 const SchoolSetupPage = () => {
 	const navigate = useNavigate();
-	const { selectedRole, setSchoolDomain, verifySchoolDomain } = useAuthStore();
+	const { selectedRole, setSchoolDomain, verifySchoolDomain, clearAllFlowStates, clearSignupData, setSignupStep } = useAuthStore();
 	const [isValidating, setIsValidating] = useState(false);
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [showSignupFlow, setShowSignupFlow] = useState(false);
+
 
 	const {
 		register,
@@ -151,6 +152,11 @@ const SchoolSetupPage = () => {
 						<button
 							type="button"
 							onClick={() => {
+								// Clear state immediately - this should be safe since we're in an event handler
+								clearAllFlowStates();
+								clearSignupData();
+								setSignupStep(null);
+								
 								// Set the domain they entered and go to signup
 								const currentUrl = getValues("schoolUrl");
 								if (currentUrl) {

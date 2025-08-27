@@ -23,6 +23,8 @@ export function useAdminProfile() {
     queryFn: () => profileApiClient.getAdminProfile(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 3, // Only retry 3 times instead of infinite
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 

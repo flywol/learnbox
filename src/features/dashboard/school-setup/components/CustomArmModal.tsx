@@ -13,7 +13,6 @@ export default function CustomArmModal({
 	isOpen,
 	onClose,
 	onSubmit,
-	className,
 }: CustomArmModalProps) {
 	const [arms, setArms] = useState([
 		{ id: 1, name: "" },
@@ -74,7 +73,7 @@ export default function CustomArmModal({
 				</div>
 
 				<p className="text-sm text-gray-600 mb-6">
-					Add custom arm names for {className}
+					Add custom arm names (will be applied to all classes)
 				</p>
 
 				<div className="space-y-3 mb-6">

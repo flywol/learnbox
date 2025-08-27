@@ -1,7 +1,5 @@
-// Simple sidebar logout - no overkill!
-
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
 	Home,
 	BookOpen,
@@ -13,6 +11,7 @@ import {
 } from "lucide-react";
 import { authApiClient } from "@/features/auth/api/authApiClient";
 
+// Menu config — root-level paths only
 const menuItems = [
 	{
 		label: "Overview hub",
@@ -20,52 +19,64 @@ const menuItems = [
 		path: "/dashboard",
 		color: "text-orange-500",
 	},
-	{ label: "Classroom", icon: BookOpen, path: "/dashboard/classroom" },
+	{ label: "Classroom", icon: BookOpen, path: "/classroom" },
 	{ label: "Users", icon: Users, path: "/user-management" },
 	{ label: "School payments", icon: CreditCard, path: "/payments" },
-	{ label: "LearnBox library", icon: Library, path: "/dashboard/library" },
+	{ label: "LearnBox library", icon: Library, path: "/library" },
 	{ label: "Profile", icon: User, path: "/profile" },
 ];
 
 export default function Sidebar() {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const location = useLocation();
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;
-
 		setIsLoggingOut(true);
-
-		// Just call the API client logout - it handles everything
 		await authApiClient.logout();
+	};
+
+	// Active check — exact or starts with path + "/"
+	const isMenuActive = (itemPath: string) => {
+		return (
+			location.pathname === itemPath ||
+			location.pathname.startsWith(itemPath + "/")
+		);
 	};
 
 	return (
 		<aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+			{/* Logo */}
 			<div className="p-6">
 				<h1 className="text-2xl font-bold">
 					Learn<span className="text-orange-500">Box</span>
 				</h1>
 			</div>
+
+			{/* Menu */}
 			<nav className="flex-1 p-4">
 				<ul className="space-y-2">
-					{menuItems.map((item) => (
-						<li key={item.path}>
-							<NavLink
-								to={item.path}
-								className={({ isActive }) =>
-									`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-										isActive
+					{menuItems.map((item) => {
+						const active = isMenuActive(item.path);
+						return (
+							<li key={item.path}>
+								<NavLink
+									to={item.path}
+									className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+										active
 											? "bg-orange-50 text-orange-500"
 											: "text-gray-700 hover:bg-gray-50"
-									}`
-								}>
-								<item.icon className="w-5 h-5" />
-								<span>{item.label}</span>
-							</NavLink>
-						</li>
-					))}
+									}`}>
+									<item.icon className="w-5 h-5" />
+									<span>{item.label}</span>
+								</NavLink>
+							</li>
+						);
+					})}
 				</ul>
 			</nav>
+
+			{/* Logout */}
 			<div className="p-4 border-t border-gray-200">
 				<button
 					onClick={handleLogout}

@@ -46,3 +46,75 @@ export interface BroadsheetData {
 }
 
 export type ClassroomTab = 'class' | 'schedule' | 'broadsheet';
+
+// Legacy types from global classroom types - consolidated here
+export interface Subject {
+  id: string;
+  name: string;
+  duration: string;
+  color: string;
+  icon?: string;
+}
+
+export interface Lesson {
+  id: string;
+  number: number;
+  title: string;
+  lessonNumber: string;
+}
+
+export interface Assignment {
+  id: string;
+  title: string;
+  dueDate: string;
+  status: 'active' | 'overdue' | 'expired';
+}
+
+export interface Quiz {
+  id: string;
+  title: string;
+  dueDate: string;
+  status: 'active' | 'expired';
+}
+
+export interface Student {
+  id: string;
+  name: string;
+  avatar: string;
+  attendance?: number;
+  assignment?: number;
+  quiz?: number;
+  caTest?: number;
+  exam?: number;
+  total?: number;
+  grade: string;
+}
+
+export interface StudentSubmission {
+  id: string;
+  name: string;
+  avatar: string;
+  submissionStatus: 'Submitted' | 'Late' | 'No submitted';
+  submissionTime: string;
+  gradeStatus: 'Graded' | 'Not graded' | '--';
+  gradePercent: number | null;
+}
+
+export interface LiveClass {
+  id: string;
+  title: string;
+  subject: string;
+  status: 'now' | 'upcoming' | 'finished' | 'cancelled';
+  time?: string;
+  dueDate?: string;
+}
+
+export interface ContentItem {
+  id: string;
+  title: string;
+  description: string;
+  type: 'video' | 'document' | 'quiz' | 'assignment';
+  icon: string;
+}
+
+export type TabType = 'lessons' | 'live-class' | 'quiz' | 'assignment' | 'assessment';

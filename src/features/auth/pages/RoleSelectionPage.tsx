@@ -26,7 +26,7 @@ const availableRoles: Role[] = ["STUDENT", "PARENT", "TEACHER", "ADMIN"];
 
 const RoleSelectionPage = () => {
 	const [selectedRole, setSelectedRoleLocal] = useState<Role | null>(null);
-	const setRole = useAuthStore((state) => state.setRole);
+	const { setRole } = useAuthStore();
 	const navigate = useNavigate();
 
 	const handleSelectRole = (role: Role) => {
