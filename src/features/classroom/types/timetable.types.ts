@@ -20,7 +20,46 @@ export interface CreateTimetableResponse {
   data: TimetableData;
 }
 
-export interface GetTimetableResponse {
+// Actual API response structure (returns array)
+export interface ActualTimeSlot {
+  day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday';
+  startTime: string; // Format: "HH:mm" (24-hour)
+  endTime: string; // Format: "HH:mm" (24-hour)
+  _id: string;
+}
+
+export interface ActualSubjectSchedule {
+  subjectName: string;
+  schedule: ActualTimeSlot[];
+  _id: string;
+}
+
+export interface ActualTimetableData {
+  _id: string;
+  subjectSchedules: ActualSubjectSchedule[];
+  class: {
+    _id: string;
+    levelName: string;
+    class: string;
+    school: string;
+    arms: Array<{
+      id: string;
+      armName: string;
+      _id: string;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+  };
+  school: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+// API returns array of timetables
+export type GetTimetableResponse = ActualTimetableData[];
+
+export interface GetTimetableResponseLegacy {
   message: string;
   data: {
     timetable: TimetableData | null;

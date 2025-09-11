@@ -103,6 +103,14 @@ export default function AddTimetableForm({ classId, onCancel, onSubmit }: AddTim
         if (slot.startTime && slot.endTime && slot.startTime >= slot.endTime) {
           errors.push(`Subject ${subjectIndex + 1}, Time slot ${slotIndex + 1}: End time must be after start time`);
         }
+        
+        // Validate school hours (8:00 AM to 3:00 PM)
+        if (slot.startTime && (slot.startTime < '08:00' || slot.startTime > '15:00')) {
+          errors.push(`Subject ${subjectIndex + 1}, Time slot ${slotIndex + 1}: Start time must be between 8:00 AM and 3:00 PM`);
+        }
+        if (slot.endTime && (slot.endTime < '08:00' || slot.endTime > '15:00')) {
+          errors.push(`Subject ${subjectIndex + 1}, Time slot ${slotIndex + 1}: End time must be between 8:00 AM and 3:00 PM`);
+        }
       });
     });
     
@@ -273,6 +281,8 @@ export default function AddTimetableForm({ classId, onCancel, onSubmit }: AddTim
                       <input
                         {...register(`subjects.${subjectIndex}.timeSlots.${timeSlotIndex}.startTime`)}
                         type="time"
+                        min="08:00"
+                        max="15:00"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg pr-8 text-sm"
                         disabled={isSubmitting}
                       />
@@ -284,6 +294,8 @@ export default function AddTimetableForm({ classId, onCancel, onSubmit }: AddTim
                       <input
                         {...register(`subjects.${subjectIndex}.timeSlots.${timeSlotIndex}.endTime`)}
                         type="time"
+                        min="08:00"
+                        max="15:00"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg pr-8 text-sm"
                         disabled={isSubmitting}
                       />

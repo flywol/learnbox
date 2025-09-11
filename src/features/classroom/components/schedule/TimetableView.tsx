@@ -113,13 +113,13 @@ export default function TimetableView({
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   
-  // Fetch available classes from API
+  // Fetch available class levels from API
   const { 
     data: availableClasses = [], 
     isLoading: classesLoading 
   } = useQuery({
-    queryKey: ['classes'],
-    queryFn: () => timetableApiClient.getClassesWithArms(),
+    queryKey: ['class-levels'],
+    queryFn: () => timetableApiClient.getClassLevels(),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
@@ -212,7 +212,11 @@ export default function TimetableView({
                 return (
                   <div key={key} className="p-2 h-24 flex items-center justify-center">
                     {subject ? (
-                      <div className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-sm`}>
+                      <div 
+                        className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+                        onClick={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
+                        title={`Edit ${subject.subjectName} on ${day} at ${time}`}
+                      >
                         {subject.icon && (
                           <div className="w-5 h-5 mb-1 flex-shrink-0">
                             <img 
@@ -236,8 +240,12 @@ export default function TimetableView({
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-full hover:bg-gray-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center">
-                        <div className="text-gray-300 text-xs">+</div>
+                      <div 
+                        className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-transparent rounded-lg transition-all cursor-pointer flex items-center justify-center group"
+                        onClick={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}&day=${day}&time=${time}`)}
+                        title={`Add subject for ${day} at ${time}`}
+                      >
+                        <div className="text-gray-300 group-hover:text-orange-500 text-xs transition-colors">+</div>
                       </div>
                     )}
                   </div>

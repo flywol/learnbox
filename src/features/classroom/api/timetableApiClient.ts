@@ -2,31 +2,38 @@ import BaseApiClient from "@/common/api/baseApiClient";
 import type {
   CreateTimetableRequest,
   CreateTimetableResponse,
-  GetTimetableResponse,
   TimetableData,
   Subject,
 } from "../types/timetable.types";
 
-// Import types for class data
-interface ClassLevelData {
-  id: string;
+// Interface for the class levels and arms response
+interface ClassLevelWithArms {
+  _id: string;
   levelName: string;
   class: string;
-  arms: any;
+  school: string;
+  arms: Array<{
+    _id: string;
+    armName: string;
+    parentClass: string;
+    school: string;
+    studentCount: number;
+    assignedTeachers: any[];
+  }>;
+  createdAt: string;
+  updatedAt: string;
+  studentCount: number;
+  teacherCount: number;
 }
 
-interface ClassArmData {
-  id: string;
-  armName: string;
-}
-
-export interface ClassWithArm {
-  id: string; // This will be the parentClass._id for timetable API calls
-  name: string;
-  levelName: string;
-  class: string;
-  armName: string;
-  armId?: string; // The actual arm._id if needed
+export interface ClassLevel {
+  id: string; // The class._id for timetable API calls
+  name: string; // Display name like "Primary 1"
+  levelName: string; // e.g., "Primary Class"
+  class: string; // e.g., "Primary 1"
+  armCount: number; // Number of arms in this class
+  studentCount: number;
+  teacherCount: number;
 }
 
 class TimetableApiClient extends BaseApiClient {
@@ -47,8 +54,28 @@ class TimetableApiClient extends BaseApiClient {
   // Get timetable for a specific class
   async getTimetable(classId: string): Promise<TimetableData | null> {
     try {
-      const response = await this.get<GetTimetableResponse>(`/timetable/${classId}`);
-      return response.data.timetable;
+      const response = await this.get<any>(`/timetable/class/${classId}`);
+      
+      // Check if response is an array of subject schedules directly
+      if (Array.isArray(response) && response.length > 0) {
+        // The API returns the subjectSchedules array directly
+        const subjectSchedules = response;
+        
+        // Transform to our expected format
+        return {
+          classId: classId, // We have the classId from the parameter
+          subjectSchedules: subjectSchedules.map(subject => ({
+            subjectName: subject.subjectName,
+            schedule: subject.schedule.map((slot: any) => ({
+              day: slot.day,
+              startTime: slot.startTime,
+              endTime: slot.endTime
+            }))
+          })),
+        };
+      }
+      
+      return null; // No timetable found
     } catch (error) {
       // Return null for 404 - no timetable exists yet
       if ((error as any)?.response?.status === 404) {
@@ -83,43 +110,42 @@ class TimetableApiClient extends BaseApiClient {
     return this.createTimetable(data);
   }
 
-  // Get all class levels
-  async getClassLevels(): Promise<ClassLevelData[]> {
+  // Edit existing timetable by ID
+  async editTimetable(timetableId: string, data: CreateTimetableRequest): Promise<TimetableData> {
     try {
-      const response = await this.get<{ data: ClassLevelData[] }>("/classes/levels/get-all");
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await this.put<CreateTimetableResponse>(`/timetable/${timetableId}`, data);
+      return response.data;
     } catch (error) {
-      return [];
+      throw error;
     }
   }
 
-  // Get all class arms
-  async getClassArms(): Promise<ClassArmData[]> {
+  // Delete timetable by ID
+  async deleteTimetable(timetableId: string): Promise<void> {
     try {
-      const response = await this.get<{ data: ClassArmData[] }>("/classes/arms/get-all");
-      return Array.isArray(response.data) ? response.data : [];
+      await this.delete(`/timetable/${timetableId}`);
     } catch (error) {
-      return [];
+      throw error;
     }
   }
 
-  // Get combined classes with their arms for display
-  async getClassesWithArms(): Promise<ClassWithArm[]> {
+  // Get all class levels for timetable creation (focuses on class level, not individual arms)
+  async getClassLevels(): Promise<ClassLevel[]> {
     try {
-      // Use the correct endpoint that returns arms with embedded parentClass data
-      const response = await this.get<{ data: any[] }>("/classes/arms/get-all");
-      const classArms = Array.isArray(response.data) ? response.data : [];
+      const response = await this.get<{ data: { classLevels: ClassLevelWithArms[] } }>("/admin/class-levels-and-arms");
+      const classLevels = response.data.classLevels || [];
 
-      return classArms.map(arm => ({
-        id: arm.parentClass._id, // Use parentClass._id for timetable API calls
-        name: `${arm.parentClass.class} ${arm.armName}`, // e.g., "Primary 1 Joy"
-        levelName: arm.parentClass.levelName,
-        class: arm.parentClass.class,
-        armName: arm.armName,
-        armId: arm._id, // Keep arm ID for reference if needed
+      return classLevels.map(classLevel => ({
+        id: classLevel._id, // Use class._id for timetable API calls
+        name: classLevel.class, // Display name like "Primary 1"
+        levelName: classLevel.levelName, // e.g., "Primary Class"
+        class: classLevel.class, // e.g., "Primary 1"
+        armCount: classLevel.arms.length, // Number of arms in this class
+        studentCount: classLevel.studentCount,
+        teacherCount: classLevel.teacherCount,
       }));
     } catch (error) {
-      console.error('Failed to fetch class arms:', error);
+      console.error('Failed to fetch class levels:', error);
       return [];
     }
   }
