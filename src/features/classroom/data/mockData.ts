@@ -161,8 +161,8 @@ export const generateMockStudents = (classId: string, count: number): ClassroomS
 };
 
 const subjects = [
-  'English', 'Maths', 'Social studies', 'Basic science', 'Basic science', 
-  'Basic science', 'Basic science', 'Basic science', 'Basic science', 'Basic science'
+  'English', 'Maths', 'Social studies', 'Basic science', 'Computer studies', 
+  'Physical education', 'French', 'Fine arts', 'Music', 'Home economics'
 ];
 
 export const mockBroadsheetData: BroadsheetData = {

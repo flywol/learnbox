@@ -18,10 +18,29 @@ class ProfileApiClient extends BaseApiClient {
   // Get admin profile
   async getAdminProfile(): Promise<AdminProfile> {
     try {
-      const response = await this.get<{ data: { admin: AdminProfile } }>("/admin/admin-by-id");
+      const userData = this.getUserData();
+      const userId = userData?.id || userData?._id;
+      
+      if (!userId) {
+        throw new Error("User ID is required to fetch admin profile");
+      }
+      
+      const response = await this.get<{ data: { admin: AdminProfile } }>(`/admin/admin-by-id/${userId}`);
       return response.data.admin;
     } catch (error) {
       throw error;
+    }
+  }
+
+  // Helper method to get stored user data
+  private getUserData() {
+    const keys = this.storageManager.getStorageKeys();
+    const userDataString = this.storageManager.getItem(keys.userProfile);
+    
+    try {
+      return userDataString ? JSON.parse(userDataString) : null;
+    } catch (error) {
+      return null;
     }
   }
 

@@ -17,6 +17,7 @@ import {
 import SchoolSetupPromptModal from "../school-setup/components/SchoolSetupPromptModal";
 import { useSchoolSetupStore } from "../school-setup/store/schoolSetupStore";
 import { useDashboardStats } from "../hooks/useDashboardStats";
+import EventsSection from "../components/EventsSection";
 
 // Action Card Component for top suggestions
 const ActionCard = ({
@@ -326,12 +327,8 @@ export default function AdminDashboard() {
 						<div className="p-4 border-b border-gray-200">
 							<h2 className="text-lg font-semibold text-gray-900">Events</h2>
 						</div>
-						<div className="p-4 flex-1 flex items-center justify-center">
-							<EmptyState
-								title="No upcoming event"
-								description=""
-								illustration="/assets/events-empty.svg"
-							/>
+						<div className="flex-1 overflow-y-auto">
+							<EventsSection />
 						</div>
 					</div>
 				</div>

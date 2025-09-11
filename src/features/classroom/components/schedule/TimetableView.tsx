@@ -5,7 +5,7 @@ interface Subject {
   name: string;
   duration: string;
   color: string;
-  icon?: string;
+  icon: string;
 }
 
 interface TimetableViewProps {
@@ -49,79 +49,58 @@ export default function TimetableView({
           </select>
         </div>
 
-        {hasTimetable && (
-          <button
-            onClick={onAddTimetable}
-            className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add timetable</span>
-          </button>
-        )}
+        <button
+          onClick={onAddTimetable}
+          className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          <span>{hasTimetable ? 'Edit timetable' : 'Add timetable'}</span>
+        </button>
       </div>
 
-      {hasTimetable ? (
-        /* Timetable Grid */
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
-            <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
-            {days.map((day) => (
-              <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {timeSlots.map((time) => (
-            <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
-                {time}
-              </div>
-              {days.map((day) => {
-                const key = `${day}-${time}`;
-                const subject = mockTimetableData[key];
-                
-                return (
-                  <div key={key} className="p-2 h-20 flex items-center justify-center">
-                    {subject ? (
-                      <div className={`w-full h-full rounded-lg border-2 ${subject.color} p-2 flex flex-col justify-center items-center text-center`}>
-                        <div className="text-lg mb-1">{subject.icon}</div>
-                        <div className="text-xs font-medium text-gray-700 truncate">
-                          {subject.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {subject.duration}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-full h-full border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">Free</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+      {/* Timetable Grid - Always Show Structure */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
+          <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
+          {days.map((day) => (
+            <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
+              {day}
             </div>
           ))}
         </div>
-      ) : (
-        /* Empty Timetable State */
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <Plus className="w-8 h-8 text-gray-400" />
+        
+        {timeSlots.map((time) => (
+          <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
+            <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
+              {time}
+            </div>
+            {days.map((day) => {
+              const key = `${day}-${time}`;
+              const subject = hasTimetable ? mockTimetableData[key] : null;
+              
+              return (
+                <div key={key} className="p-2 h-24 flex items-center justify-center">
+                  {subject ? (
+                    <div className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center`}>
+                      <div className="w-5 h-5 mb-1 flex-shrink-0">
+                        <img src={subject.icon} alt={subject.name} className="w-full h-full object-contain" />
+                      </div>
+                      <div className="text-xs font-semibold text-gray-900 mb-1 leading-tight">
+                        {subject.name}
+                      </div>
+                      <div className="text-xs text-gray-600 leading-tight">
+                        {subject.duration}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full"></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No timetable yet</h3>
-          <p className="text-gray-600 mb-6">
-            Create a timetable to help students and teachers know their daily schedule
-          </p>
-          <button
-            onClick={onAddTimetable}
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            Create timetable
-          </button>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

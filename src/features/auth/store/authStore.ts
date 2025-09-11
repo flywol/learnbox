@@ -79,7 +79,7 @@ const initialLoginContext: LoginContext = {
 // Helper function to transform API user data to internal User type
 const transformUserData = (apiUser: UserData): User => {
 	return {
-		id: apiUser.id || "",
+		id: apiUser.id || apiUser._id || "",
 		created_at: new Date().toISOString(),
 		updated_at: new Date().toISOString(),
 		deleted_at: "",
@@ -145,7 +145,7 @@ export const useAuthStore = create<AuthState>()(
 					const isVerified = !!(
 						response.data &&
 						response.data.school &&
-						response.data.school.id
+						(response.data.school.id || response.data.school._id)
 					);
 
 					if (isVerified) {

@@ -11,13 +11,15 @@ interface TableProps<T> {
     columns: ColumnDef<T>[];
     isLoading?: boolean;
     onRowClick?: (row: T) => void;
+    headerTheme?: 'gray' | 'orange';
 }
 
 export function Table<T>({ 
     data, 
     columns, 
     isLoading = false, 
-    onRowClick 
+    onRowClick,
+    headerTheme = 'gray'
 }: TableProps<T>) {
     const table = useReactTable({
         data,
@@ -26,10 +28,12 @@ export function Table<T>({
         getPaginationRowModel: getPaginationRowModel(),
     });
 
+    const headerBgClass = headerTheme === 'orange' ? 'bg-orange-50' : 'bg-gray-50';
+
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className={`${headerBgClass} border-b border-gray-200`}>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (

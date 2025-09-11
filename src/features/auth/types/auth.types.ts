@@ -105,7 +105,8 @@ export interface VerifyDomainRequest {
 
 // ===== API RESPONSE TYPES (ALIGNED WITH BACKEND) =====
 export interface UserData {
-	id: string;
+	id?: string;
+	_id?: string;
 	email: string;
 	firstName: string;
 	lastName: string;
@@ -151,25 +152,30 @@ export interface RefreshTokenResponse {
 
 // Updated to match actual backend response
 export interface School {
-	id: string;
-	created_at: string;
-	updated_at: string;
-	deleted_at: string | null;
+	id?: string;
+	_id?: string;
+	created_at?: string;
+	updated_at?: string;
+	deleted_at?: string | null;
+	createdAt?: string;
+	updatedAt?: string;
 	schoolName: string;
 	schoolShortName: string;
-	schoolWebsite: string;
-	schoolType: string | null;
-	schoolPrincipal: string | null;
-	schoolMotto: string | null;
-	schoolAddress: string | null;
-	schoolPhoneNumber: string | null;
-	country: string | null;
-	state: string | null;
-	schoolEmail: string | null;
-	schoolLogo: string | null;
-	principalSignature: string | null;
+	schoolWebsite?: string;
+	schoolType?: string | null;
+	schoolPrincipal?: string | null;
+	schoolMotto?: string | null;
+	schoolAddress?: string | null;
+	schoolPhoneNumber?: string | null;
+	country?: string | null;
+	state?: string | null;
+	schoolEmail?: string | null;
+	schoolLogo?: string | null;
+	principalSignature?: string | null;
 	learnboxUrl: string;
-	isDeleted: boolean;
+	isDeleted?: boolean;
+	admin?: string;
+	__v?: number;
 }
 
 export interface VerifyDomainResponse {

@@ -11,15 +11,9 @@ interface Subject {
   name: string;
   duration: string;
   color: string;
-  icon?: string;
+  icon: string;
 }
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  type: 'assignment' | 'class' | 'quiz' | 'trip' | 'holiday';
-}
 
 export default function ScheduleTab() {
   const [activeSubTab, setActiveSubTab] = useState<'timetable' | 'calendar'>('timetable');
@@ -27,29 +21,38 @@ export default function ScheduleTab() {
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState('JSS 1');
-  const [hasTimetable, setHasTimetable] = useState(false);
+  const [hasTimetable, setHasTimetable] = useState(true);
 
   // Mock populated timetable data
   const mockTimetableData: { [key: string]: Subject | null } = {
-    'Monday-08:00am': { id: 'math', name: 'Further M...', duration: '1hr 30mins', color: 'bg-blue-100 border-blue-200', icon: '📐' },
-    'Tuesday-09:00am': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100 border-orange-200', icon: '🧬' },
-    'Wednesday-08:00am': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100 border-orange-200', icon: '🧬' },
-    'Wednesday-10:00am': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 border-yellow-200', icon: '⚗️' },
-    'Thursday-09:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100 border-blue-200', icon: '📐' },
-    'Thursday-12:00pm': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100 border-orange-200', icon: '🧬' },
-    'Friday-08:00am': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 border-yellow-200', icon: '⚗️' },
-    'Friday-10:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100 border-blue-200', icon: '📐' },
-    'Monday-10:00am': { id: 'english', name: 'English', duration: '1hr 30mins', color: 'bg-green-100 border-green-200', icon: '📚' },
-    'Tuesday-11:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100 border-blue-200', icon: '📐' },
-    'Monday-12:00pm': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 border-yellow-200', icon: '⚗️' },
+    'Monday-08:00am': { id: 'math', name: 'Further M...', duration: '1hr 30mins', color: 'bg-blue-100', icon: '/assets/maths.svg' },
+    'Tuesday-08:00am': { id: 'english', name: 'English', duration: '1hr 30mins', color: 'bg-green-100', icon: '/assets/english.svg' },
+    'Wednesday-08:00am': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100', icon: '/assets/biology.svg' },
+    'Friday-08:00am': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100', icon: '/assets/chem.svg' },
+    
+    'Tuesday-09:00am': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100', icon: '/assets/biology.svg' },
+    'Thursday-09:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100', icon: '/assets/maths.svg' },
+    
+    'Monday-10:00am': { id: 'english', name: 'English', duration: '1hr 30mins', color: 'bg-green-100', icon: '/assets/english.svg' },
+    'Wednesday-10:00am': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100', icon: '/assets/chem.svg' },
+    'Friday-10:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100', icon: '/assets/maths.svg' },
+    
+    'Tuesday-11:00am': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100', icon: '/assets/maths.svg' },
+    
+    'Monday-12:00pm': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100', icon: '/assets/chem.svg' },
+    'Wednesday-12:00pm': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100', icon: '/assets/maths.svg' },
+    'Friday-12:00pm': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100', icon: '/assets/biology.svg' },
+    
+    'Tuesday-01:00pm': { id: 'english', name: 'English', duration: '1hr 30mins', color: 'bg-green-100', icon: '/assets/english.svg' },
+    'Friday-01:00pm': { id: 'english', name: 'English', duration: '1hr 30mins', color: 'bg-green-100', icon: '/assets/english.svg' },
+    
+    'Monday-02:00pm': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100', icon: '/assets/biology.svg' },
+    'Wednesday-02:00pm': { id: 'biology', name: 'Biology', duration: '50mins', color: 'bg-orange-100', icon: '/assets/biology.svg' },
+    
+    'Tuesday-03:00pm': { id: 'chemistry', name: 'Chemistry', duration: '50mins', color: 'bg-yellow-100', icon: '/assets/chem.svg' },
+    'Friday-03:00pm': { id: 'math', name: 'Further M...', duration: '1hr', color: 'bg-blue-100', icon: '/assets/maths.svg' },
   };
 
-  // Mock events data
-  const mockEvents: Event[] = [
-    { id: '1', title: 'Math Assignment Due', date: '2024-01-15', type: 'assignment' },
-    { id: '2', title: 'Biology Quiz', date: '2024-01-17', type: 'quiz' },
-    { id: '3', title: 'School Trip', date: '2024-01-20', type: 'trip' },
-  ];
 
   const handleAddTimetable = () => {
     setShowAddTimetable(true);
@@ -113,7 +116,6 @@ export default function ScheduleTab() {
 
       {activeSubTab === 'calendar' && (
         <CalendarView
-          events={mockEvents}
           onAddEvent={handleAddEvent}
         />
       )}

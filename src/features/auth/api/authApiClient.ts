@@ -56,7 +56,7 @@ class AuthApiClient extends BaseApiClient {
 	// Helper method to check if domain verification was successful
 	isDomainVerified(response: VerifyDomainResponse): boolean {
 		// Domain is verified if we have a school object with an ID
-		return !!(response.data && response.data.school && response.data.school.id);
+		return !!(response.data && response.data.school && (response.data.school.id || response.data.school._id));
 	}
 
 	// Login with email and password

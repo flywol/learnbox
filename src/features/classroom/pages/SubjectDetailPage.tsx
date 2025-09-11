@@ -46,10 +46,25 @@ export default function SubjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      <SubjectHeader 
-        subjectData={mockData.subjectData}
-        onBack={handleBack}
-      />
+      {/* Subject Header - Only show on Lessons tab */}
+      {activeTab === 'lessons' && (
+        <SubjectHeader 
+          subjectData={mockData.subjectData}
+          onBack={handleBack}
+        />
+      )}
+
+      {/* For other tabs, just show back button and title */}
+      {activeTab !== 'lessons' && (
+        <div className="flex items-center space-x-4">
+          <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-semibold">{mockData.subjectData.name}</h1>
+        </div>
+      )}
 
       <SubjectTabs 
         activeTab={activeTab}
@@ -57,31 +72,44 @@ export default function SubjectDetailPage() {
       />
 
       {/* Tab Content */}
-      <div className="bg-white rounded-lg p-6">
+      <div className="space-y-6">
         {activeTab === 'lessons' && (
-          <LessonsGrid 
-            lessons={mockData.lessons}
-            onLessonClick={handleLessonClick}
-          />
+          <div className="bg-white rounded-lg p-6">
+            <LessonsGrid 
+              lessons={mockData.lessons}
+              onLessonClick={handleLessonClick}
+            />
+          </div>
         )}
 
         {activeTab === 'live-class' && (
-          <LiveClassTab students={mockData.students} />
+          <div className="bg-white rounded-lg p-6">
+            <LiveClassTab 
+              students={mockData.students} 
+              liveClasses={mockData.liveClasses}
+            />
+          </div>
         )}
 
         {activeTab === 'quiz' && (
-          <QuizTab quizzes={mockData.quizzes || []} />
+          <div className="bg-white rounded-lg p-6">
+            <QuizTab quizzes={mockData.quizzes || []} />
+          </div>
         )}
 
         {activeTab === 'assignment' && (
-          <AssignmentTab assignments={mockData.assignments || []} />
+          <div className="bg-white rounded-lg p-6">
+            <AssignmentTab assignments={mockData.assignments || []} />
+          </div>
         )}
 
         {activeTab === 'assessment' && (
-          <AssessmentTab 
-            students={mockData.assessmentStudents}
-            summary={mockData.assessmentSummary}
-          />
+          <div className="bg-white rounded-lg p-6">
+            <AssessmentTab 
+              students={mockData.assessmentStudents}
+              summary={mockData.assessmentSummary}
+            />
+          </div>
         )}
       </div>
     </div>

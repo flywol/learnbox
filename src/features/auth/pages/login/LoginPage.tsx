@@ -118,7 +118,7 @@ const CombinedSchoolLoginPage = () => {
 
 
 			// Transform API user data to internal User type
-			const userId = response.data.user.id || response.data.user.id;
+			const userId = response.data.user.id || response.data.user._id;
 			if (!userId) {
 				throw new Error("User ID is required");
 			}
