@@ -15,32 +15,13 @@ class ProfileApiClient extends BaseApiClient {
     super();
   }
 
-  // Get admin profile
+  // Get admin profile (uses token to identify logged-in admin)
   async getAdminProfile(): Promise<AdminProfile> {
     try {
-      const userData = this.getUserData();
-      const userId = userData?.id || userData?._id;
-      
-      if (!userId) {
-        throw new Error("User ID is required to fetch admin profile");
-      }
-      
-      const response = await this.get<{ data: { admin: AdminProfile } }>(`/admin/admin-by-id/${userId}`);
+      const response = await this.get<{ data: { admin: AdminProfile } }>('/admin/admin-by-id');
       return response.data.admin;
     } catch (error) {
       throw error;
-    }
-  }
-
-  // Helper method to get stored user data
-  private getUserData() {
-    const keys = this.storageManager.getStorageKeys();
-    const userDataString = this.storageManager.getItem(keys.userProfile);
-    
-    try {
-      return userDataString ? JSON.parse(userDataString) : null;
-    } catch (error) {
-      return null;
     }
   }
 
@@ -58,7 +39,7 @@ class ProfileApiClient extends BaseApiClient {
       if (data.position) formData.append('position', data.position);
       if (data.profilePicture) formData.append('profilePicture', data.profilePicture);
 
-      const response = await this.put<{ message: string }>("/api/v1/admin/update-admin-personal-information", formData, {
+      const response = await this.put<{ message: string }>("/admin/update-admin-personal-information", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -73,7 +54,7 @@ class ProfileApiClient extends BaseApiClient {
   // Get school information
   async getSchoolInformation(): Promise<SchoolInformation> {
     try {
-      const response = await this.get<{ data: SchoolInformation }>("/api/v1/admin/school-information");
+      const response = await this.get<{ data: SchoolInformation }>("/admin/school-information");
       return response.data;
     } catch (error) {
       throw error;
@@ -84,7 +65,7 @@ class ProfileApiClient extends BaseApiClient {
   async updateSchoolInformation(data: UpdateSchoolInfoDto): Promise<{ message: string }> {
     try {
       
-      const response = await this.put<{ message: string }>("/api/v1/admin/update-admin-school-information", data);
+      const response = await this.put<{ message: string }>("/admin/update-admin-school-information", data);
       
       return response;
     } catch (error) {
@@ -95,7 +76,7 @@ class ProfileApiClient extends BaseApiClient {
   // Get session configuration
   async getSessionConfiguration(): Promise<SessionConfiguration> {
     try {
-      const response = await this.get<{ data: SessionConfiguration }>("/api/v1/admin/session-configuration");
+      const response = await this.get<{ data: SessionConfiguration }>("/admin/session-configuration");
       return response.data;
     } catch (error) {
       throw error;
@@ -105,7 +86,7 @@ class ProfileApiClient extends BaseApiClient {
   // Update session configuration
   async updateSessionConfiguration(data: UpdateSessionConfigDto): Promise<{ message: string }> {
     try {
-      const response = await this.put<{ message: string }>("/api/v1/admin/update-session-term-configuration", data);
+      const response = await this.put<{ message: string }>("/admin/update-session-term-configuration", data);
       return response;
     } catch (error) {
       throw error;
@@ -115,7 +96,7 @@ class ProfileApiClient extends BaseApiClient {
   // Get class levels overview
   async getClassLevels(): Promise<ClassLevel[]> {
     try {
-      const response = await this.get<{ data: ClassLevel[] }>("/api/v1/admin/class-levels-overview");
+      const response = await this.get<{ data: ClassLevel[] }>("/admin/class-levels-overview");
       return response.data;
     } catch (error) {
       throw error;

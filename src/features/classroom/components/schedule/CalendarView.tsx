@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { eventsApiClient } from '@/features/events/api/eventsApiClient';
 import { apiDateToDate, getMonthName, getDayNames, isToday as checkIsToday, isSameDay } from '@/features/events/utils/dateUtils';
 import { EVENT_COLORS } from '@/features/events/types/events.types';
@@ -8,7 +9,6 @@ import type { EventResponse } from '@/features/events/types/events.types';
 
 interface CalendarViewProps {
   events?: EventResponse[]; // Optional prop for future use, we'll use API data
-  onAddEvent: () => void;
 }
 
 // Loading component
@@ -54,9 +54,8 @@ const CalendarError = ({ message }: { message: string }) => (
   </div>
 );
 
-export default function CalendarView({ onAddEvent }: CalendarViewProps) {
-  console.log('CalendarView component rendered');
-  
+export default function CalendarView({}: CalendarViewProps) {
+  const navigate = useNavigate();
   // State for current viewing month/year
   const [currentDate, setCurrentDate] = useState(new Date());
   const currentMonth = currentDate.getMonth();
@@ -65,15 +64,10 @@ export default function CalendarView({ onAddEvent }: CalendarViewProps) {
   // Fetch events from API
   const { data: events, isLoading, error } = useQuery({
     queryKey: ['events'],
-    queryFn: () => {
-      console.log('Calendar events query function called');
-      return eventsApiClient.getEvents();
-    },
+    queryFn: () => eventsApiClient.getEvents(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (gcTime is the new name for cacheTime in React Query v5)
   });
-
-  console.log('CalendarView state:', { events, isLoading, error });
 
   // Navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -160,7 +154,7 @@ export default function CalendarView({ onAddEvent }: CalendarViewProps) {
         </div>
         
         <button
-          onClick={onAddEvent}
+          onClick={() => navigate('/classroom/add-event')}
           className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
