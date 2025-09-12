@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ClassOverviewTab from '../components/ClassOverviewTab';
 import ScheduleTab from '../components/ScheduleTab';
 import BroadsheetTab from '../components/BroadsheetTab';
@@ -11,7 +12,16 @@ const tabs = [
 ] as const;
 
 export default function ClassroomOverviewPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<ClassroomTab>('class');
+
+  // Read tab from URL parameters on mount
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') as ClassroomTab;
+    if (tabFromUrl && ['class', 'schedule', 'broadsheet'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   return (
     <div className="space-y-6">
@@ -20,7 +30,10 @@ export default function ClassroomOverviewPage() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setSearchParams({ tab: tab.id });
+            }}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               activeTab === tab.id
                 ? 'bg-orange-500 text-white'
