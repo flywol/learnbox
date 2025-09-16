@@ -27,7 +27,12 @@ class EventsApiClient extends BaseApiClient {
       console.log('EventsApiClient.getEvents() called - making request to /admin/events');
       const response = await this.get<GetEventsResponse>("/admin/events");
       console.log('EventsApiClient.getEvents() response:', response);
-      return response.data.events;
+      
+      // Transform _id to id for frontend consistency
+      return response.data.events.map((event: any) => ({
+        ...event,
+        id: event._id
+      }));
     } catch (error) {
       console.error('EventsApiClient.getEvents() error:', error);
       throw error;
@@ -40,7 +45,12 @@ class EventsApiClient extends BaseApiClient {
       const response = await this.get<GetEventsResponse>(
         `/admin/events?startDate=${startDate}&endDate=${endDate}`
       );
-      return response.data.events;
+      
+      // Transform _id to id for frontend consistency
+      return response.data.events.map((event: any) => ({
+        ...event,
+        id: event._id
+      }));
     } catch (error) {
       throw error;
     }
@@ -50,7 +60,12 @@ class EventsApiClient extends BaseApiClient {
   async getEventsByReceiver(receiver: 'all' | 'parents' | 'students' | 'teachers'): Promise<EventResponse[]> {
     try {
       const response = await this.get<GetEventsResponse>(`/admin/events?receiver=${receiver}`);
-      return response.data.events;
+      
+      // Transform _id to id for frontend consistency
+      return response.data.events.map((event: any) => ({
+        ...event,
+        id: event._id
+      }));
     } catch (error) {
       throw error;
     }

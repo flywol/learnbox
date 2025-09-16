@@ -23,16 +23,6 @@ export const AuthGuard = ({
 		user,
 	} = useAuthStore();
 
-
-	// Don't render anything until hydration is complete
-	if (!hasHydrated) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-gray-50">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-			</div>
-		);
-	}
-
 	useEffect(() => {
 		// Save intended destination for protected routes
 		if (
@@ -49,6 +39,15 @@ export const AuthGuard = ({
 		location.pathname,
 		setIntendedDestination,
 	]);
+
+	// Don't render anything until hydration is complete
+	if (!hasHydrated) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-gray-50">
+				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+			</div>
+		);
+	}
 
 	// Handle password reset requirement (highest priority)
 	if (isAuthenticated && user && loginContext.requiresPasswordReset) {

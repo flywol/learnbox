@@ -88,8 +88,14 @@ class TimetableApiClient extends BaseApiClient {
   // Get available subjects (if endpoint exists)
   async getSubjects(): Promise<Subject[]> {
     try {
-      const response = await this.get<{ data: { subjects: Subject[] } }>("/subjects");
-      return response.data.subjects;
+      const response = await this.get<{ data: { subjects: any[] } }>("/subjects");
+      const subjects = response.data.subjects;
+      
+      // Transform _id to id for frontend consistency
+      return subjects.map((subject: any) => ({
+        ...subject,
+        id: subject._id
+      }));
     } catch (error) {
       // Return default subjects if API doesn't exist
       return [

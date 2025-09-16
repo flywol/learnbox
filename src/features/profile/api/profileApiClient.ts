@@ -96,8 +96,18 @@ class ProfileApiClient extends BaseApiClient {
   // Get class levels overview
   async getClassLevels(): Promise<ClassLevel[]> {
     try {
-      const response = await this.get<{ data: ClassLevel[] }>("/admin/class-levels-overview");
-      return response.data;
+      const response = await this.get<{ data: any[] }>("/admin/class-levels-overview");
+      const classLevels = response.data;
+      
+      // Transform _id to id for frontend consistency
+      return classLevels.map((level: any) => ({
+        ...level,
+        id: level._id,
+        arms: level.arms?.map((arm: any) => ({
+          ...arm,
+          id: arm._id
+        })) || []
+      }));
     } catch (error) {
       throw error;
     }
@@ -106,8 +116,27 @@ class ProfileApiClient extends BaseApiClient {
   // Get class levels and arms (Admin only)
   async getClassLevelsAndArms(): Promise<ClassLevelsAndArmsResponse> {
     try {
-      const response = await this.get<ClassLevelsAndArmsResponse>("/admin/class-levels-and-arms");
-      return response;
+      const response = await this.get<{ data: { classLevels: any[], classArms: any[] } }>("/admin/class-levels-and-arms");
+      
+      // Transform _id to id for frontend consistency
+      const transformedData = {
+        data: {
+          classLevels: response.data.classLevels.map((level: any) => ({
+            ...level,
+            id: level._id,
+            arms: level.arms?.map((arm: any) => ({
+              ...arm,
+              id: arm._id
+            })) || []
+          })),
+          classArms: response.data.classArms.map((arm: any) => ({
+            ...arm,
+            id: arm._id
+          }))
+        }
+      };
+      
+      return transformedData;
     } catch (error) {
       throw error;
     }

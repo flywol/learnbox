@@ -33,6 +33,12 @@ export default function EditSchoolInfoPage() {
   const navigate = useNavigate();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [signatureError, setSignatureError] = useState<string | null>(null);
+
+  // File size limits (in bytes)
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB for logos/signatures
+  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 
   const { data: schoolInfo, isLoading } = useSchoolInformation();
   const updateSchoolInfoMutation = useUpdateSchoolInfo();
@@ -57,7 +63,24 @@ export default function EditSchoolInfoPage() {
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    setLogoError(null); // Clear previous errors
+    
     if (file) {
+      // Validate file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        setLogoError("Please upload a valid image file (JPEG or PNG only)");
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setLogoError(`File size (${sizeMB}MB) exceeds the maximum limit of 3MB. Please choose a smaller image.`);
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64String = e.target?.result as string;
@@ -71,7 +94,24 @@ export default function EditSchoolInfoPage() {
 
   const handleSignatureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    setSignatureError(null); // Clear previous errors
+    
     if (file) {
+      // Validate file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        setSignatureError("Please upload a valid image file (JPEG or PNG only)");
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setSignatureError(`File size (${sizeMB}MB) exceeds the maximum limit of 3MB. Please choose a smaller image.`);
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64String = e.target?.result as string;
@@ -118,6 +158,8 @@ export default function EditSchoolInfoPage() {
             signaturePreview={signaturePreview}
             onLogoUpload={handleLogoUpload}
             onSignatureUpload={handleSignatureUpload}
+            logoError={logoError}
+            signatureError={signatureError}
           />
           <SchoolFormSubmit isSubmitting={updateSchoolInfoMutation.isPending} />
         </form>

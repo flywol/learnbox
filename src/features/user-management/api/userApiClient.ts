@@ -66,7 +66,13 @@ class UserApiClient extends BaseApiClient {
   async getStudents(): Promise<any[]> {
     try {
       const response = await this.get<{ data: { students: any[] } }>("/admin/all-students");
-      return response.data.students || [];
+      const students = response.data.students || [];
+      
+      // Transform _id to id for frontend consistency
+      return students.map((student: any) => ({
+        ...student,
+        id: student._id
+      }));
     } catch (error) {
       throw error;
     }
@@ -86,19 +92,24 @@ class UserApiClient extends BaseApiClient {
   async getClassLevels(): Promise<any[]> {
     try {
       const response = await this.get<{ data: ClassLevelData[] }>("/classes/levels/get-all");
+      
       // BaseApiClient already extracts the data, so response is the actual data object
       const levels = Array.isArray(response.data) ? response.data : [];
       
       // Transform arms array to map armName to name for consistency
-      return levels.map(level => ({
+      const transformedLevels = levels.map((level: any) => ({
         ...level,
+        id: level._id, // Map MongoDB _id to id for frontend consistency
         arms: level.arms && Array.isArray(level.arms) 
           ? level.arms.map((arm: any) => ({
               ...arm,
+              id: arm._id, // Map MongoDB _id to id
               name: arm.armName
             }))
           : level.arms
       }));
+      
+      return transformedLevels;
     } catch (error) {
       throw error;
     }
@@ -112,8 +123,9 @@ class UserApiClient extends BaseApiClient {
       const arms = Array.isArray(response.data) ? response.data : [];
       
       // Map armName to name for frontend consistency
-      return arms.map(arm => ({
+      return arms.map((arm: any) => ({
         ...arm,
+        id: arm._id, // Map MongoDB _id to id for frontend consistency
         name: arm.armName
       }));
     } catch (error) {
@@ -124,8 +136,14 @@ class UserApiClient extends BaseApiClient {
   // Get all users list
   async getAllUsers(): Promise<UserListItem[]> {
     try {
-      const response = await this.get<{ data: { users: UserListItem[] } }>("/admin/all-users-list");
-      return response.data.users || [];
+      const response = await this.get<{ data: { users: any[] } }>("/admin/all-users-list");
+      const users = response.data.users || [];
+      
+      // Transform _id to id for frontend consistency
+      return users.map((user: any) => ({
+        ...user,
+        id: user._id
+      }));
     } catch (error) {
       throw error;
     }
@@ -134,8 +152,14 @@ class UserApiClient extends BaseApiClient {
   // Get user by ID
   async getUserById(userId: string): Promise<DetailedUser> {
     try {
-      const response = await this.get<{ data: { user: DetailedUser } }>(`/admin/user-by-id/${userId}`);
-      return response.data.user;
+      const response = await this.get<{ data: { user: any } }>(`/admin/user-by-id/${userId}`);
+      const user = response.data.user;
+      
+      // Transform _id to id for frontend consistency
+      return {
+        ...user,
+        id: user._id
+      };
     } catch (error) {
       throw error;
     }

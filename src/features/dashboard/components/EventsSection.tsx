@@ -126,7 +126,7 @@ export default function EventsSection() {
   return (
     <div className="space-y-2">
       {upcomingEvents.map((event: EventResponse) => (
-        <EventItem key={event._id} event={event} />
+        <EventItem key={event.id} event={event} />
       ))}
       
       {events && events.length > 5 && (

@@ -21,6 +21,11 @@ type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
 export default function EditPersonalInfoPage() {
   const navigate = useNavigate();
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // File size limits (in bytes)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 
   // Fetch current profile data
   const { data: adminProfile, isLoading } = useAdminProfile();
@@ -59,7 +64,24 @@ export default function EditPersonalInfoPage() {
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    setUploadError(null); // Clear previous errors
+    
     if (file) {
+      // Validate file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        setUploadError("Please upload a valid image file (JPEG or PNG only)");
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setUploadError(`File size (${sizeMB}MB) exceeds the maximum limit of 5MB. Please choose a smaller image.`);
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
       setValue("profilePicture", file);
       
       // Create preview URL
@@ -144,8 +166,18 @@ export default function EditPersonalInfoPage() {
                 className="hidden"
               />
             </div>
-            <span className="text-gray-600">Tap to change</span>
+            <div className="flex flex-col">
+              <span className="text-gray-600 text-sm">Tap to change</span>
+              <span className="text-gray-500 text-xs">Max size: 5MB (JPEG, PNG only)</span>
+            </div>
           </div>
+
+          {/* Upload Error Message */}
+          {uploadError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{uploadError}</p>
+            </div>
+          )}
 
           {/* Form Fields */}
           <div className="space-y-4">

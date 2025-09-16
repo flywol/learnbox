@@ -102,18 +102,21 @@ export default function ClassSelector({ selectedClasses, onClassesChange, error 
               <div className="px-4 py-2 text-sm text-gray-500">No classes found</div>
             ) : (
               classLevels.map((classLevel) => (
-                <label
+                <div
                   key={classLevel.id}
                   className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleClassToggle(classLevel.id)}
                 >
                   <input
                     type="checkbox"
                     checked={selectedClasses.includes(classLevel.id)}
-                    onChange={() => handleClassToggle(classLevel.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                    }}
                     className="mr-3 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <span className="text-sm text-gray-900">{classLevel.class}</span>
-                </label>
+                </div>
               ))
             )}
           </div>

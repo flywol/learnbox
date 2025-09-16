@@ -3,7 +3,9 @@ import { Gender, ClassLevelData, ClassArmData } from "../../types/user.types";
 import { userApiClient } from "../../api/userApiClient";
 
 interface StudentFieldsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any;
 }
 

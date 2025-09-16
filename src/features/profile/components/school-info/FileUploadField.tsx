@@ -8,6 +8,8 @@ interface FileUploadFieldProps {
   placeholder: string;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
+  error?: string | null;
+  helpText?: string;
 }
 
 export default function FileUploadField({
@@ -17,7 +19,9 @@ export default function FileUploadField({
   altText,
   placeholder,
   onFileChange,
-  className = "h-20 w-20"
+  className = "h-20 w-20",
+  error,
+  helpText
 }: FileUploadFieldProps) {
   return (
     <div>
@@ -45,6 +49,16 @@ export default function FileUploadField({
           Choose File
         </label>
       </div>
+      
+      {/* Help Text */}
+      {helpText && (
+        <p className="text-xs text-gray-500 mt-1">{helpText}</p>
+      )}
+      
+      {/* Error Message */}
+      {error && (
+        <p className="text-sm text-red-600 mt-1">{error}</p>
+      )}
     </div>
   );
 }

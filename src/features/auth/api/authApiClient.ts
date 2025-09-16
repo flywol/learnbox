@@ -28,29 +28,21 @@ class AuthApiClient extends BaseApiClient {
 
 	// Register new user
 	async register(data: RegisterRequest): Promise<RegisterResponse> {
-		try {
-			const response = await this.post<RegisterResponse>(
-				"/auth/register",
-				data
-			);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<RegisterResponse>(
+			"/auth/register",
+			data
+		);
+		return response;
 	}
 
 	// Verify school domain
 	async verifyDomain(data: VerifyDomainRequest): Promise<VerifyDomainResponse> {
-		try {
-			const response = await this.post<VerifyDomainResponse>(
-				"/school/verify-domain",
-				data
-			);
+		const response = await this.post<VerifyDomainResponse>(
+			"/school/verify-domain",
+			data
+		);
 
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		return response;
 	}
 
 	// Helper method to check if domain verification was successful
@@ -107,7 +99,7 @@ class AuthApiClient extends BaseApiClient {
 	async logout(): Promise<void> {
 		try {
 			await this.post<LogoutResponse>("/auth/logout");
-		} catch (error) {
+		} catch {
 			// Continue with local cleanup even if API call fails
 		} finally {
 			// Always clear all auth data regardless of API response
@@ -126,39 +118,27 @@ class AuthApiClient extends BaseApiClient {
 
 	// Refresh access token
 	async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-		try {
-			const response = await this.post<RefreshTokenResponse>(
-				"/auth/refresh-token",
-				{ refreshToken }
-			);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<RefreshTokenResponse>(
+			"/auth/refresh-token",
+			{ refreshToken }
+		);
+		return response;
 	}
 
 	// Send OTP to email - support both old signature and new object signature
 	async resendOtp(emailOrRequest: string | ResendOtpRequest): Promise<OtpResponse> {
-		try {
-			const requestData = typeof emailOrRequest === 'string' 
-				? { email: emailOrRequest }
-				: emailOrRequest;
-				
-			const response = await this.post<OtpResponse>("/auth/resend-otp", requestData);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const requestData = typeof emailOrRequest === 'string' 
+			? { email: emailOrRequest }
+			: emailOrRequest;
+			
+		const response = await this.post<OtpResponse>("/auth/resend-otp", requestData);
+		return response;
 	}
 
 	// Verify OTP
 	async verifyOtp(data: OtpRequest): Promise<OtpResponse> {
-		try {
-			const response = await this.post<OtpResponse>("/auth/verify-otp", data);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<OtpResponse>("/auth/verify-otp", data);
+		return response;
 	}
 
 	// Initiate forgot password flow
@@ -185,53 +165,37 @@ class AuthApiClient extends BaseApiClient {
 
 	// Resend password reset OTP
 	async resendPasswordOtp(email: string): Promise<OtpResponse> {
-		try {
-			const response = await this.post<OtpResponse>(
-				"/auth/resend-password-otp",
-				{ email }
-			);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<OtpResponse>(
+			"/auth/resend-password-otp",
+			{ email }
+		);
+		return response;
 	}
 
 	// Verify forgot password OTP
 	async verifyForgotPasswordOtp(data: OtpRequest): Promise<OtpResponse> {
-		try {
-			const response = await this.post<OtpResponse>(
-				"/auth/verify-forgot-password-otp",
-				data
-			);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<OtpResponse>(
+			"/auth/verify-forgot-password-otp",
+			data
+		);
+		return response;
 	}
 
 	// Reset password with OTP
 	async resetPassword(
 		data: ResetPasswordRequest
 	): Promise<ResetPasswordResponse> {
-		try {
-			const response = await this.post<ResetPasswordResponse>(
-				"/auth/reset-password",
-				data
-			);
-			return response;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.post<ResetPasswordResponse>(
+			"/auth/reset-password",
+			data
+		);
+		return response;
 	}
 
 	// Get current user data (for session restoration)
 	async getCurrentUser(): Promise<UserData> {
-		try {
-			const response = await this.get<CurrentUserResponse>("/auth/me");
-			return response.data.user;
-		} catch (error) {
-			throw error;
-		}
+		const response = await this.get<CurrentUserResponse>("/auth/me");
+		return response.data.user;
 	}
 
 	// User data management
@@ -241,7 +205,7 @@ class AuthApiClient extends BaseApiClient {
 
 		try {
 			return userDataString ? JSON.parse(userDataString) : null;
-		} catch (error) {
+		} catch {
 			this.clearUserData();
 			return null;
 		}
@@ -270,7 +234,7 @@ class AuthApiClient extends BaseApiClient {
 			this.clearUserData();
 			// Force token cleanup by setting empty tokens
 			this.setTokens("", "", false);
-		} catch (error) {
+		} catch {
 			// Continue silently on error
 		}
 	}

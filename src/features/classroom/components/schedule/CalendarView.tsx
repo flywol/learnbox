@@ -202,7 +202,7 @@ export default function CalendarView({}: CalendarViewProps) {
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((event: EventResponse) => (
                     <div 
-                      key={event._id}
+                      key={event.id}
                       className={`text-xs px-2 py-1 rounded truncate ${EVENT_COLORS[event.receivers as keyof typeof EVENT_COLORS]}`}
                       title={event.description}
                     >

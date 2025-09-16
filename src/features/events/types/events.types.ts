@@ -7,7 +7,7 @@ export interface CreateEventRequest {
 }
 
 export interface EventResponse {
-  _id: string;
+  id: string;
   description: string;
   receivers: 'all' | 'parents' | 'students' | 'teachers';
   date: string; // Format: DD/MM/YYYY

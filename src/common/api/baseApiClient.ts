@@ -10,7 +10,7 @@ import { storageManager } from "../storage/StorageManager";
 export interface ApiErrorResponse {
 	message: string;
 	status: number;
-	data?: any;
+	data?: Record<string, unknown>;
 }
 
 export class BaseApiClient {
@@ -45,7 +45,7 @@ export class BaseApiClient {
 				if (
 					error.response?.status === 401 &&
 					originalRequest &&
-					!(originalRequest as any)._retry
+					!(originalRequest as AxiosRequestConfig & { _retry?: boolean })._retry
 				) {
 					// Check if this is a validation error (not a token expiry)
 					const isValidationError = this.isValidationError(error, originalRequest);
@@ -55,7 +55,7 @@ export class BaseApiClient {
 						return Promise.reject(this.normalizeError(error));
 					}
 
-					(originalRequest as any)._retry = true;
+					(originalRequest as AxiosRequestConfig & { _retry?: boolean })._retry = true;
 
 					const refreshToken = this.getRefreshToken();
 					if (refreshToken) {
@@ -72,7 +72,7 @@ export class BaseApiClient {
 								originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 							}
 							return this.api(originalRequest);
-						} catch (refreshError) {
+						} catch {
 								this.clearAllTokens();
 							window.location.href = "/";
 							return Promise.reject(this.normalizeError(error));
@@ -88,7 +88,7 @@ export class BaseApiClient {
 	}
 
 	// Helper method to determine if a 401 error is a validation error vs token expiry
-	private isValidationError(_error: AxiosError, originalRequest: any): boolean {
+	private isValidationError(_error: AxiosError, originalRequest: AxiosRequestConfig): boolean {
 		const url = originalRequest?.url || '';
 		
 		// List of endpoints that return 401 for validation errors, not token expiry
@@ -188,11 +188,11 @@ export class BaseApiClient {
 	// Normalize errors
 	protected normalizeError(error: AxiosError): ApiErrorResponse {
 		if (error.response) {
-			const data = (error.response.data as Record<string, any>) || {};
+			const data = (error.response.data as Record<string, unknown>) || {};
 			return {
 				message:
-					data.message ||
-					(error.response as any).message ||
+					(data.message as string) ||
+					(error.response.data as { message?: string })?.message ||
 					"An error occurred with the request.",
 				status: error.response.status,
 				data: data,
@@ -219,7 +219,7 @@ export class BaseApiClient {
 
 	protected async post<T>(
 		url: string,
-		data?: any,
+		data?: unknown,
 		config?: AxiosRequestConfig
 	): Promise<T> {
 		const response: AxiosResponse<T> = await this.api.post<T>(
@@ -232,7 +232,7 @@ export class BaseApiClient {
 
 	protected async put<T>(
 		url: string,
-		data?: any,
+		data?: unknown,
 		config?: AxiosRequestConfig
 	): Promise<T> {
 		const response: AxiosResponse<T> = await this.api.put<T>(url, data, config);
@@ -241,7 +241,7 @@ export class BaseApiClient {
 
 	protected async patch<T>(
 		url: string,
-		data?: any,
+		data?: unknown,
 		config?: AxiosRequestConfig
 	): Promise<T> {
 		const response: AxiosResponse<T> = await this.api.patch<T>(

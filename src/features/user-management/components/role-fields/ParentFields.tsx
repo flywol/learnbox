@@ -5,8 +5,11 @@ import ChildSelector from "../ChildSelector";
 
 interface ParentFieldsProps {
   control: Control<CreateUserFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any;
 }
 
