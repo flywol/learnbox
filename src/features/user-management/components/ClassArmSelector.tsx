@@ -1,15 +1,24 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
 import { userApiClient } from "../api/userApiClient";
-import type { ClassArmData } from "../types/user.types";
+import type { ClassLevelData } from "../types/user.types";
+
+interface ClassArmData {
+  id: string;
+  name: string;
+  armName: string;
+  classLevel: string;
+  classLevelId: string;
+}
 
 interface ClassArmSelectorProps {
   selectedClassArms: string[];
   onClassArmsChange: (classArms: string[]) => void;
+  selectedClasses: string[];
   error?: string;
 }
 
-export default function ClassArmSelector({ selectedClassArms, onClassArmsChange, error }: ClassArmSelectorProps) {
+export default function ClassArmSelector({ selectedClassArms, onClassArmsChange, selectedClasses, error }: ClassArmSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [classArms, setClassArms] = useState<ClassArmData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -18,8 +27,27 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
     const fetchClassArms = async () => {
       setLoading(true);
       try {
-        const arms = await userApiClient.getClassArms();
-        setClassArms(Array.isArray(arms) ? arms : []);
+        const classLevels = await userApiClient.getClassLevels();
+        
+        // Extract arms from selected classes only
+        const filteredArms: ClassArmData[] = [];
+        
+        classLevels.forEach((level: ClassLevelData) => {
+          // Only include arms from selected classes
+          if (selectedClasses.includes(level.id) && level.arms && Array.isArray(level.arms)) {
+            level.arms.forEach((arm: any) => {
+              filteredArms.push({
+                id: arm.id,
+                name: arm.name || arm.armName,
+                armName: arm.armName,
+                classLevel: level.levelName,
+                classLevelId: level.id
+              });
+            });
+          }
+        });
+        
+        setClassArms(filteredArms);
       } catch (error) {
         console.error("Failed to fetch class arms:", error);
         setClassArms([]);
@@ -28,8 +56,13 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
       }
     };
 
-    fetchClassArms();
-  }, []);
+    // Only fetch if classes are selected
+    if (selectedClasses.length > 0) {
+      fetchClassArms();
+    } else {
+      setClassArms([]);
+    }
+  }, [selectedClasses]);
 
   const handleClassArmToggle = (classArmId: string) => {
     if (selectedClassArms.includes(classArmId)) {
@@ -44,10 +77,28 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
   };
 
   const getClassArmName = (classArmId: string) => {
-    return classArms.find(arm => arm.id === classArmId)?.armName || classArmId;
+    const arm = classArms.find(arm => arm.id === classArmId);
+    return arm ? `${arm.classLevel} ${arm.armName}` : classArmId;
   };
 
-  // If no class arms from API, show text input for manual entry
+  // If no classes are selected, show a message
+  if (selectedClasses.length === 0) {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Assigned class arms *
+        </label>
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <p className="text-sm text-gray-600">Please select classes first to view available class arms.</p>
+        </div>
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
+      </div>
+    );
+  }
+
+  // If no class arms from selected classes, show text input for manual entry
   if (!loading && classArms.length === 0) {
     return (
       <div className="space-y-2">
@@ -168,7 +219,7 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
                     onChange={() => handleClassArmToggle(classArm.id)}
                     className="mr-3 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                   />
-                  <span className="text-sm text-gray-900">{classArm.armName}</span>
+                  <span className="text-sm text-gray-900">{classArm.classLevel} {classArm.armName}</span>
                 </label>
               ))
             )}

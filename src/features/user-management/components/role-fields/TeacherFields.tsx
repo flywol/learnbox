@@ -121,6 +121,7 @@ export default function TeacherFields({ control, register, setValue, errors }: T
         <SubjectSelector
           selectedSubjects={assignedSubjects}
           onSubjectsChange={(subjects) => setValue("assignedSubjects", subjects)}
+          selectedClasses={assignedClasses}
           error={errors.assignedSubjects?.message}
         />
       </div>
@@ -129,6 +130,7 @@ export default function TeacherFields({ control, register, setValue, errors }: T
       <ClassArmSelector
         selectedClassArms={assignedClassArms}
         onClassArmsChange={(classArms) => setValue("assignedClassArms", classArms)}
+        selectedClasses={assignedClasses}
         error={errors.assignedClassArms?.message}
       />
     </div>

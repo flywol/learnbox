@@ -116,23 +116,36 @@ class ProfileApiClient extends BaseApiClient {
   // Get class levels and arms (Admin only)
   async getClassLevelsAndArms(): Promise<ClassLevelsAndArmsResponse> {
     try {
-      const response = await this.get<{ data: { classLevels: any[], classArms: any[] } }>("/admin/class-levels-and-arms");
+      const response = await this.get<{ data: { classLevels: any[] } }>("/admin/class-levels-and-arms");
+      
+      // Extract class arms from class levels since API returns nested structure
+      const classArmsFromLevels: any[] = [];
       
       // Transform _id to id for frontend consistency
-      const transformedData = {
-        data: {
-          classLevels: response.data.classLevels.map((level: any) => ({
-            ...level,
-            id: level._id,
-            arms: level.arms?.map((arm: any) => ({
-              ...arm,
-              id: arm._id
-            })) || []
-          })),
-          classArms: response.data.classArms.map((arm: any) => ({
+      const transformedClassLevels = response.data.classLevels.map((level: any) => {
+        const transformedArms = (level.arms || []).map((arm: any) => {
+          const transformedArm = {
             ...arm,
             id: arm._id
-          }))
+          };
+          
+          // Add to flat classArms array for ClassLevelsSection component
+          classArmsFromLevels.push(transformedArm);
+          
+          return transformedArm;
+        });
+
+        return {
+          ...level,
+          id: level._id,
+          arms: transformedArms
+        };
+      });
+
+      const transformedData = {
+        data: {
+          classLevels: transformedClassLevels,
+          classArms: classArmsFromLevels
         }
       };
       
