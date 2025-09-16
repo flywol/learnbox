@@ -39,8 +39,8 @@ const LoadingTimetable = () => (
   </div>
 );
 
-// Error component
-const TimetableError = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
+// Enhanced Error component with better UX
+const TimetableError = ({ message, onRetry, showRetry = true }: { message: string; onRetry: () => void; showRetry?: boolean }) => (
   <div className="space-y-4">
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -61,13 +61,15 @@ const TimetableError = ({ message, onRetry }: { message: string; onRetry: () => 
       <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
       <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load timetable</h3>
       <p className="text-gray-500 mb-4">{message}</p>
-      <button
-        onClick={onRetry}
-        className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors mx-auto"
-      >
-        <RefreshCw className="w-4 h-4" />
-        <span>Try Again</span>
-      </button>
+      {showRetry && (
+        <button
+          onClick={onRetry}
+          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors mx-auto"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Try Again</span>
+        </button>
+      )}
     </div>
   </div>
 );
@@ -155,7 +157,13 @@ export default function TimetableView({
   }
 
   if (availableClasses.length === 0) {
-    return <TimetableError message="No classes found. Please create classes first." onRetry={() => refetch()} />;
+    return (
+      <TimetableError 
+        message="No classes found. Please create classes through the school setup first." 
+        onRetry={() => refetch()} 
+        showRetry={false}
+      />
+    );
   }
   
   return (

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ArrowLeft, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Loader2 } from 'lucide-react';
+import { subjectsApiClient } from '../../user-management/api/subjectsApiClient';
+import FailureModal from '../../../common/components/FailureModal';
 
 interface Subject {
   id: string;
@@ -9,6 +11,7 @@ interface Subject {
 }
 
 interface AddSubjectViewProps {
+  classId: string;
   onBack: () => void;
   onAddSubjects: (subjects: Subject[]) => void;
   onShowSuccess: () => void;
@@ -22,9 +25,12 @@ const AVAILABLE_SUBJECTS = [
   { id: 'chemistry', name: 'Chemistry', icon: '/assets/chem.svg', bgColor: 'bg-yellow-500' },
 ];
 
-export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }: AddSubjectViewProps) {
+export default function AddSubjectView({ classId, onBack, onAddSubjects, onShowSuccess }: AddSubjectViewProps) {
   const [subjectInputs, setSubjectInputs] = useState([{ id: 1, value: '' }]);
   const [nextId, setNextId] = useState(2);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFailureModal, setShowFailureModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAddInput = () => {
     setSubjectInputs([...subjectInputs, { id: nextId, value: '' }]);
@@ -43,10 +49,29 @@ export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }:
     ));
   };
 
-  const handleSubmit = () => {
-    const validSubjects = subjectInputs
-      .filter(input => input.value.trim())
-      .map(input => {
+  const handleSubmit = async () => {
+    const validInputs = subjectInputs.filter(input => input.value.trim());
+    
+    if (validInputs.length === 0) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Prepare API request
+      const subjectsToAdd = validInputs.map(input => ({
+        name: input.value.trim()
+      }));
+
+      // Call API
+      await subjectsApiClient.addSubjectsToClass(classId, {
+        subjects: subjectsToAdd
+      });
+
+      // Create UI subjects for immediate display
+      const validSubjects = validInputs.map(input => {
         // Try to match with predefined subjects
         const predefined = AVAILABLE_SUBJECTS.find(s => 
           s.name.toLowerCase().includes(input.value.toLowerCase()) ||
@@ -61,13 +86,31 @@ export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }:
         };
       });
 
-    if (validSubjects.length > 0) {
+      // Update UI and show success
       onAddSubjects(validSubjects);
       onShowSuccess();
+      
+    } catch (err) {
+      console.error('Failed to add subjects:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(`Failed to add subjects: ${errorMessage}`);
+      setShowFailureModal(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const isSubmitDisabled = !subjectInputs.some(input => input.value.trim());
+  const handleRetry = () => {
+    setShowFailureModal(false);
+    handleSubmit();
+  };
+
+  const handleFailureModalClose = () => {
+    setShowFailureModal(false);
+    setError(null);
+  };
+
+  const isSubmitDisabled = !subjectInputs.some(input => input.value.trim()) || isSubmitting;
 
   return (
     <div className="space-y-6">
@@ -95,6 +138,7 @@ export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }:
                   onChange={(e) => handleInputChange(input.id, e.target.value)}
                   placeholder="Subject"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -102,14 +146,16 @@ export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }:
               {index === subjectInputs.length - 1 ? (
                 <button
                   onClick={handleAddInput}
-                  className="mt-6 w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600"
+                  disabled={isSubmitting}
+                  className="mt-6 w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   onClick={() => handleRemoveInput(input.id)}
-                  className="mt-6 w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600"
+                  disabled={isSubmitting}
+                  className="mt-6 w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
@@ -122,15 +168,32 @@ export default function AddSubjectView({ onBack, onAddSubjects, onShowSuccess }:
         <button
           onClick={handleSubmit}
           disabled={isSubmitDisabled}
-          className={`w-full py-3 rounded-lg font-medium transition-colors ${
+          className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
             isSubmitDisabled
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-orange-500 text-white hover:bg-orange-600'
           }`}
         >
-          Add
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Adding...
+            </>
+          ) : (
+            'Add'
+          )}
         </button>
       </div>
+      
+      {/* Failure Modal */}
+      <FailureModal
+        isOpen={showFailureModal}
+        onClose={handleFailureModalClose}
+        title="Error Adding Subjects"
+        message={error || 'Failed to add subjects to class. Please check your connection and try again.'}
+        onRetry={handleRetry}
+        retryText="Try Again"
+      />
     </div>
   );
 }

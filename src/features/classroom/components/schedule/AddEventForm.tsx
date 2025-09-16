@@ -1,4 +1,4 @@
-import { Calendar as CalendarIcon, ChevronDown, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -194,9 +194,15 @@ export default function AddEventForm({ onCancel, onSubmit }: AddEventFormProps) 
 
       {/* Error Message */}
       {createEventMutation.isError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">
-            Failed to create event. Please try again.
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2 text-red-800">
+            <AlertCircle className="w-5 h-5" />
+            <span className="font-medium">Failed to create event</span>
+          </div>
+          <p className="mt-1 text-sm text-red-700">
+            {createEventMutation.error instanceof Error 
+              ? createEventMutation.error.message 
+              : 'Please check your connection and try again.'}
           </p>
         </div>
       )}
