@@ -360,8 +360,34 @@ export const useAuthStore = create<AuthState>()(
 					// Run migration for existing users
 					storageManager.migrateExistingData();
 
-					const authClient = getAuthClientForRole(state.selectedRole);
-					const isAuthenticated = authClient.isAuthenticated();
+					// Handle selectedRole being null during hydration
+					let authClient;
+					let isAuthenticated = false;
+					
+					if (state.selectedRole) {
+						// Role is available, use specific client
+						authClient = getAuthClientForRole(state.selectedRole);
+						isAuthenticated = authClient.isAuthenticated();
+					} else if (state.user) {
+						// Role not available but user exists, try to determine from user data or check both clients
+						const teacherAuthCheck = teacherAuthApiClient.isAuthenticated();
+						const regularAuthCheck = authApiClient.isAuthenticated();
+						
+						if (teacherAuthCheck) {
+							authClient = teacherAuthApiClient;
+							isAuthenticated = true;
+							// Restore the selectedRole based on which client has valid tokens
+							set({ selectedRole: "TEACHER" });
+						} else if (regularAuthCheck) {
+							authClient = authApiClient;
+							isAuthenticated = true;
+							// Could set to "ADMIN" or another role, but let's be safe and not assume
+						}
+					} else {
+						// No role and no user, use default client
+						authClient = getAuthClientForRole(state.selectedRole);
+						isAuthenticated = authClient.isAuthenticated();
+					}
 
 					// If we have a user in state but no token, clear state
 					if (state.user && !isAuthenticated) {
@@ -393,9 +419,32 @@ export const useAuthStore = create<AuthState>()(
 			// Auth status checker
 			checkAuthStatus: () => {
 				const state = get();
-				const authClient = getAuthClientForRole(state.selectedRole);
-				const isAuthenticated = authClient.isAuthenticated();
-
+				
+				// Handle selectedRole being null during hydration
+				let isAuthenticated = false;
+				
+				if (state.selectedRole) {
+					// Role is available, use specific client
+					const authClient = getAuthClientForRole(state.selectedRole);
+					isAuthenticated = authClient.isAuthenticated();
+				} else if (state.user) {
+					// Role not available but user exists, check both clients
+					const teacherAuthCheck = teacherAuthApiClient.isAuthenticated();
+					const regularAuthCheck = authApiClient.isAuthenticated();
+					
+					if (teacherAuthCheck) {
+						isAuthenticated = true;
+						// Restore the selectedRole based on which client has valid tokens
+						set({ selectedRole: "TEACHER" });
+					} else if (regularAuthCheck) {
+						isAuthenticated = true;
+						// Could set to other roles, but let's be safe and not assume
+					}
+				} else {
+					// No role and no user, use default client
+					const authClient = getAuthClientForRole(state.selectedRole);
+					isAuthenticated = authClient.isAuthenticated();
+				}
 
 				// Quick consistency check
 				if (isAuthenticated && state.user && !state.isAuthenticated) {

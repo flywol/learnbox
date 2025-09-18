@@ -192,9 +192,9 @@ class AuthApiClient extends BaseApiClient {
 		return response;
 	}
 
-	// Get current user data (for session restoration)
+	// Get current admin data (for session restoration)
 	async getCurrentUser(): Promise<UserData> {
-		const response = await this.get<CurrentUserResponse>("/auth/me");
+		const response = await this.get<CurrentUserResponse>("/admin/admin-by-id");
 		return response.data.user;
 	}
 

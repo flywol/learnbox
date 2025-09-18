@@ -12,7 +12,6 @@ import type {
 	OtpRequest,
 	OtpResponse,
 	UserData,
-	CurrentUserResponse,
 	VerifyDomainRequest,
 	VerifyDomainResponse,
 } from "../types/auth.types";
@@ -235,10 +234,18 @@ class TeacherAuthApiClient extends BaseApiClient {
 		return !!(response.data && response.data.school && (response.data.school.id || response.data.school._id));
 	}
 
-	// Get current teacher data (following existing pattern)
+	// Get current teacher data (use stored data since no API endpoint exists)
 	async getCurrentUser(): Promise<UserData> {
-		const response = await this.get<CurrentUserResponse>("/teacher/me");
-		return response.data.user;
+		console.log("🍎 TeacherAuthApiClient: Getting stored teacher data (no API call needed)");
+		
+		const storedUserData = this.getUserData();
+		if (storedUserData) {
+			console.log("🍎 TeacherAuthApiClient: Successfully retrieved stored teacher data");
+			return storedUserData;
+		}
+		
+		console.error("🍎 TeacherAuthApiClient: No stored teacher data found");
+		throw new Error("No stored teacher data available");
 	}
 
 	// Simple logout method that clears everything and redirects (same as base auth)
