@@ -1,5 +1,5 @@
 // src/features/auth/pages/password/ForgotPassword.tsx
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,33 +7,29 @@ import {
 	forgotPasswordSchema,
 	ForgotPasswordFormData,
 } from "../../schemas/authSchema";
-import { useAuthStore } from "../../store/authStore";
+import { usePasswordReset } from "../../hooks/usePasswordReset";
 import OtpVerification from "../../components/OtpVerification";
 import { AuthPageWrapper } from "../../components/ui/AuthPageWrapper";
-import { authApiClient } from "../../api/authApiClient";
 
 const ForgotPasswordPage = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
+	// Use the password reset hook which includes factory pattern
 	const {
-		passwordResetEmail,
-		passwordResetStep,
-		loadingState,
-		setPasswordResetEmail,
-		setPasswordResetStep,
-		setLoadingState,
-	} = useAuthStore();
+		currentStep: passwordResetStep,
+		isLoading,
+		error,
+		email: passwordResetEmail,
+		requestPasswordReset,
+		verifyOtp,
+		resendOtp,
+	} = usePasswordReset();
 
 	// Pre-fill email if coming from login page
 	const defaultEmail = location.state?.email || "";
 
-	// Initialize password reset flow
-	useEffect(() => {
-		if (passwordResetStep === null) {
-			setPasswordResetStep("email");
-		}
-	}, [passwordResetStep, setPasswordResetStep]);
+	// Initialize password reset flow - the hook handles this automatically
 
 	const {
 		register,
@@ -49,21 +45,13 @@ const ForgotPasswordPage = () => {
 
 	const onEmailSubmit = useCallback(
 		async (data: ForgotPasswordFormData) => {
-			setLoadingState("submitting");
-
-			try {
-				await authApiClient.forgotPassword({ email: data.email });
-				setPasswordResetEmail(data.email);
-				setPasswordResetStep("otp");
-				setLoadingState("success");
-			} catch (err: any) {
-				const errorMessage =
-					err.message || "Failed to send reset email. Please try again.";
-				setError("email", { message: errorMessage });
-				setLoadingState("error");
+			const success = await requestPasswordReset(data.email);
+			
+			if (!success && error) {
+				setError("email", { message: error });
 			}
 		},
-		[setPasswordResetEmail, setPasswordResetStep, setLoadingState, setError]
+		[requestPasswordReset, error, setError]
 	);
 
 	// OTP verification callback
@@ -73,13 +61,13 @@ const ForgotPasswordPage = () => {
 				throw new Error("Email is required for OTP verification");
 			}
 
-			await authApiClient.verifyForgotPasswordOtp({
-				email: passwordResetEmail,
-				otp,
-			});
+			const success = await verifyOtp(otp);
+			
+			if (!success) {
+				throw new Error("OTP verification failed");
+			}
 
-			// Move to success step briefly, then redirect to reset password
-			setPasswordResetStep("newPassword");
+			// Success! The hook automatically moved to newPassword step
 
 			// Redirect to reset password page after a brief delay
 			setTimeout(() => {
@@ -91,7 +79,7 @@ const ForgotPasswordPage = () => {
 				});
 			}, 1500);
 		},
-		[passwordResetEmail, setPasswordResetStep, navigate]
+		[passwordResetEmail, verifyOtp, navigate]
 	);
 
 	// OTP resend callback
@@ -99,8 +87,8 @@ const ForgotPasswordPage = () => {
 		if (!passwordResetEmail) {
 			throw new Error("Email is required for resending OTP");
 		}
-		await authApiClient.forgotPassword({ email: passwordResetEmail });
-	}, [passwordResetEmail]);
+		await resendOtp();
+	}, [passwordResetEmail, resendOtp]);
 
 	// OTP error callback
 	const handleOtpError = useCallback(
@@ -120,8 +108,9 @@ const ForgotPasswordPage = () => {
 	}, [navigate, passwordResetEmail, defaultEmail]);
 
 	const handleBackToEmail = useCallback(() => {
-		setPasswordResetStep("email");
-	}, [setPasswordResetStep]);
+		// Reset the password reset flow to start over
+		navigate("/forgot-password");
+	}, [navigate]);
 
 	// Render OTP step
 	if (passwordResetStep === "otp") {
@@ -208,7 +197,7 @@ const ForgotPasswordPage = () => {
 							{...register("email")}
 							className="w-full p-3 border rounded-md"
 							placeholder="Email address"
-							disabled={loadingState === "submitting"}
+							disabled={isLoading}
 						/>
 						{errors.email && (
 							<p className="text-red-500 text-sm mt-1">
@@ -219,9 +208,9 @@ const ForgotPasswordPage = () => {
 
 					<button
 						type="submit"
-						disabled={!isValid || loadingState === "submitting"}
+						disabled={!isValid || isLoading}
 						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-						{loadingState === "submitting"
+						{isLoading
 							? "Sending..."
 							: "Send Verification Code"}
 					</button>

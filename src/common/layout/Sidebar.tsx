@@ -9,7 +9,7 @@ import {
 	User,
 	LogOut,
 } from "lucide-react";
-import { authApiClient } from "@/features/auth/api/authApiClient";
+import { useAuthStore } from "@/features/auth/store/authStore";
 
 // Menu config — root-level paths only
 const menuItems = [
@@ -29,11 +29,12 @@ const menuItems = [
 export default function Sidebar() {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
+	const { logout } = useAuthStore();
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;
 		setIsLoggingOut(true);
-		await authApiClient.logout();
+		await logout();
 	};
 
 	// Active check — exact or starts with path + "/"

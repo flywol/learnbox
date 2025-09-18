@@ -12,6 +12,7 @@ import type {
 	UserData,
 } from "../types/auth.types";
 import { authApiClient } from "../api/authApiClient";
+import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
 
 interface AuthState {
 	// Core state
@@ -76,6 +77,37 @@ const initialLoginContext: LoginContext = {
 	tempCredentialsUsed: false,
 };
 
+// Helper function to get the appropriate auth client based on current role
+const getAuthClientForRole = (selectedRole: Role | null) => {
+	console.log("🏪 AuthStore: Getting auth client for role", { 
+		selectedRole,
+		roleType: typeof selectedRole,
+		isNull: selectedRole === null,
+		isUndefined: selectedRole === undefined
+	});
+	
+	// Let's also check the current store state
+	const currentState = useAuthStore.getState();
+	console.log("🏪 AuthStore: Current store state during client request", {
+		storeSelectedRole: currentState.selectedRole,
+		paramSelectedRole: selectedRole,
+		storeRoleType: typeof currentState.selectedRole,
+		rolesMatch: currentState.selectedRole === selectedRole
+	});
+	
+	if (selectedRole === "TEACHER") {
+		console.log("🏪 AuthStore: Auth client obtained for role", { 
+			selectedRole, 
+			clientType: "TeacherAuthApiClient" 
+		});
+		return teacherAuthApiClient;
+	}
+	
+	console.log("🏪 AuthStore: No role selected, using fallback AuthApiClient");
+	// Fallback to base auth client if no role selected
+	return authApiClient;
+};
+
 // Helper function to transform API user data to internal User type
 const transformUserData = (apiUser: UserData): User => {
 	return {
@@ -126,7 +158,20 @@ export const useAuthStore = create<AuthState>()(
 
 			// Role and school management
 			setRole: (role) => {
+				console.log("🏪 AuthStore: Setting role", { 
+					previousRole: get().selectedRole, 
+					newRole: role,
+					roleType: typeof role 
+				});
 				set({ selectedRole: role });
+				
+				// Verify role was set correctly
+				const currentRole = get().selectedRole;
+				console.log("🏪 AuthStore: Role set verification", { 
+					setRole: role, 
+					currentRole,
+					matches: role === currentRole 
+				});
 			},
 
 			setSchoolDomain: (domain) => {
@@ -137,9 +182,18 @@ export const useAuthStore = create<AuthState>()(
 			// School domain verification
 			verifySchoolDomain: async (domain) => {
 				try {
-					const response = await authApiClient.verifyDomain({
+					const state = get();
+					console.log("🏪 AuthStore: Starting school domain verification", { 
+						domain, 
+						selectedRole: state.selectedRole 
+					});
+					
+					const authClient = getAuthClientForRole(state.selectedRole);
+					const response = await authClient.verifyDomain({
 						schoolDomain: domain,
 					});
+					
+					console.log("🏪 AuthStore: School domain verification response", response);
 
 					// Check if school exists in response (indicates verification success)
 					const isVerified = !!(
@@ -161,9 +215,25 @@ export const useAuthStore = create<AuthState>()(
 
 			// Flow state management
 			clearAllFlowStates: () => {
+				console.log("🏪 AuthStore: clearAllFlowStates called");
+				const currentState = get();
+				console.log("🏪 AuthStore: State before clearing flow states", {
+					selectedRole: currentState.selectedRole,
+					passwordResetEmail: currentState.passwordResetEmail,
+					passwordResetStep: currentState.passwordResetStep
+				});
+				
 				set({
 					passwordResetEmail: null,
 					passwordResetStep: null,
+				});
+				
+				const newState = get();
+				console.log("🏪 AuthStore: State after clearing flow states", {
+					selectedRole: newState.selectedRole,
+					passwordResetEmail: newState.passwordResetEmail,
+					passwordResetStep: newState.passwordResetStep,
+					roleChanged: currentState.selectedRole !== newState.selectedRole
 				});
 			},
 
@@ -179,11 +249,18 @@ export const useAuthStore = create<AuthState>()(
 			// Fix for authStore.ts - Complete logout with storage clearing
 
 			logout: async () => {
+				console.log("🏪 AuthStore: Starting logout");
 
 				try {
-					// Call API logout
-					await authApiClient.logout();
+					// Call API logout using the appropriate client
+					const state = get();
+					console.log("🏪 AuthStore: Logout for role", { selectedRole: state.selectedRole });
+					
+					const authClient = getAuthClientForRole(state.selectedRole);
+					await authClient.logout();
+					console.log("🏪 AuthStore: API logout successful");
 				} catch (error) {
+					console.error("🏪 AuthStore: API logout failed", error);
 					// Continue with local cleanup even if API call fails
 				}
 
@@ -215,8 +292,10 @@ export const useAuthStore = create<AuthState>()(
 
 			// Session restoration
 			restoreSession: async () => {
+				const state = get();
+				const authClient = getAuthClientForRole(state.selectedRole);
 
-				if (!authApiClient.isAuthenticated()) {
+				if (!authClient.isAuthenticated()) {
 					return false;
 				}
 
@@ -224,7 +303,7 @@ export const useAuthStore = create<AuthState>()(
 					set({ loadingState: "validating" });
 
 					// First try to get user data from storage
-					const storedUserData = authApiClient.getUserData();
+					const storedUserData = authClient.getUserData();
 					if (storedUserData) {
 						const user = transformUserData(storedUserData);
 						set({
@@ -237,7 +316,7 @@ export const useAuthStore = create<AuthState>()(
 
 					// If no stored user data, try to fetch from API
 					try {
-						const apiUser = await authApiClient.getCurrentUser();
+						const apiUser = await authClient.getCurrentUser();
 						const user = transformUserData(apiUser);
 
 						set({
@@ -255,7 +334,7 @@ export const useAuthStore = create<AuthState>()(
 
 					// Clear invalid session using logout to properly clear tokens
 					try {
-						await authApiClient.logout();
+						await authClient.logout();
 					} catch (logoutError) {
 						// Continue with state clearing anyway
 					}
@@ -281,7 +360,8 @@ export const useAuthStore = create<AuthState>()(
 					// Run migration for existing users
 					storageManager.migrateExistingData();
 
-					const isAuthenticated = authApiClient.isAuthenticated();
+					const authClient = getAuthClientForRole(state.selectedRole);
+					const isAuthenticated = authClient.isAuthenticated();
 
 					// If we have a user in state but no token, clear state
 					if (state.user && !isAuthenticated) {
@@ -313,7 +393,8 @@ export const useAuthStore = create<AuthState>()(
 			// Auth status checker
 			checkAuthStatus: () => {
 				const state = get();
-				const isAuthenticated = authApiClient.isAuthenticated();
+				const authClient = getAuthClientForRole(state.selectedRole);
+				const isAuthenticated = authClient.isAuthenticated();
 
 
 				// Quick consistency check

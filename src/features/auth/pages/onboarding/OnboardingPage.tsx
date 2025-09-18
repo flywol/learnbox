@@ -128,9 +128,15 @@ const OnboardingPage = () => {
 
 	const handleNext = () => {
 		if (isLastScreen) {
-			// Complete onboarding and go to dashboard
+			// Complete onboarding
 			markOnboardingComplete();
-			navigate("/dashboard");
+			
+			// Teachers go to school-setup, others go to dashboard
+			if (selectedRole === "TEACHER") {
+				navigate("/school-setup");
+			} else {
+				navigate("/dashboard");
+			}
 		} else {
 			// Go to next screen
 			setCurrentScreen(currentScreen + 1);
@@ -140,7 +146,13 @@ const OnboardingPage = () => {
 	const handleSkip = () => {
 		// Skip entire onboarding
 		markOnboardingComplete();
-		navigate("/dashboard");
+		
+		// Teachers go to school-setup, others go to dashboard
+		if (selectedRole === "TEACHER") {
+			navigate("/school-setup");
+		} else {
+			navigate("/dashboard");
+		}
 	};
 
 	return (

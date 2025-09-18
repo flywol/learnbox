@@ -3,7 +3,6 @@ import { lazy } from "react";
 import { AuthGuard } from "../features/auth/components/guards/AuthGuard";
 import { FlowGuard } from "../features/auth/components/guards/FlowGuard";
 import { FlowContextGuard } from "../features/auth/components/guards/FlowContextGuard";
-import { ProtectedRoute } from "../features/auth/components/guards/FirstTimeLoginGuard";
 import { DeviceRestrictedPage } from "../common/security/DeviceRestrictedPage";
 
 const RoleSelectionPage = lazy(() => import("../features/auth/pages/RoleSelectionPage"));
@@ -95,9 +94,13 @@ export function PublicRoutes() {
       <Route
         path="/onboarding"
         element={
-          <ProtectedRoute>
-            <OnboardingPage />
-          </ProtectedRoute>
+          <AuthGuard requiresAuth={false}>
+            <FlowGuard requiresRole>
+              <FlowContextGuard flowType="onboarding">
+                <OnboardingPage />
+              </FlowContextGuard>
+            </FlowGuard>
+          </AuthGuard>
         }
       />
     </>

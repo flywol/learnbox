@@ -5,12 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "../../store/authStore";
+import { useAuth } from "../../hooks/useAuth";
 import {
 	loginSchema,
 	SchoolSetupFormData,
 	schoolSetupSchema,
 } from "../../schemas/authSchema";
-import { authApiClient } from "../../api/authApiClient";
 import AuthIllustration from "./components/AuthIllustration";
 import SchoolDomainStep from "./components/SchoolDomainStep";
 import LoginForm from "./components/LoginForm";
@@ -31,12 +31,13 @@ const CombinedSchoolLoginPage = () => {
 		schoolDomain,
 		setSchoolDomain,
 		hasSeenOnboarding,
-		login: loginAction,
-		setFirstTimeLogin,
 		intendedDestination,
 		setIntendedDestination,
 		verifySchoolDomain,
 	} = useAuthStore();
+
+	// Use the auth hook which has the factory pattern
+	const { login: authLogin } = useAuth();
 
 	// School setup form
 	const schoolForm = useForm<SchoolSetupFormData>({
@@ -106,115 +107,64 @@ const CombinedSchoolLoginPage = () => {
 		setIsLoggingIn(true);
 		setLoginError(null);
 
+		console.log("🔑 LoginPage: Starting login for teacher", { 
+			email: data.email, 
+			selectedRole, 
+			schoolDomain 
+		});
+
 		try {
-			// Call API using new auth client
-			const response = await authApiClient.login(
-				{
-					email: data.email,
-					password: data.password,
-				},
-				data.rememberMe || false
-			);
+			// Use the auth hook which includes the factory pattern
+			const result = await authLogin(data.email, data.password, data.rememberMe || false);
 
+			if (result.success && result.user) {
+				console.log("🔑 LoginPage: Login successful", { 
+					user: result.user, 
+					isFirstTimeLogin: result.isFirstTimeLogin 
+				});
 
-			// Transform API user data to internal User type
-			const userId = response.data.user.id || response.data.user._id;
-			if (!userId) {
-				throw new Error("User ID is required");
-			}
-
-			const transformedUser = {
-				id: userId,
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-				deleted_at: "",
-				fullName:
-					response.data.user.firstName && response.data.user.lastName
-						? `${response.data.user.firstName} ${response.data.user.lastName}`
-						: response.data.user.fullName || "",
-				phoneNumber:
-					response.data.user.phone || response.data.user.phoneNumber || "",
-				email: response.data.user.email,
-				role: response.data.user.role,
-				isVerified: response.data.user.isVerified ?? true,
-				isActive: response.data.user.isActive ?? true,
-				isDeleted: false,
-				otp: "",
-				otpExpiration: "",
-				resetPasswordToken: response.data.user.resetPasswordToken || "",
-				resetPasswordExpires: "",
-			};
-
-			// Handle unverified users - redirect to OTP verification  
-			// Simply redirect without setting tokens (keeps user unauthenticated)
-			if (!transformedUser.isVerified) {
-				try {
-					// Auto-resend OTP for unverified users
-					await authApiClient.resendOtp({
-						email: transformedUser.email
-					});
-					
-					// Navigate to OTP verification page (no authentication, no clearing)
+				// Handle unverified users
+				if (!result.user.isVerified) {
+					// TODO: Handle OTP verification flow
 					navigate("/verify-email", {
 						state: {
-							email: transformedUser.email,
-							message: "Your account is not verified. Please enter the verification code we just sent to your email.",
-							from: intendedDestination || "/dashboard",
-						},
-					});
-				} catch (otpError) {
-					// If OTP resend fails, still redirect but with error message
-					navigate("/verify-email", {
-						state: {
-							email: transformedUser.email,
+							email: result.user.email,
 							message: "Your account is not verified. Please verify your email to continue.",
-							error: "Failed to send verification code. Please try again.",
 							from: intendedDestination || "/dashboard",
 						},
 					});
+					return;
 				}
-				return; // Exit early - don't set tokens, don't authenticate
+
+				// Small delay to ensure state propagation
+				setTimeout(() => {
+					// Navigate based on user state
+					if (result.isFirstTimeLogin) {
+						navigate("/reset-password", {
+							state: {
+								resetToken: result.resetToken,
+								email: result.user!.email,
+								from: intendedDestination || "/dashboard",
+							},
+							replace: true,
+						});
+					} else if (intendedDestination) {
+						const destination = intendedDestination;
+						setIntendedDestination(null);
+						navigate(destination, { replace: true });
+					} else if (hasSeenOnboarding) {
+						navigate("/dashboard", { replace: true });
+					} else {
+						navigate("/onboarding", { replace: true });
+					}
+				}, 100);
+			} else {
+				console.error("🔑 LoginPage: Login failed", result.error);
+				setLoginError(result.error || "Login failed. Please check your credentials.");
 			}
-
-			// Check for first-time login
-			const isFirstTimeLogin = !!(
-				transformedUser.resetPasswordToken &&
-				transformedUser.resetPasswordToken.length > 0
-			);
-			if (isFirstTimeLogin) {
-				setFirstTimeLogin(true, response.data.accessToken);
-			}
-
-			// Authenticate user in store
-			loginAction(transformedUser);
-
-			// Small delay to ensure state propagation
-			setTimeout(() => {
-				// Navigate based on user state
-				if (isFirstTimeLogin) {
-					navigate("/reset-password", {
-						state: {
-							resetToken: response.data.accessToken,
-							email: transformedUser.email,
-							from: intendedDestination || "/dashboard",
-						},
-						replace: true,
-					});
-				} else if (intendedDestination) {
-					const destination = intendedDestination;
-					setIntendedDestination(null);
-					navigate(destination, { replace: true });
-				} else if (hasSeenOnboarding) {
-					navigate("/dashboard", { replace: true });
-				} else {
-					navigate("/onboarding", { replace: true });
-				}
-			}, 100);
 		} catch (error: any) {
-			console.error("❌ Login failed:", error);
-			setLoginError(
-				error.message || "Login failed. Please check your credentials."
-			);
+			console.error("🔑 LoginPage: Login exception", error);
+			setLoginError(error.message || "Login failed. Please check your credentials.");
 		} finally {
 			setIsLoggingIn(false);
 		}

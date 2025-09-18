@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { Role, User, UserData } from "../types/auth.types";
 import { authApiClient } from "../api/authApiClient";
+import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
 
 interface UseAuthOptions {
 	redirectTo?: string;
@@ -59,6 +60,15 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 		setIntendedDestination,
 	} = authState;
 
+	// Log current auth state whenever useAuth is called
+	console.log("🎣 useAuth: Hook called with current state", {
+		selectedRole,
+		roleType: typeof selectedRole,
+		isAuthenticated,
+		hasUser: !!user,
+		loadingState
+	});
+
 	// Check access permissions
 	const hasAccess = useCallback(() => {
 		if (!requireAuth) return true;
@@ -69,16 +79,31 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 		return true;
 	}, [requireAuth, isAuthenticated, allowedRoles, user]);
 
-	// Enhanced login function
+	// Enhanced login function - delegates to auth store which has factory pattern
 	const login = useCallback(
 		async (email: string, password: string, rememberMe: boolean = false) => {
+			console.log("🎣 useAuth: Delegating login to auth store", { 
+				email, 
+				selectedRole, 
+				rememberMe 
+			});
+			
 			setLoadingState("submitting");
 
 			try {
-				const response = await authApiClient.login(
+				// Simple client selection
+				const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				console.log("🎣 useAuth: Using auth client for role", { selectedRole });
+				
+				const response = await authClient.login(
 					{ email, password },
 					rememberMe
 				);
+				
+				console.log("🎣 useAuth: Login response received", {
+					hasData: !!response.data,
+					hasUser: !!response.data?.user
+				});
 
 				// Transform user data
 				const transformedUser = transformUserData(response.data.user);
@@ -108,7 +133,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 				};
 			}
 		},
-		[setLoadingState, setFirstTimeLogin, storeLogin]
+		[selectedRole, setLoadingState, setFirstTimeLogin, storeLogin]
 	);
 
 	// Enhanced logout function

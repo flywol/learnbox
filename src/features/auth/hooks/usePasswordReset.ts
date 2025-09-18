@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { authApiClient } from "../api/authApiClient";
+import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
 
 interface UsePasswordResetReturn {
 	// State
@@ -15,8 +16,7 @@ interface UsePasswordResetReturn {
 	verifyOtp: (otp: string) => Promise<boolean>;
 	resetPassword: (
 		newPassword: string,
-		confirmPassword: string,
-		email: string
+		confirmPassword: string
 	) => Promise<boolean>;
 	resendOtp: () => Promise<boolean>;
 	clearError: () => void;
@@ -37,6 +37,7 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 	const {
 		passwordResetEmail,
 		passwordResetStep,
+		selectedRole,
 		setPasswordResetEmail,
 		setPasswordResetStep,
 		completePasswordReset,
@@ -48,11 +49,22 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 	// Request password reset (send OTP)
 	const requestPasswordReset = useCallback(
 		async (email: string): Promise<boolean> => {
+			console.log("🔐 usePasswordReset: Starting password reset request", { 
+				email, 
+				selectedRole 
+			});
+			
 			setIsLoading(true);
 			setError(null);
 
 			try {
-				await authApiClient.forgotPassword({ email });
+				console.log("🔐 usePasswordReset: Getting auth client for role", { selectedRole });
+				// Simple client selection
+			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				console.log("🔐 usePasswordReset: Calling forgotPassword");
+				
+				await authClient.forgotPassword({ email });
+				console.log("🔐 usePasswordReset: Password reset request successful");
 
 				setPasswordResetEmail(email);
 				setPasswordResetStep("otp");
@@ -75,17 +87,28 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 				return false;
 			}
 
+			console.log("🔐 usePasswordReset: Starting OTP verification", { 
+				otp, 
+				email: passwordResetEmail, 
+				selectedRole 
+			});
+
 			setIsLoading(true);
 			setError(null);
 
 			try {
-				await authApiClient.verifyForgotPasswordOtp({
+				console.log("🔐 usePasswordReset: Getting auth client for OTP verification");
+				// Simple client selection
+			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				await authClient.verifyForgotPasswordOtp({
 					email: passwordResetEmail,
 					otp,
 				});
+				console.log("🔐 usePasswordReset: OTP verification successful");
 				setPasswordResetStep("newPassword");
 				return true;
 			} catch (err: any) {
+				console.error("🔐 usePasswordReset: OTP verification failed", err);
 				setError(err.message || "Invalid or expired OTP");
 				return false;
 			} finally {
@@ -107,7 +130,9 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				await authApiClient.resetPassword({
+				// Simple client selection
+			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				await authClient.resetPassword({
 					password: password,
 					confirmPassword: confirmPassword,
 					email: passwordResetEmail,
@@ -137,7 +162,9 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 		setError(null);
 
 		try {
-			await authApiClient.forgotPassword({ email: passwordResetEmail });
+			// Simple client selection
+			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+			await authClient.forgotPassword({ email: passwordResetEmail });
 			return true;
 		} catch (err: any) {
 			setError(err.message || "Failed to resend OTP");

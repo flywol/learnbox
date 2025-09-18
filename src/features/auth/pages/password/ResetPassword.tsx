@@ -8,7 +8,7 @@ import {
 	ResetPasswordFormData,
 } from "../../schemas/authSchema";
 import { useAuthStore } from "../../store/authStore";
-import { authApiClient } from "../../api/authApiClient";
+import { usePasswordReset } from "../../hooks/usePasswordReset";
 
 // Illustration component that stays static during transition
 const AuthIllustration = () => (
@@ -31,7 +31,8 @@ const ResetPasswordPage = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-	const { loginContext, user, logout, completePasswordReset } = useAuthStore();
+	const { loginContext, user, logout } = useAuthStore();
+	const { resetPassword } = usePasswordReset();
 
 	// Get email from location state (from forgot password flow)
 	const userEmail = location.state?.email || user?.email;
@@ -87,14 +88,11 @@ const ResetPasswordPage = () => {
 		setError(null);
 
 		try {
-			await authApiClient.resetPassword({
-				password: data.password,
-				confirmPassword: data.confirmPassword,
-				email: userEmail,
-			});
-
-			// Clear the password reset state
-			completePasswordReset();
+			const success = await resetPassword(data.password, data.confirmPassword);
+			
+			if (!success) {
+				throw new Error("Password reset failed");
+			}
 
 			// For first-time login, they're already logged in, just redirect
 			if (isFirstTimeLogin) {

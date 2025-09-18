@@ -2,14 +2,15 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
+import { usePasswordReset } from "../../hooks/usePasswordReset";
 import OtpVerification from "../../components/OtpVerification";
-import { authApiClient } from "../../api/authApiClient";
 
 const ForgotPasswordOtpPage = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const { passwordResetEmail, setPasswordResetStep } = useAuthStore();
+	const { setPasswordResetStep } = useAuthStore();
+	const { email: passwordResetEmail, verifyOtp, resendOtp } = usePasswordReset();
 
 	// Get email from location state if not in store
 	const emailFromState = location.state?.email;
@@ -29,13 +30,11 @@ const ForgotPasswordOtpPage = () => {
 				throw new Error("Email is required for OTP verification");
 			}
 
-			await authApiClient.verifyForgotPasswordOtp({
-				email: verificationEmail,
-				otp,
-			});
-
-			// Move to success step briefly, then redirect to reset password
-			setPasswordResetStep("newPassword");
+			const success = await verifyOtp(otp);
+			
+			if (!success) {
+				throw new Error("OTP verification failed");
+			}
 
 			// Redirect to reset password page after a brief delay
 			setTimeout(() => {
@@ -55,8 +54,8 @@ const ForgotPasswordOtpPage = () => {
 		if (!verificationEmail) {
 			throw new Error("Email is required for resending OTP");
 		}
-		await authApiClient.forgotPassword({ email: verificationEmail });
-	}, [verificationEmail]);
+		await resendOtp();
+	}, [verificationEmail, resendOtp]);
 
 	// Error handling callback
 	const handleOtpError = useCallback((error: string) => {
