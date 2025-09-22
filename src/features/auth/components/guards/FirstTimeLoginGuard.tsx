@@ -75,6 +75,7 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	}
 
 	// Redirect to role selection if not authenticated
+	// Add a small grace period to handle race conditions during login
 	if (!isAuthenticated || !user) {
 		return (
 			<Navigate

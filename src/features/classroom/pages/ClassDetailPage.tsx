@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Phone } from 'lucide-react';
-import { userApiClient } from '../../user-management/api/userApiClient';
-import { subjectsApiClient } from '../../user-management/api/subjectsApiClient';
+import { userApiClient } from '../../admin/user-management/api/userApiClient';
+import { subjectsApiClient } from '../../admin/user-management/api/subjectsApiClient';
 import StudentCard from '../components/StudentCard';
 import StudentDetailModal from '../components/StudentDetailModal';
 import AddSubjectView from '../components/AddSubjectView';

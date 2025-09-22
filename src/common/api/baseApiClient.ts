@@ -94,6 +94,7 @@ export class BaseApiClient {
 		// List of endpoints that return 401 for validation errors, not token expiry
 		const validationEndpoints = [
 			'/auth/login',           // Wrong email/password
+			'/teacher/login',        // Wrong teacher email/password
 			'/auth/verify-otp',      // Wrong OTP
 			'/auth/resend-otp',      // OTP-related errors
 			'/auth/forgot-password', // Email not found

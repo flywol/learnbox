@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '@/common/ui/Table';
-import { PaginationSection } from '../../user-management/components/PaginationSection';
+import { PaginationSection } from '../../admin/user-management/components/PaginationSection';
 import { createAssessmentColumns } from '../utils/assessmentColumns';
 import type { AssessmentStudent, AssessmentSummary } from '../types/classroom.types';
 

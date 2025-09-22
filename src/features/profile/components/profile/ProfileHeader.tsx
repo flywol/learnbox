@@ -1,4 +1,4 @@
-import UserAvatar from "../../../user-management/components/UserAvatar";
+import UserAvatar from "../../../admin/user-management/components/UserAvatar";
 
 interface AdminProfile {
   profilePicture?: string | null;

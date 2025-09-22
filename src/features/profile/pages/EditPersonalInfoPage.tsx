@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useAdminProfile, useUpdatePersonalInfo } from "../hooks/useProfile";
-import UserAvatar from "../../user-management/components/UserAvatar";
+import UserAvatar from "../../admin/user-management/components/UserAvatar";
 
 const personalInfoSchema = z.object({
   fullName: z.string().min(1, "Name is required"),

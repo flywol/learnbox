@@ -16,11 +16,12 @@ import type {
 	VerifyDomainResponse,
 } from "../types/auth.types";
 
-// Teacher login response has 'teacher' instead of 'user'
+// Teacher login response - may have 'teacher' field instead of 'user'
 interface TeacherLoginData {
 	accessToken: string;
 	refreshToken: string;
-	teacher: UserData; // Teacher data with same structure as UserData
+	teacher?: UserData; // Teacher data (if returned as 'teacher')
+	user?: UserData;    // User data (if returned as 'user')
 }
 
 interface TeacherLoginResponse {
@@ -39,68 +40,51 @@ class TeacherAuthApiClient extends BaseApiClient {
 		data: LoginRequest,
 		rememberMe: boolean = false
 	): Promise<LoginResponse> {
-		console.log("🍎 TeacherAuthApiClient: Starting teacher login", {
-			email: data.email,
-			rememberMe,
-			endpoint: "/teacher/login"
-		});
-
 		try {
 			const response = await this.post<TeacherLoginResponse>("/teacher/login", data);
-			console.log("🍎 TeacherAuthApiClient: Teacher login response received", {
-				hasData: !!response.data,
-				hasAccessToken: !!(response.data?.accessToken),
-				hasRefreshToken: !!(response.data?.refreshToken),
-				hasTeacher: !!(response.data?.teacher),
-				responseStructure: response.data,
-				dataKeys: response.data ? Object.keys(response.data) : []
-			});
 
 			// Store tokens and user data on successful login 
-			// Note: Teacher endpoint returns 'teacher' field instead of 'user'
+			// Teacher endpoint may return 'teacher' field or 'user' field
+			const userData = response.data.teacher || response.data.user;
+			
 			if (
 				response.data &&
 				response.data.accessToken &&
 				response.data.refreshToken &&
-				response.data.teacher
+				userData
 			) {
-				console.log("🍎 TeacherAuthApiClient: Storing tokens and teacher data");
 				this.setTokens(
 					response.data.accessToken,
 					response.data.refreshToken,
 					rememberMe
 				);
-				// Use teacher data but store as user data for consistency
-				this.setUserData(response.data.teacher);
-				console.log("🍎 TeacherAuthApiClient: Teacher login successful");
+				// Store user data
+				this.setUserData(userData);
 			} else {
-				console.error("🍎 TeacherAuthApiClient: Login response missing tokens", response.data);
-				throw new Error("Login response missing tokens");
+				throw new Error("Login response missing tokens or user data");
 			}
 
 			// Transform the response to match the expected structure
-			// Convert teacher field to user field for consistency with frontend
-			const transformedResponse = {
+			// Ensure response has 'user' field for frontend compatibility
+			const transformedResponse: LoginResponse = {
 				...response,
 				data: {
-					...response.data,
-					user: response.data.teacher // Map teacher to user for frontend compatibility
+					accessToken: response.data.accessToken,
+					refreshToken: response.data.refreshToken,
+					user: userData
 				}
 			};
 
 			return transformedResponse;
 		} catch (error) {
-			console.error("🍎 TeacherAuthApiClient: Teacher login failed", error);
 			const apiError = error as ApiErrorResponse;
 
 			if (apiError.status === 401) {
-				console.log("🍎 TeacherAuthApiClient: 401 Unauthorized - Invalid credentials");
 				throw {
 					message: "Invalid email or password",
 					status: 401,
 				};
 			} else if (apiError.status === 429) {
-				console.log("🍎 TeacherAuthApiClient: 429 Too Many Requests");
 				throw {
 					message: "Too many login attempts. Please try again later.",
 					status: 429,
@@ -112,16 +96,11 @@ class TeacherAuthApiClient extends BaseApiClient {
 
 	// Teacher logout
 	async logout(): Promise<void> {
-		console.log("🍎 TeacherAuthApiClient: Starting teacher logout");
-
 		try {
 			await this.post<LogoutResponse>("/teacher/logout");
-			console.log("🍎 TeacherAuthApiClient: Teacher logout API call successful");
 		} catch (error) {
-			console.error("🍎 TeacherAuthApiClient: Teacher logout API call failed", error);
 			// Continue with local cleanup even if API call fails
 		} finally {
-			console.log("🍎 TeacherAuthApiClient: Performing local logout cleanup");
 			// Always clear all auth data regardless of API response
 			this.performLogout();
 		}
@@ -140,27 +119,19 @@ class TeacherAuthApiClient extends BaseApiClient {
 	async forgotPassword(
 		data: ForgotPasswordRequest
 	): Promise<ForgotPasswordResponse> {
-		console.log("🍎 TeacherAuthApiClient: Starting teacher forgot password", {
-			email: data.email,
-			endpoint: "/teacher/forgot-password"
-		});
-
 		try {
 			const response = await this.post<ForgotPasswordResponse>(
 				"/teacher/forgot-password",
 				data
 			);
-			console.log("🍎 TeacherAuthApiClient: Teacher forgot password successful");
 			return response;
 		} catch (error) {
 			console.error("🍎 TeacherAuthApiClient: Teacher forgot password failed", error);
 			const apiError = error as ApiErrorResponse;
 
 			if (apiError.status === 400) {
-				console.log("🍎 TeacherAuthApiClient: 400 Bad Request - Invalid email");
 				throw { message: "Invalid email address", status: 400 };
 			} else if (apiError.status === 404) {
-				console.log("🍎 TeacherAuthApiClient: 404 Not Found - Email not found");
 				throw { message: "Email not found", status: 404 };
 			}
 			throw apiError;
@@ -178,18 +149,11 @@ class TeacherAuthApiClient extends BaseApiClient {
 
 	// Verify forgot password OTP for teachers
 	async verifyForgotPasswordOtp(data: OtpRequest): Promise<OtpResponse> {
-		console.log("🍎 TeacherAuthApiClient: Starting teacher OTP verification", {
-			email: data.email,
-			otp: data.otp,
-			endpoint: "/teacher/verify-forgot-password-otp"
-		});
-
 		try {
 			const response = await this.post<OtpResponse>(
 				"/teacher/verify-forgot-password-otp",
 				data
 			);
-			console.log("🍎 TeacherAuthApiClient: Teacher OTP verification successful");
 			return response;
 		} catch (error) {
 			console.error("🍎 TeacherAuthApiClient: Teacher OTP verification failed", error);
@@ -201,17 +165,11 @@ class TeacherAuthApiClient extends BaseApiClient {
 	async resetPassword(
 		data: ResetPasswordRequest
 	): Promise<ResetPasswordResponse> {
-		console.log("🍎 TeacherAuthApiClient: Starting teacher password reset", {
-			email: data.email,
-			endpoint: "/teacher/reset-password"
-		});
-
 		try {
 			const response = await this.post<ResetPasswordResponse>(
 				"/teacher/reset-password",
 				data
 			);
-			console.log("🍎 TeacherAuthApiClient: Teacher password reset successful");
 			return response;
 		} catch (error) {
 			console.error("🍎 TeacherAuthApiClient: Teacher password reset failed", error);
@@ -236,15 +194,11 @@ class TeacherAuthApiClient extends BaseApiClient {
 
 	// Get current teacher data (use stored data since no API endpoint exists)
 	async getCurrentUser(): Promise<UserData> {
-		console.log("🍎 TeacherAuthApiClient: Getting stored teacher data (no API call needed)");
-		
 		const storedUserData = this.getUserData();
 		if (storedUserData) {
-			console.log("🍎 TeacherAuthApiClient: Successfully retrieved stored teacher data");
 			return storedUserData;
 		}
 		
-		console.error("🍎 TeacherAuthApiClient: No stored teacher data found");
 		throw new Error("No stored teacher data available");
 	}
 

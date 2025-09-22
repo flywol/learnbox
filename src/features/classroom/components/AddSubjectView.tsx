@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Plus, Minus, Loader2 } from 'lucide-react';
-import { subjectsApiClient } from '../../user-management/api/subjectsApiClient';
+import { subjectsApiClient } from '../../admin/user-management/api/subjectsApiClient';
 import FailureModal from '../../../common/components/FailureModal';
 
 interface Subject {

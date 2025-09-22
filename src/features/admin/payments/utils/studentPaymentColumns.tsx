@@ -1,7 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { TransactionData } from "../types/payment.types";
+import { StudentPayment } from "../types/payment.types";
 
-export const createTransactionColumns = (): ColumnDef<TransactionData, any>[] => [
+export const createStudentPaymentColumns = (): ColumnDef<StudentPayment, unknown>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -29,7 +29,7 @@ export const createTransactionColumns = (): ColumnDef<TransactionData, any>[] =>
         cell: ({ row }) => (
             <div className="flex items-center gap-3">
                 <img
-                    src={row.original.studentAvatar}
+                    src={row.original.avatar}
                     alt={row.original.studentName}
                     className="w-10 h-10 rounded-full object-cover"
                 />
@@ -53,15 +53,6 @@ export const createTransactionColumns = (): ColumnDef<TransactionData, any>[] =>
                     {row.original.parentName}
                 </span>
             </div>
-        ),
-    },
-    {
-        accessorKey: "classLevel",
-        header: "Class level",
-        cell: ({ getValue }) => (
-            <span className="text-sm text-gray-900">
-                {getValue() as string}
-            </span>
         ),
     },
     {

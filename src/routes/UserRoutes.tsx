@@ -1,10 +1,10 @@
 import { Route } from "react-router-dom";
 import { lazy } from "react";
 
-const CreateUserPage = lazy(() => import("../features/user-management/pages/CreateUserPage"));
-const UserListPage = lazy(() => import("../features/user-management/pages/UserListPage"));
-const UserDetailPage = lazy(() => import("../features/user-management/pages/UserDetailPage"));
-const EditUserPage = lazy(() => import("../features/user-management/pages/EditUserPage"));
+const CreateUserPage = lazy(() => import("../features/admin/user-management/pages/CreateUserPage"));
+const UserListPage = lazy(() => import("../features/admin/user-management/pages/UserListPage"));
+const UserDetailPage = lazy(() => import("../features/admin/user-management/pages/UserDetailPage"));
+const EditUserPage = lazy(() => import("../features/admin/user-management/pages/EditUserPage"));
 
 export function UserRoutes() {
   return (

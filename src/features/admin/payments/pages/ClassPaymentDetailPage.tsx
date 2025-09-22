@@ -154,7 +154,7 @@ const ClassPaymentDetailPage: React.FC = () => {
     }).format(amount);
   };
 
-  const handleExport = (_selectedIds: string[]) => {
+  const handleExport = () => {
   };
 
   const handleFilterChange = (newFilter: string) => {

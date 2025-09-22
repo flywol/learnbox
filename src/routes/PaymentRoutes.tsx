@@ -1,8 +1,8 @@
 import { Route } from "react-router-dom";
 import { lazy } from "react";
 
-const SchoolPaymentsPage = lazy(() => import("../features/payments/pages/SchoolPaymentsPage"));
-const ClassPaymentDetailPage = lazy(() => import("../features/payments/pages/ClassPaymentDetailPage"));
+const SchoolPaymentsPage = lazy(() => import("../features/admin/payments/pages/SchoolPaymentsPage"));
+const ClassPaymentDetailPage = lazy(() => import("../features/admin/payments/pages/ClassPaymentDetailPage"));
 
 export function PaymentRoutes() {
   return (

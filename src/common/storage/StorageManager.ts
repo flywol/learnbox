@@ -179,7 +179,7 @@ export class StorageManager {
           return null;
         }
       },
-      setItem: (key: string, value: any) => {
+      setItem: (key: string, value: unknown) => {
         this.setItem(key, JSON.stringify(value));
       },
       removeItem: (key: string) => {

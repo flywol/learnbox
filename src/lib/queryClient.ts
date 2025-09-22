@@ -5,10 +5,13 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry on 401/403 errors
-        if (error?.response?.status === 401 || error?.response?.status === 403) {
-          return false
+        if (error && typeof error === 'object' && 'response' in error) {
+          const responseError = error as { response?: { status?: number } };
+          if (responseError?.response?.status === 401 || responseError?.response?.status === 403) {
+            return false;
+          }
         }
         return failureCount < 3
       },

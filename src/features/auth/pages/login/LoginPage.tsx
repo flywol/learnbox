@@ -136,28 +136,46 @@ const CombinedSchoolLoginPage = () => {
 					return;
 				}
 
-				// Small delay to ensure state propagation
-				setTimeout(() => {
-					// Navigate based on user state
-					if (result.isFirstTimeLogin) {
-						navigate("/reset-password", {
-							state: {
-								resetToken: result.resetToken,
-								email: result.user!.email,
-								from: intendedDestination || "/dashboard",
-							},
-							replace: true,
-						});
-					} else if (intendedDestination) {
-						const destination = intendedDestination;
-						setIntendedDestination(null);
-						navigate(destination, { replace: true });
-					} else if (hasSeenOnboarding) {
-						navigate("/dashboard", { replace: true });
+				// Ensure auth state is properly set before navigation
+				const checkAndNavigate = () => {
+					const currentAuthState = useAuthStore.getState();
+					console.log("🔑 LoginPage: Checking auth state before navigation", {
+						isAuthenticated: currentAuthState.isAuthenticated,
+						hasUser: !!currentAuthState.user,
+						selectedRole: currentAuthState.selectedRole,
+						userRole: currentAuthState.user?.role
+					});
+					
+					// Verify that authentication state is properly set
+					if (currentAuthState.isAuthenticated && currentAuthState.user) {
+						// Navigate based on user state
+						if (result.isFirstTimeLogin) {
+							navigate("/reset-password", {
+								state: {
+									resetToken: result.resetToken,
+									email: result.user!.email,
+									from: intendedDestination || "/dashboard",
+								},
+								replace: true,
+							});
+						} else if (intendedDestination) {
+							const destination = intendedDestination;
+							setIntendedDestination(null);
+							navigate(destination, { replace: true });
+						} else if (hasSeenOnboarding) {
+							navigate("/dashboard", { replace: true });
+						} else {
+							navigate("/onboarding", { replace: true });
+						}
 					} else {
-						navigate("/onboarding", { replace: true });
+						// State not yet ready, wait a bit more
+						console.log("🔑 LoginPage: Auth state not ready, waiting...");
+						setTimeout(checkAndNavigate, 100);
 					}
-				}, 100);
+				};
+				
+				// Start checking after a brief delay
+				setTimeout(checkAndNavigate, 200);
 			} else {
 				console.error("🔑 LoginPage: Login failed", result.error);
 				setLoginError(result.error || "Login failed. Please check your credentials.");

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClassCard from './ClassCard';
 import FailureModal from '../../../common/components/FailureModal';
-import { userApiClient } from '../../user-management/api/userApiClient';
+import { userApiClient } from '../../admin/user-management/api/userApiClient';
 import type { ClassroomClass } from '../types/classroom.types';
 
 // Helper function to generate colors for different classes
