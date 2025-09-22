@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { storageManager } from "@/common/storage/StorageManager";
-import type { CreateSessionRequest } from "../../dashboard/types/dashboard-api.types";
+import type { CreateSessionRequest } from "@/features/admin/dashboard/types/dashboard-api.types";
 
 export interface SessionState {
   // Session data

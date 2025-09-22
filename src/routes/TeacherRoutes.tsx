@@ -7,6 +7,8 @@ const TeacherDashboard = lazy(() => import("../features/teacher/dashboard/pages/
 const MyClassesPage = lazy(() => import("../features/teacher/classroom/pages/MyClassesPage"));
 const AssignmentListPage = lazy(() => import("../features/teacher/assignments/pages/AssignmentListPage"));
 const CreateAssignmentPage = lazy(() => import("../features/teacher/assignments/pages/CreateAssignmentPage"));
+const TeacherNotificationsPage = lazy(() => import("../features/teacher/notifications/pages/NotificationsPage"));
+const TeacherProfilePage = lazy(() => import("../features/teacher/profile/pages/AdminProfilePage"));
 
 export function TeacherRoutes() {
   return (
@@ -16,6 +18,8 @@ export function TeacherRoutes() {
       <Route path="/teacher/classes" element={<MyClassesPage />} />
       <Route path="/teacher/assignments" element={<AssignmentListPage />} />
       <Route path="/teacher/assignments/create" element={<CreateAssignmentPage />} />
+      <Route path="/teacher/notifications" element={<TeacherNotificationsPage />} />
+      <Route path="/teacher/profile" element={<TeacherProfilePage />} />
     </>
   );
 }

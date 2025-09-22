@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Clock, Users } from 'lucide-react';
-import { eventsApiClient } from '@/features/events/api/eventsApiClient';
-import { apiDateToDate, formatDateForDisplay, isToday } from '@/features/events/utils/dateUtils';
-import { EVENT_COLORS } from '@/features/events/types/events.types';
-import type { EventResponse } from '@/features/events/types/events.types';
+import { eventsApiClient } from '@/features/admin/events/api/eventsApiClient';
+import { apiDateToDate, formatDateForDisplay, isToday } from '@/features/admin/events/utils/dateUtils';
+import { EVENT_COLORS } from '@/features/admin/events/types/events.types';
+import type { EventResponse } from '@/features/admin/events/types/events.types';
 
 // Empty State Component
 const EmptyState = () => (

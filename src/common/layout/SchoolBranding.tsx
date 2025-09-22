@@ -1,4 +1,4 @@
-import { useAdminProfile } from "@/features/profile/hooks/useProfile";
+import { useAdminProfile } from "@/features/admin/profile/hooks/useProfile";
 
 export default function SchoolBranding() {
   const { data: adminProfile } = useAdminProfile();

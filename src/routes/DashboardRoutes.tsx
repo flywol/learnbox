@@ -5,9 +5,9 @@ import DashboardLayout from "../common/layout/DashboardLayout";
 import TeacherLayout from "../common/layout/TeacherLayout";
 import { useCurrentUser } from "../features/auth/store/authStore";
 
-const RoleDashboard = lazy(() => import("../features/dashboard/pages/RoleDashboard"));
+const RoleDashboard = lazy(() => import("../features/admin/dashboard/pages/RoleDashboard"));
 const CompleteSetupPage = lazy(() => import("../features/admin/school-setup/pages/CompleteSetupPage"));
-const NotificationsPage = lazy(() => import("../features/notifications/pages/NotificationsPage"));
+const NotificationsPage = lazy(() => import("../features/admin/notifications/pages/NotificationsPage"));
 
 // Layout wrapper that chooses the right layout based on role
 function RoleBasedLayout() {

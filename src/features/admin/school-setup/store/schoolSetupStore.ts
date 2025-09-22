@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { storageManager } from "@/common/storage/StorageManager";
-import { SchoolInfo } from "../../dashboard/types/dashboard.types";
+import { SchoolInfo } from "@/features/admin/dashboard/types/dashboard.types";
 
 
 export interface Term {

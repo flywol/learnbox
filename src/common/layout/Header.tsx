@@ -1,6 +1,6 @@
 import { Settings } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import NotificationDropdown from "@/features/notifications/components/NotificationDropdown";
+import NotificationDropdown from "@/features/admin/notifications/components/NotificationDropdown";
 import { useNavigate } from "react-router-dom";
 import SchoolBranding from "./SchoolBranding";
 
