@@ -72,7 +72,7 @@ export default function ClassDetailPage() {
           // Check if classId matches any arm ID
           if (level.arms && Array.isArray(level.arms)) {
             for (const arm of level.arms) {
-              if (`${level.id}-${arm.id}` === classId) {
+              if (`${level.id}-${arm._id}` === classId) {
                 foundClass = {
                   id: classId,
                   name: `${level.class} ${arm.armName}`,
@@ -118,11 +118,15 @@ export default function ClassDetailPage() {
 
         setStudents(filteredStudents);
 
-        // Fetch subjects for this class if we have the class level ID
+        // Fetch subjects for this class if we have the class level ID and arm ID
         if (foundClass) {
           try {
             const levelId = foundClass.id.split('-')[0]; // Extract level ID
-            const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId);
+            const armId = foundClass.id.split('-')[1]; // Extract arm ID
+            
+            // Only fetch subjects if we have both level and arm IDs
+            if (levelId && armId) {
+              const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId, armId);
             
             const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => ({
               id: subject.id,
@@ -131,7 +135,11 @@ export default function ClassDetailPage() {
               bgColor: ['bg-purple-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'][index % 4],
             }));
             
-            setSubjects(transformedSubjects);
+              setSubjects(transformedSubjects);
+            } else {
+              console.log('Missing level or arm ID, cannot fetch subjects');
+              setSubjects([]);
+            }
           } catch (subjectError) {
             console.log('No subjects found for this class, keeping empty array');
             setSubjects([]);
@@ -248,10 +256,11 @@ export default function ClassDetailPage() {
   };
 
   // Show Add Subject View
-  if (showAddSubjectView) {
+  if (showAddSubjectView && classData) {
     return (
       <AddSubjectView
-        classId={classId!}
+        classId={classData.id.split('-')[0]}
+        classArmId={classData.id.split('-')[1]}
         onBack={handleBackFromAddSubject}
         onAddSubjects={handleAddSubjects}
         onShowSuccess={handleShowSuccess}

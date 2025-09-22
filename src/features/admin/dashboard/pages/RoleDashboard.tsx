@@ -1,7 +1,7 @@
 // src/features/dashboard/pages/RoleDashboard.tsx - Route based on user role
 import { useCurrentUser } from "@/features/auth/store/authStore";
 import DashboardPage from "./DashboardPage";
-import TeacherDashboard from "./TeacherDashboard";
+import TeacherDashboard from "../../../teacher/dashboard/pages/TeacherDashboard";
 
 const RoleDashboard = () => {
 	const user = useCurrentUser();

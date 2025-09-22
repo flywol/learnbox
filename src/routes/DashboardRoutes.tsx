@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../features/auth/components/guards/FirstTimeLogi
 import DashboardLayout from "../common/layout/DashboardLayout";
 import TeacherLayout from "../common/layout/TeacherLayout";
 import { useCurrentUser } from "../features/auth/store/authStore";
+import { LayoutNotFoundPage } from "../components/ErrorPages";
 
 const RoleDashboard = lazy(() => import("../features/admin/dashboard/pages/RoleDashboard"));
 const CompleteSetupPage = lazy(() => import("../features/admin/school-setup/pages/CompleteSetupPage"));
@@ -34,6 +35,7 @@ export function DashboardRoutes() {
       <Route path="/dashboard" element={<RoleDashboard />} />
       <Route path="/dashboard/complete-school-setup" element={<CompleteSetupPage />} />
       <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/dashboard/*" element={<LayoutNotFoundPage />} />
     </Route>
   );
 }

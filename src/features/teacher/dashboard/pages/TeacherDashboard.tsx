@@ -1,114 +1,172 @@
-// src/features/dashboard/pages/TeacherDashboard.tsx - Simple static teacher page
-import { useCurrentUser } from "@/features/auth/store/authStore";
+import { useState, useEffect } from 'react';
+import { 
+  StatCard, 
+  ActionCard,
+  EventsSection 
+} from '@/common/components/dashboard';
+import { 
+  Users, 
+  BookOpen, 
+  ClipboardList, 
+  FileText,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
+import { useAuthStore } from '@/features/auth/store/authStore';
+import TasksSection from '../components/TasksSection';
+import RecentClassesSection from '../components/RecentClassesSection';
+import TeacherWelcomeModal from '../../components/TeacherWelcomeModal';
+import { useTeacherDashboard } from '../hooks/useTeacherDashboard';
 
-const TeacherDashboard = () => {
-	const user = useCurrentUser();
+export default function TeacherDashboard() {
+  const { user } = useAuthStore();
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  
+  const {
+    actionCards,
+    stats,
+    tasks,
+    completedTasks,
+    totalTasks,
+    schedule,
+    selectedDay,
+    events,
+    eventsLoading,
+    eventsError,
+    loading,
+    handleAddTask,
+    handleDayChange
+  } = useTeacherDashboard();
 
-	return (
-		<div className="min-h-screen bg-gray-50 p-6">
-			<div className="max-w-4xl mx-auto">
-				{/* Header */}
-				<div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-					<h1 className="text-2xl font-bold text-gray-900 mb-2">
-						Welcome back, {user?.fullName || 'Teacher'}!
-					</h1>
-					<p className="text-gray-600">
-						Here's your teaching dashboard with everything you need.
-					</p>
-				</div>
+  useEffect(() => {
+    // Show welcome modal for teacher users who haven't seen it
+    if (user?.role === "TEACHER" && !localStorage.getItem('teacher-welcome-seen')) {
+      setShowWelcomeModal(true);
+    }
+  }, [user]);
 
-				{/* Stats Cards */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-					<div className="bg-white rounded-lg shadow-sm p-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-gray-600">My Students</p>
-								<p className="text-2xl font-bold text-gray-900">45</p>
-							</div>
-							<div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-								<span className="text-blue-600 text-xl">👥</span>
-							</div>
-						</div>
-					</div>
+  return (
+    <>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Content - Left Side (3/4) */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Welcome Header */}
+          <div className="bg-gray-100 rounded-lg p-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome {user?.fullName?.split(" ")[0] || "Joe"}, what do you want to do today?
+            </h1>
+            
+            {/* Action Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {actionCards.map((action, index) => (
+                <ActionCard
+                  key={index}
+                  iconSrc={action.iconSrc}
+                  title={action.title}
+                  description={action.description}
+                  onClick={action.onClick}
+                  buttonText={action.buttonText}
+                />
+              ))}
+            </div>
+          </div>
 
-					<div className="bg-white rounded-lg shadow-sm p-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-gray-600">My Classes</p>
-								<p className="text-2xl font-bold text-gray-900">3</p>
-							</div>
-							<div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-								<span className="text-green-600 text-xl">📚</span>
-							</div>
-						</div>
-					</div>
+          {/* Classroom Overview */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Classroom Overview</h2>
 
-					<div className="bg-white rounded-lg shadow-sm p-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-gray-600">Assignments</p>
-								<p className="text-2xl font-bold text-gray-900">12</p>
-							</div>
-							<div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-								<span className="text-purple-600 text-xl">📝</span>
-							</div>
-						</div>
-					</div>
-				</div>
+            {/* Top Row Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <StatCard
+                icon={Users}
+                label="Total students"
+                value={stats.totalStudents}
+                iconColor="text-red-500"
+                loading={loading}
+              />
+              <StatCard
+                icon={BookOpen}
+                label="Total classes"
+                value={stats.totalClasses}
+                iconColor="text-blue-500"
+                loading={loading}
+              />
+              <StatCard
+                icon={ClipboardList}
+                label="Assignment created"
+                value={stats.assignmentCreated}
+                iconColor="text-green-500"
+                loading={loading}
+              />
+            </div>
 
-				{/* Quick Actions */}
-				<div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-					<h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-						<button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-							<span className="text-2xl mb-2 block">📊</span>
-							<span className="text-sm text-gray-700">View Grades</span>
-						</button>
-						<button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-							<span className="text-2xl mb-2 block">📅</span>
-							<span className="text-sm text-gray-700">Schedule</span>
-						</button>
-						<button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-							<span className="text-2xl mb-2 block">💬</span>
-							<span className="text-sm text-gray-700">Messages</span>
-						</button>
-						<button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-							<span className="text-2xl mb-2 block">📋</span>
-							<span className="text-sm text-gray-700">Reports</span>
-						</button>
-					</div>
-				</div>
+            {/* Bottom Row Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard
+                icon={AlertCircle}
+                label="Not graded"
+                value={stats.notGraded}
+                iconColor="text-red-500"
+                loading={loading}
+              />
+              <StatCard
+                icon={FileText}
+                label="Quiz created"
+                value={stats.quizCreated}
+                iconColor="text-purple-500"
+                loading={loading}
+              />
+              <StatCard
+                icon={CheckCircle}
+                label="Not graded"
+                value={stats.notGradedQuiz}
+                iconColor="text-orange-500"
+                loading={loading}
+              />
+            </div>
+          </div>
 
-				{/* Recent Activity */}
-				<div className="bg-white rounded-lg shadow-sm p-6">
-					<h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-					<div className="space-y-3">
-						<div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-							<span className="text-blue-600 text-lg">📚</span>
-							<div>
-								<p className="text-sm font-medium text-gray-900">Mathematics Quiz Submitted</p>
-								<p className="text-xs text-gray-600">23 students submitted - 2 hours ago</p>
-							</div>
-						</div>
-						<div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-							<span className="text-green-600 text-lg">✅</span>
-							<div>
-								<p className="text-sm font-medium text-gray-900">Assignment Graded</p>
-								<p className="text-xs text-gray-600">Science homework - 5 hours ago</p>
-							</div>
-						</div>
-						<div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-							<span className="text-purple-600 text-lg">👋</span>
-							<div>
-								<p className="text-sm font-medium text-gray-900">New Student Enrolled</p>
-								<p className="text-xs text-gray-600">John Doe joined your class - Yesterday</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-};
+          {/* Tasks Section */}
+          <TasksSection
+            completedTasks={completedTasks}
+            totalTasks={totalTasks}
+            tasks={tasks}
+            onAddTask={handleAddTask}
+          />
+        </div>
 
-export default TeacherDashboard;
+        {/* Sidebar - Right Side (1/4) */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Recent Classes */}
+          <RecentClassesSection
+            classes={schedule}
+            selectedDay={selectedDay}
+            onDayChange={handleDayChange}
+          />
+
+          {/* Events */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[400px] flex flex-col">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Events</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <EventsSection
+                events={events}
+                isLoading={eventsLoading}
+                error={eventsError}
+                maxEvents={5}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      <TeacherWelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+      />
+    </>
+  );
+}

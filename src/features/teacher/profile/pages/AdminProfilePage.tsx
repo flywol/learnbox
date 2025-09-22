@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdminProfile, useClassLevelsAndArms } from "../hooks/useProfile";
 import { useAuthStore } from "../../../auth/store/authStore";
 import SchoolHeader from "../components/profile/SchoolHeader";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -14,14 +13,53 @@ import LogoutModal from "../components/profile/LogoutModal";
 export default function AdminProfilePage() {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
 
-  const { data: adminProfile, isLoading: profileLoading } = useAdminProfile();
-  const { data: classLevelsData, isLoading: classLevelsLoading } = useClassLevelsAndArms();
+  // MOCK DATA - No API calls for teachers until endpoints provided
+  const mockTeacherProfile = {
+    id: 'teacher-123',
+    fullName: user?.fullName || 'Joe Jameshill',
+    email: user?.email || 'joe@lakeridge.edu',
+    phone: '+234 803 123 4567',
+    role: 'TEACHER',
+    subjects: ['English Language', 'Literature'],
+    employeeId: 'TCH001',
+    school: {
+      id: 'school-1',
+      name: 'Lakeridge Mountain High School',
+      address: '123 Education Drive, Lagos, Nigeria',
+      phone: '+234 1 234 5678',
+      email: 'info@lakeridge.edu',
+      website: 'www.lakeridge.edu'
+    }
+  };
+
+  const mockClassLevels = [
+    {
+      id: 'level-1',
+      class: 'Junior Secondary School 1',
+      arms: [{ id: 'arm-1', armName: 'A' }, { id: 'arm-2', armName: 'B' }]
+    },
+    {
+      id: 'level-2', 
+      class: 'Junior Secondary School 2',
+      arms: [{ id: 'arm-3', armName: 'A' }, { id: 'arm-4', armName: 'B' }]
+    }
+  ];
+
+  const mockClassArms = [
+    { id: 'arm-1', studentCount: 35, assignedTeachers: [{ name: 'Joe Jameshill' }] },
+    { id: 'arm-2', studentCount: 32, assignedTeachers: [{ name: 'Joe Jameshill' }] },
+    { id: 'arm-3', studentCount: 38, assignedTeachers: [{ name: 'Another Teacher' }] },
+    { id: 'arm-4', studentCount: 34, assignedTeachers: [{ name: 'Another Teacher' }] }
+  ];
   
-  const schoolInfo = adminProfile?.school;
-  const classLevels = classLevelsData?.data.classLevels || [];
-  const classArms = classLevelsData?.data.classArms || [];
+  const adminProfile = mockTeacherProfile; // Use mock data instead of API
+  const schoolInfo = mockTeacherProfile.school;
+  const classLevels = mockClassLevels;
+  const classArms = mockClassArms;
+  const profileLoading = false;
+  const classLevelsLoading = false;
 
   const handleEditPersonalInfo = () => {
     navigate("/profile/edit-personal");

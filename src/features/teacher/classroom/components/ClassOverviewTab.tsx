@@ -54,7 +54,7 @@ export default function ClassOverviewTab() {
           
           // Create a class entry for each arm
           return level.arms.map((arm: any, armIndex: number) => ({
-            id: `${level.id}-${arm.id}`,
+            id: `${level.id}-${arm._id}`,
             name: `${level.class} ${arm.armName}`,
             level: level.levelName,
             arm: arm.armName,

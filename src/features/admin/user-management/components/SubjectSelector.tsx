@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
-import { subjectsApiClient, type Subject } from "../api/subjectsApiClient";
+import { type Subject } from "../api/subjectsApiClient";
 
 interface SubjectSelectorProps {
   selectedSubjects: string[];
@@ -22,18 +22,28 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
         return;
       }
 
+      // For now, we can't fetch subjects without arm IDs
+      // This is a limitation of the current API design
+      setSubjects([]);
+      return;
+
       setLoading(true);
       try {
         // Fetch subjects from all selected classes
-        const allSubjectsPromises = selectedClasses.map(classId =>
-          subjectsApiClient.getSubjectsForClass(classId)
-        );
+        // Note: This is a temporary solution - we need class arms to get subjects
+        // For now, we'll show a message that class arms are needed
+        const allSubjectsPromises = selectedClasses.map(async (classId) => {
+          // Since we don't have arm IDs here, we can't fetch subjects
+          // This needs to be handled at the API level or UI flow level
+          console.warn(`Cannot fetch subjects for class ${classId} without arm ID`);
+          return [];
+        });
         
         const allSubjectsArrays = await Promise.all(allSubjectsPromises);
         
         // Flatten and deduplicate subjects by id
         const allSubjects = allSubjectsArrays.flat();
-        const uniqueSubjects = allSubjects.reduce((acc: Subject[], current) => {
+        const uniqueSubjects = allSubjects.reduce((acc: Subject[], current: Subject) => {
           const exists = acc.find(subject => subject.id === current.id);
           if (!exists) {
             acc.push(current);
@@ -125,7 +135,7 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
               <div className="px-4 py-2 text-sm text-gray-500">
                 {selectedClasses.length === 0 
                   ? 'Please select classes first to view available subjects' 
-                  : 'No subjects found for the selected classes'}
+                  : 'Subject selection requires specific class arms. Please contact admin to configure subjects for these classes.'}
               </div>
             ) : (
               subjects.map((subject) => (
@@ -149,6 +159,12 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
 
       {error && (
         <p className="text-sm text-red-600">{error}</p>
+      )}
+      
+      {selectedClasses.length > 0 && subjects.length === 0 && !loading && (
+        <p className="text-xs text-amber-600">
+          Note: Subject assignment requires class arms to be configured. Contact your administrator.
+        </p>
       )}
     </div>
   );

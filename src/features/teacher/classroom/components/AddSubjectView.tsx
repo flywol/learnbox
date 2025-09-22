@@ -12,6 +12,7 @@ interface Subject {
 
 interface AddSubjectViewProps {
   classId: string;
+  classArmId: string;
   onBack: () => void;
   onAddSubjects: (subjects: Subject[]) => void;
   onShowSuccess: () => void;
@@ -25,7 +26,7 @@ const AVAILABLE_SUBJECTS = [
   { id: 'chemistry', name: 'Chemistry', icon: '/assets/chem.svg', bgColor: 'bg-yellow-500' },
 ];
 
-export default function AddSubjectView({ classId, onBack, onAddSubjects, onShowSuccess }: AddSubjectViewProps) {
+export default function AddSubjectView({ classId, classArmId, onBack, onAddSubjects, onShowSuccess }: AddSubjectViewProps) {
   const [subjectInputs, setSubjectInputs] = useState([{ id: 1, value: '' }]);
   const [nextId, setNextId] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,8 +66,8 @@ export default function AddSubjectView({ classId, onBack, onAddSubjects, onShowS
         name: input.value.trim()
       }));
 
-      // Call API
-      await subjectsApiClient.addSubjectsToClass(classId, {
+      // Call API with separate classId and classArmId
+      await subjectsApiClient.addSubjectsToClass(classId, classArmId, {
         subjects: subjectsToAdd
       });
 

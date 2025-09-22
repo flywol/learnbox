@@ -22,9 +22,9 @@ class SubjectsApiClient extends BaseApiClient {
     super();
   }
 
-  // Get subjects for a specific class
-  async getSubjectsForClass(classId: string): Promise<Subject[]> {
-    const response = await this.get<SubjectsResponse>(`/subjects/get/${classId}`);
+  // Get subjects for a specific class and arm
+  async getSubjectsForClass(classId: string, classArmId: string): Promise<Subject[]> {
+    const response = await this.get<SubjectsResponse>(`/subjects/get/${classId}/${classArmId}`);
     
     // Transform _id to id for frontend consistency
     const subjects = response.data.subjects.map((subject: any) => ({
@@ -35,9 +35,9 @@ class SubjectsApiClient extends BaseApiClient {
     return subjects;
   }
 
-  // Add subjects to a specific class
-  async addSubjectsToClass(classId: string, subjects: AddSubjectsRequest): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>(`/subjects/add/${classId}`, subjects);
+  // Add subjects to a specific class and arm
+  async addSubjectsToClass(classId: string, classArmId: string, subjects: AddSubjectsRequest): Promise<{ message: string }> {
+    const response = await this.post<{ message: string }>(`/subjects/add/${classId}/${classArmId}`, subjects);
     return response;
   }
 }

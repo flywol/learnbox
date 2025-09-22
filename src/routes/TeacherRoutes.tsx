@@ -1,6 +1,8 @@
 // src/routes/TeacherRoutes.tsx
 import { Route } from "react-router-dom";
 import { lazy } from "react";
+import TeacherLayout from "../common/layout/TeacherLayout";
+import { LayoutNotFoundPage } from "../components/ErrorPages";
 
 // Teacher feature pages
 const TeacherDashboard = lazy(() => import("../features/teacher/dashboard/pages/TeacherDashboard"));
@@ -12,7 +14,7 @@ const TeacherProfilePage = lazy(() => import("../features/teacher/profile/pages/
 
 export function TeacherRoutes() {
   return (
-    <>
+    <Route element={<TeacherLayout />}>
       <Route path="/teacher" element={<TeacherDashboard />} />
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
       <Route path="/teacher/classes" element={<MyClassesPage />} />
@@ -20,6 +22,7 @@ export function TeacherRoutes() {
       <Route path="/teacher/assignments/create" element={<CreateAssignmentPage />} />
       <Route path="/teacher/notifications" element={<TeacherNotificationsPage />} />
       <Route path="/teacher/profile" element={<TeacherProfilePage />} />
-    </>
+      <Route path="/teacher/*" element={<LayoutNotFoundPage />} />
+    </Route>
   );
 }

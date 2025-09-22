@@ -16,7 +16,7 @@ import { AdminRoutes } from "./routes/AdminRoutes";
 import { TeacherRoutes } from "./routes/TeacherRoutes";
 
 // Error and loading components
-import { UnauthorizedPage, NotFoundPage, LoadingSpinner } from "./components/ErrorPages";
+import { UnauthorizedPage, NotFoundPage, LoadingSpinner, LayoutNotFoundPage } from "./components/ErrorPages";
 
 export default function App() {
   return (
@@ -42,6 +42,7 @@ export default function App() {
               {UserRoutes()}
               {ProfileRoutes()}
               {PaymentRoutes()}
+              <Route path="*" element={<LayoutNotFoundPage />} />
             </Route>
 
             <Route path="/unauthorized" element={<UnauthorizedPage />} />

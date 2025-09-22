@@ -72,7 +72,7 @@ export default function ClassDetailPage() {
           // Check if classId matches any arm ID
           if (level.arms && Array.isArray(level.arms)) {
             for (const arm of level.arms) {
-              if (`${level.id}-${arm.id}` === classId) {
+              if (`${level.id}-${arm._id}` === classId) {
                 foundClass = {
                   id: classId,
                   name: `${level.class} ${arm.armName}`,
@@ -121,8 +121,8 @@ export default function ClassDetailPage() {
         // Fetch subjects for this class if we have the class level ID
         if (foundClass) {
           try {
-            const levelId = foundClass.id.split('-')[0]; // Extract level ID
-            const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId);
+            const [levelId, armId] = foundClass.id.split('-'); // Extract level ID and arm ID
+            const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId, armId);
             
             const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => ({
               id: subject.id,
@@ -248,10 +248,11 @@ export default function ClassDetailPage() {
   };
 
   // Show Add Subject View
-  if (showAddSubjectView) {
+  if (showAddSubjectView && classData) {
     return (
       <AddSubjectView
-        classId={classId!}
+        classId={classData.id.split('-')[0]}
+        classArmId={classData.id.split('-')[1]}
         onBack={handleBackFromAddSubject}
         onAddSubjects={handleAddSubjects}
         onShowSuccess={handleShowSuccess}
