@@ -39,7 +39,33 @@ export default function ClassDetailPage() {
 
   useEffect(() => {
     const fetchClassData = async () => {
-      if (!classId) return;
+      console.log('🚀 [ClassDetail] Starting class data fetch:', {
+        classId,
+        armId,
+        hasClassId: !!classId,
+        hasArmId: !!armId,
+        classIdType: typeof classId,
+        armIdType: typeof armId,
+        urlParams: { classId, armId },
+        timestamp: new Date().toISOString()
+      });
+
+      if (!classId) {
+        console.warn('⚠️ [ClassDetail] No classId provided, aborting fetch');
+        return;
+      }
+
+      // Enhanced ID validation
+      console.log('🔍 [ClassDetail] ID validation:', {
+        classIdValid: !!classId && classId.length > 0,
+        armIdValid: !!armId && armId.length > 0,
+        classIdLength: classId?.length || 0,
+        armIdLength: armId?.length || 0,
+        classIdPattern: /^[a-f\d]{24}$/i.test(classId) ? 'Valid MongoDB ObjectId' : 'Not MongoDB ObjectId pattern',
+        armIdPattern: armId ? (/^[a-f\d]{24}$/i.test(armId) ? 'Valid MongoDB ObjectId' : 'Not MongoDB ObjectId pattern') : 'No armId provided',
+        classIdContainsSlash: classId.includes('/'),
+        armIdContainsSlash: armId?.includes('/') || false
+      });
 
       try {
         setLoading(true);
@@ -279,11 +305,23 @@ export default function ClassDetailPage() {
   };
 
   const handleAddSubjects = (newSubjects: Subject[]) => {
+    console.log('➕ [ClassDetail] Adding new subjects to UI:', {
+      newSubjects,
+      currentSubjectsCount: subjects.length,
+      totalAfterAdd: subjects.length + newSubjects.length
+    });
     setSubjects(prev => [...prev, ...newSubjects]);
   };
 
   const handleShowSuccess = () => {
+    console.log('🎉 [ClassDetail] handleShowSuccess called - showing success modal');
     setShowSuccessModal(true);
+    
+    // Ensure we return to the subject list view after showing success
+    setTimeout(() => {
+      console.log('🔄 [ClassDetail] Auto-returning to subject view after success');
+      setShowAddSubjectView(false);
+    }, 2000); // Give user time to see the success modal
   };
 
   const handleSuccessClose = () => {
@@ -479,8 +517,8 @@ export default function ClassDetailPage() {
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={handleSuccessClose}
-        title="Success!"
-        message="You've successfully added subject to class"
+        title="Subjects Added Successfully!"
+        message={`Successfully added ${subjects.length > 0 ? 'subjects' : 'subject'} to ${classData?.name || 'class'}`}
         buttonText="Continue"
       />
 

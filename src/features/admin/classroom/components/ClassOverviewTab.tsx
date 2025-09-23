@@ -98,34 +98,51 @@ export default function ClassOverviewTab() {
     setRetryAction(null);
   };
 
-  const handleQuickCreateSuccess = () => {
-    // Refetch classes after successful creation
-    const fetchClasses = async () => {
-      try {
-        setLoading(true);
-        const classLevels = await userApiClient.getClassLevels();
+  const handleQuickCreateSuccess = async () => {
+    // Add delay to ensure backend has processed the creation
+    console.log('🔄 [ClassOverview] Quick creation success - refetching class data with arm IDs');
+    
+    try {
+      setLoading(true);
+      
+      // Add a small delay to ensure backend consistency
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('📡 [ClassOverview] Refetching class levels with proper arm IDs');
+      const classLevels = await userApiClient.getClassLevels();
+      
+      console.log('🔍 [ClassOverview] Raw refetched class levels:', classLevels);
+      
+      // Transform API data to ClassroomClass format
+      const transformedClasses: ClassroomClass[] = classLevels.flatMap((level: any, levelIndex: number) => {
+        if (!level.arms || !Array.isArray(level.arms)) {
+          // If no arms, create a single class entry
+          return [{
+            id: level.id,
+            name: level.class,
+            level: level.levelName,
+            arm: '',
+            teacher: {
+              id: 'teacher-placeholder',
+              name: 'Not Assigned', // Default teacher name
+            },
+            studentCount: level.studentCount || 0,
+            color: getClassColor(levelIndex),
+          }];
+        }
         
-        // Transform API data to ClassroomClass format
-        const transformedClasses: ClassroomClass[] = classLevels.flatMap((level: any, levelIndex: number) => {
-          if (!level.arms || !Array.isArray(level.arms)) {
-            // If no arms, create a single class entry
-            return [{
-              id: level.id,
-              name: level.class,
-              level: level.levelName,
-              arm: '',
-              teacher: {
-                id: 'teacher-placeholder',
-                name: 'Not Assigned', // Default teacher name
-              },
-              studentCount: level.studentCount || 0,
-              color: getClassColor(levelIndex),
-            }];
-          }
+        // Create a class entry for each arm - using proper arm IDs
+        return level.arms.map((arm: any, armIndex: number) => {
+          const classWithArmId = `${level.id}/${arm.id}`;
+          console.log('🏗️ [ClassOverview] Creating class entry:', {
+            classId: level.id,
+            armId: arm.id,
+            armName: arm.armName,
+            combinedId: classWithArmId
+          });
           
-          // Create a class entry for each arm
-          return level.arms.map((arm: any, armIndex: number) => ({
-            id: `${level.id}/${arm.id}`,
+          return {
+            id: classWithArmId,
             name: `${level.class} ${arm.armName}`,
             level: level.levelName,
             arm: arm.armName,
@@ -135,19 +152,19 @@ export default function ClassOverviewTab() {
             },
             studentCount: arm.studentCount || 0,
             color: getClassColor(levelIndex + armIndex),
-          }));
+          };
         });
-        
-        setClasses(transformedClasses);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to refetch classes:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClasses();
+      });
+      
+      console.log('✅ [ClassOverview] Transformed classes with proper IDs:', transformedClasses);
+      setClasses(transformedClasses);
+      setError(null);
+    } catch (err) {
+      console.error('❌ [ClassOverview] Failed to refetch classes after creation:', err);
+      // Don't show error modal for refetch failures, just log them
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {

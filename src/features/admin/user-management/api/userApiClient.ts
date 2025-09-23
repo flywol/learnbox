@@ -103,7 +103,7 @@ class UserApiClient extends BaseApiClient {
         arms: level.arms && Array.isArray(level.arms) 
           ? level.arms.map((arm: any) => ({
               ...arm,
-              id: arm._id, // Map MongoDB _id to id
+              id: arm.id, // Use the existing id field, not _id
               name: arm.armName
             }))
           : level.arms

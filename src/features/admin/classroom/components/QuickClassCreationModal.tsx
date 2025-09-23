@@ -8,6 +8,7 @@ interface ClassData {
   levelName: string;
   className: string;
   arms: string[];
+  customArmInput: string;
 }
 
 interface QuickClassCreationModalProps {
@@ -36,7 +37,8 @@ export default function QuickClassCreationModal({
     id: '1',
     levelName: 'Primary Class',
     className: 'Primary 1',
-    arms: ['A']
+    arms: ['A'],
+    customArmInput: ''
   }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,8 @@ export default function QuickClassCreationModal({
       id: Date.now().toString(),
       levelName: 'Primary Class',
       className: 'Primary 1',
-      arms: ['A']
+      arms: ['A'],
+      customArmInput: ''
     };
     setClasses([...classes, newClass]);
   };
@@ -77,6 +80,32 @@ export default function QuickClassCreationModal({
       }
       return c;
     }));
+  };
+
+  // Add custom arm
+  const addCustomArm = (classId: string) => {
+    setClasses(classes.map(c => {
+      if (c.id === classId && c.customArmInput.trim()) {
+        const customArm = c.customArmInput.trim();
+        // Check if arm already exists
+        if (!c.arms.includes(customArm)) {
+          return { 
+            ...c, 
+            arms: [...c.arms, customArm],
+            customArmInput: '' // Clear input after adding
+          };
+        }
+      }
+      return c;
+    }));
+  };
+
+  // Handle Enter key press for custom arm input
+  const handleCustomArmKeyPress = (classId: string, event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addCustomArm(classId);
+    }
   };
 
   // Handle form submission
@@ -115,7 +144,8 @@ export default function QuickClassCreationModal({
         id: '1',
         levelName: 'Primary Class',
         className: 'Primary 1',
-        arms: ['A']
+        arms: ['A'],
+        customArmInput: ''
       }]);
       
       onSuccess();
@@ -222,7 +252,9 @@ export default function QuickClassCreationModal({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Class Arms
                   </label>
-                  <div className="flex flex-wrap gap-2">
+                  
+                  {/* Predefined Arms */}
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {ARM_OPTIONS.map(arm => (
                       <button
                         key={arm}
@@ -238,8 +270,53 @@ export default function QuickClassCreationModal({
                       </button>
                     ))}
                   </div>
+
+                  {/* Custom Arms */}
+                  {classData.arms.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-2">Selected Arms:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {classData.arms.map(arm => (
+                          <span
+                            key={arm}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-lg"
+                          >
+                            {arm}
+                            <button
+                              onClick={() => toggleArm(classData.id, arm)}
+                              disabled={isSubmitting}
+                              className="text-orange-600 hover:text-orange-800 disabled:opacity-50"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Custom Arm Input */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={classData.customArmInput}
+                      onChange={(e) => updateClass(classData.id, 'customArmInput', e.target.value)}
+                      onKeyPress={(e) => handleCustomArmKeyPress(classData.id, e)}
+                      disabled={isSubmitting}
+                      placeholder="Add custom arm (e.g., Science, Arts, East, West)"
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:opacity-50"
+                    />
+                    <button
+                      onClick={() => addCustomArm(classData.id)}
+                      disabled={isSubmitting || !classData.customArmInput.trim()}
+                      className="px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+
                   {classData.arms.length === 0 && (
-                    <p className="text-red-500 text-xs mt-1">Select at least one arm</p>
+                    <p className="text-red-500 text-xs mt-2">Select at least one arm</p>
                   )}
                 </div>
               </div>

@@ -125,9 +125,17 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
 
       // Update UI and show success
       onAddSubjects(validSubjects);
+      
+      // Clear form state immediately after successful submission
+      console.log('🧹 [AddSubject] Clearing form state after successful submission');
+      setSubjectInputs([{ id: 1, value: '' }]);
+      setNextId(2);
+      setError(null);
+      
+      // Show success modal
       onShowSuccess();
       
-      console.log('🎉 [AddSubject] Subject addition completed successfully');
+      console.log('🎉 [AddSubject] Subject addition completed successfully - form cleared and success shown');
       
     } catch (err) {
       console.error('❌ [AddSubject] Subject addition failed:', {
