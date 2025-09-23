@@ -60,6 +60,25 @@ export function useClassArmsLogic(onComplete?: () => void) {
     }
   };
 
+  const handleCustomArmAdd = (armName: string) => {
+    // Add custom arm to all classes (this already auto-selects it)
+    addCustomArmToAllClasses([armName]);
+    
+    // Update editing arms to reflect the change
+    const newEditingArms: { [key: string]: string[] } = {};
+    activeClassLevels.forEach((level) => {
+      const currentArms = editingArms[level.id] || 
+        classArms.find((ca) => ca.classId === level.id)?.arms || [];
+      // Only add if not already present
+      if (!currentArms.includes(armName)) {
+        newEditingArms[level.id] = [...currentArms, armName];
+      } else {
+        newEditingArms[level.id] = currentArms;
+      }
+    });
+    setEditingArms((prev) => ({ ...prev, ...newEditingArms }));
+  };
+
   const handleDeleteArm = (classId: string, arm: string) => {
     const isFirstClass = classId === activeClassLevels[0]?.id;
     
@@ -143,6 +162,6 @@ export function useClassArmsLogic(onComplete?: () => void) {
     getClassArms,
     previousStep,
     deleteAllArmsForClass,
-    addCustomArmToAllClasses,
+    handleCustomArmAdd,
   };
 }

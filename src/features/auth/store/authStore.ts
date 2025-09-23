@@ -103,8 +103,8 @@ const getAuthClientForRole = (selectedRole: Role | null) => {
 		return teacherAuthApiClient;
 	}
 	
-	console.log("🏪 AuthStore: No role selected, using fallback AuthApiClient");
-	// Fallback to base auth client if no role selected
+	console.log("🏪 AuthStore: Using AuthApiClient for role", { selectedRole });
+	// Use base auth client for ADMIN and other roles
 	return authApiClient;
 };
 

@@ -19,7 +19,7 @@ interface Subject {
 }
 
 export default function ClassDetailPage() {
-  const { classId } = useParams<{ classId: string }>();
+  const { classId, armId } = useParams<{ classId: string; armId: string }>();
   const navigate = useNavigate();
   const [selectedStudent, setSelectedStudent] = useState<ClassroomStudent | null>(null);
   const [activeTab, setActiveTab] = useState<'student-list' | 'subject'>('student-list');
@@ -69,12 +69,12 @@ export default function ClassDetailPage() {
             break;
           }
           
-          // Check if classId matches any arm ID
-          if (level.arms && Array.isArray(level.arms)) {
+          // Check if we have matching classId and armId
+          if (level.arms && Array.isArray(level.arms) && level.id === classId) {
             for (const arm of level.arms) {
-              if (`${level.id}-${arm._id}` === classId) {
+              if (arm.id === armId) {
                 foundClass = {
-                  id: classId,
+                  id: `${classId}/${armId}`,
                   name: `${level.class} ${arm.armName}`,
                   level: level.levelName,
                   arm: arm.armName,
@@ -119,29 +119,69 @@ export default function ClassDetailPage() {
         setStudents(filteredStudents);
 
         // Fetch subjects for this class if we have the class level ID and arm ID
-        if (foundClass) {
+        if (foundClass && classId && armId) {
+          console.log('🎯 [ClassDetail] Starting subject fetch for:', {
+            foundClass: {
+              id: foundClass.id,
+              name: foundClass.name,
+              level: foundClass.level,
+              arm: foundClass.arm
+            },
+            classId,
+            armId,
+            timestamp: new Date().toISOString()
+          });
+          
           try {
-            const levelId = foundClass.id.split('-')[0]; // Extract level ID
-            const armId = foundClass.id.split('-')[1]; // Extract arm ID
+            console.log('📡 [ClassDetail] Calling getSubjectsForClass with:', { classId, armId });
+            const classSubjects = await subjectsApiClient.getSubjectsForClass(classId, armId);
             
-            // Only fetch subjects if we have both level and arm IDs
-            if (levelId && armId) {
-              const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId, armId);
+            console.log('🔄 [ClassDetail] Raw subjects received:', {
+              subjectsCount: classSubjects.length,
+              rawSubjects: classSubjects
+            });
             
-            const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => ({
-              id: subject.id,
-              name: subject.name,
-              icon: `/assets/${subject.name.toLowerCase().replace(/\s+/g, '')}.svg`,
-              bgColor: ['bg-purple-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'][index % 4],
-            }));
+            const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => {
+              const iconName = subject.name.toLowerCase().replace(/\s+/g, '');
+              const bgColor = ['bg-purple-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'][index % 4];
+              
+              const transformed = {
+                id: subject.id,
+                name: subject.name,
+                icon: `/assets/${iconName}.svg`,
+                bgColor: bgColor,
+              };
+              
+              console.log(`🎨 [ClassDetail] Transformed subject ${index + 1}:`, {
+                original: subject,
+                transformed: transformed,
+                iconName,
+                bgColor
+              });
+              
+              return transformed;
+            });
             
-              setSubjects(transformedSubjects);
-            } else {
-              console.log('Missing level or arm ID, cannot fetch subjects');
-              setSubjects([]);
-            }
+            console.log('✅ [ClassDetail] Final transformed subjects:', {
+              totalSubjects: transformedSubjects.length,
+              transformedSubjects,
+              subjectNames: transformedSubjects.map(s => s.name)
+            });
+            
+            setSubjects(transformedSubjects);
+            
           } catch (subjectError) {
-            console.log('No subjects found for this class, keeping empty array');
+            console.log('📭 [ClassDetail] No subjects found for this specific arm:', {
+              classId,
+              armId,
+              error: subjectError,
+              errorMessage: subjectError instanceof Error ? subjectError.message : 'Unknown error',
+              result: 'Setting empty subjects array - user can add subjects for this arm'
+            });
+            
+            // Set empty subjects - this is correct behavior!
+            // Users should see that THIS specific arm has no subjects
+            // and can add subjects specifically for this arm
             setSubjects([]);
           }
         }
@@ -158,7 +198,7 @@ export default function ClassDetailPage() {
     };
 
     fetchClassData();
-  }, [classId]);
+  }, [classId, armId]);
 
   const handleRetry = () => {
     setShowFailureModal(false);
@@ -252,15 +292,15 @@ export default function ClassDetailPage() {
   };
 
   const handleSubjectClick = (subject: Subject) => {
-    navigate(`/classroom/${classId}/subject/${subject.id}`);
+    navigate(`/classroom/${classId}/${armId}/subject/${subject.id}`);
   };
 
   // Show Add Subject View
   if (showAddSubjectView && classData) {
     return (
       <AddSubjectView
-        classId={classData.id.split('-')[0]}
-        classArmId={classData.id.split('-')[1]}
+        classId={classId!}
+        classArmId={armId!}
         onBack={handleBackFromAddSubject}
         onAddSubjects={handleAddSubjects}
         onShowSuccess={handleShowSuccess}

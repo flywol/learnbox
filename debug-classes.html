@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Classes</title>
+</head>
+<body>
+    <h1>Debug Class IDs</h1>
+    <button onclick="fetchClasses()">Fetch Current Classes</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function fetchClasses() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('https://learnbox-lms-backend.onrender.com/api/v1/admin/class-levels-overview', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('output').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

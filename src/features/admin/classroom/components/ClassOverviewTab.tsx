@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClassCard from './ClassCard';
 import FailureModal from '../../../../common/components/FailureModal';
+import QuickClassCreationModal from './QuickClassCreationModal';
 import { userApiClient } from '../../user-management/api/userApiClient';
 import type { ClassroomClass } from '../types/classroom.types';
 
@@ -27,6 +28,7 @@ export default function ClassOverviewTab() {
   const [error, setError] = useState<string | null>(null);
   const [showFailureModal, setShowFailureModal] = useState(false);
   const [retryAction, setRetryAction] = useState<(() => void) | null>(null);
+  const [showQuickCreateModal, setShowQuickCreateModal] = useState(false);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -54,7 +56,7 @@ export default function ClassOverviewTab() {
           
           // Create a class entry for each arm
           return level.arms.map((arm: any, armIndex: number) => ({
-            id: `${level.id}-${arm._id}`,
+            id: `${level.id}/${arm.id}`,
             name: `${level.class} ${arm.armName}`,
             level: level.levelName,
             arm: arm.armName,
@@ -94,6 +96,58 @@ export default function ClassOverviewTab() {
   const handleFailureModalClose = () => {
     setShowFailureModal(false);
     setRetryAction(null);
+  };
+
+  const handleQuickCreateSuccess = () => {
+    // Refetch classes after successful creation
+    const fetchClasses = async () => {
+      try {
+        setLoading(true);
+        const classLevels = await userApiClient.getClassLevels();
+        
+        // Transform API data to ClassroomClass format
+        const transformedClasses: ClassroomClass[] = classLevels.flatMap((level: any, levelIndex: number) => {
+          if (!level.arms || !Array.isArray(level.arms)) {
+            // If no arms, create a single class entry
+            return [{
+              id: level.id,
+              name: level.class,
+              level: level.levelName,
+              arm: '',
+              teacher: {
+                id: 'teacher-placeholder',
+                name: 'Not Assigned', // Default teacher name
+              },
+              studentCount: level.studentCount || 0,
+              color: getClassColor(levelIndex),
+            }];
+          }
+          
+          // Create a class entry for each arm
+          return level.arms.map((arm: any, armIndex: number) => ({
+            id: `${level.id}/${arm.id}`,
+            name: `${level.class} ${arm.armName}`,
+            level: level.levelName,
+            arm: arm.armName,
+            teacher: {
+              id: arm.assignedTeachers?.[0]?.id || 'teacher-placeholder',
+              name: arm.assignedTeachers?.[0]?.name || 'Not Assigned',
+            },
+            studentCount: arm.studentCount || 0,
+            color: getClassColor(levelIndex + armIndex),
+          }));
+        });
+        
+        setClasses(transformedClasses);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to refetch classes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClasses();
   };
 
   if (loading) {
@@ -153,18 +207,24 @@ export default function ClassOverviewTab() {
             <p className="text-gray-500 mb-6 max-w-sm mx-auto">
               You haven't set up any classes yet. Classes will appear here once they are created through the school setup process.
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <button 
-                onClick={() => navigate('/dashboard/complete-school-setup')}
+                onClick={() => setShowQuickCreateModal(true)}
                 className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Set Up Classes
+                Create Classes & Arms
+              </button>
+              <button 
+                onClick={() => navigate('/dashboard/complete-school-setup')}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Complete School Setup
               </button>
               <p className="text-xs text-gray-400 mt-2">
-                Or contact your administrator to set up classes
+                Quick class creation or complete the full school setup
               </p>
             </div>
           </div>
@@ -183,6 +243,13 @@ export default function ClassOverviewTab() {
         message={error || 'Failed to load class information. Please check your connection and try again.'}
         onRetry={handleRetry}
         retryText="Retry Loading"
+      />
+
+      {/* Quick Class Creation Modal */}
+      <QuickClassCreationModal
+        isOpen={showQuickCreateModal}
+        onClose={() => setShowQuickCreateModal(false)}
+        onSuccess={handleQuickCreateSuccess}
       />
     </div>
   );

@@ -17,7 +17,7 @@ export const profileKeys = {
 }
 
 // Hook to fetch admin profile
-export function useAdminProfile() {
+export function useAdminProfile(enabled: boolean = true) {
   return useQuery({
     queryKey: profileKeys.admin(),
     queryFn: () => profileApiClient.getAdminProfile(),
@@ -25,6 +25,7 @@ export function useAdminProfile() {
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3, // Only retry 3 times instead of infinite
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    enabled, // Allow disabling the query
   })
 }
 

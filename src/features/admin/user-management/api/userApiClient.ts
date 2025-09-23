@@ -152,7 +152,7 @@ class UserApiClient extends BaseApiClient {
   // Get user by ID
   async getUserById(userId: string): Promise<DetailedUser> {
     try {
-      const response = await this.get<{ data: { user: any } }>(`/admin/user-by-id/${userId}`);
+      const response = await this.get<{ data: { user: any } }>(`/admin/students/${userId}`);
       const user = response.data.user;
       
       // Transform _id to id for frontend consistency

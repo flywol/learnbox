@@ -72,13 +72,14 @@ class ProfileApiClient extends BaseApiClient {
     const response = await this.get<{ data: Record<string, unknown>[] }>("/admin/class-levels-overview");
     const classLevels = response.data;
     
-    // Transform _id to id for frontend consistency
+    // Keep original structure - don't overwrite the id field
     return classLevels.map((level: any) => ({
       ...level,
       id: level._id,
       arms: level.arms?.map((arm: any) => ({
         ...arm,
-        id: arm._id
+        // Keep both id and _id fields - don't overwrite the original id
+        _id: arm._id
       })) || []
     }));
   }

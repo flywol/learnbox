@@ -1,8 +1,11 @@
 import { useAdminProfile } from "@/features/admin/profile/hooks/useProfile";
+import { useAuthStore } from "@/features/auth/store/authStore";
 
 export default function SchoolBranding() {
-  const { data: adminProfile } = useAdminProfile();
+  const { isAuthenticated } = useAuthStore();
+  const { data: adminProfile } = useAdminProfile(isAuthenticated);
   const schoolInfo = adminProfile?.school;
+
 
   // Get first letter of school name for fallback
   const getSchoolInitial = () => {

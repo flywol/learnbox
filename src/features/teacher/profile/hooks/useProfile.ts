@@ -6,32 +6,33 @@ import type {
   UpdateSessionConfigDto
 } from '../types/profile.types'
 
-// Query keys
-export const profileKeys = {
-  all: ['profile'] as const,
-  admin: () => [...profileKeys.all, 'admin'] as const,
-  school: () => [...profileKeys.all, 'school'] as const,
-  sessions: () => [...profileKeys.all, 'sessions'] as const,
-  classLevels: () => [...profileKeys.all, 'classLevels'] as const,
-  classLevelsAndArms: () => [...profileKeys.all, 'classLevelsAndArms'] as const,
+// Query keys for teacher profile
+export const teacherProfileKeys = {
+  all: ['teacher-profile'] as const,
+  admin: () => [...teacherProfileKeys.all, 'admin'] as const,
+  school: () => [...teacherProfileKeys.all, 'school'] as const,
+  sessions: () => [...teacherProfileKeys.all, 'sessions'] as const,
+  classLevels: () => [...teacherProfileKeys.all, 'classLevels'] as const,
+  classLevelsAndArms: () => [...teacherProfileKeys.all, 'classLevelsAndArms'] as const,
 }
 
 // Hook to fetch admin profile
-export function useAdminProfile() {
+export function useAdminProfile(enabled: boolean = true) {
   return useQuery({
-    queryKey: profileKeys.admin(),
+    queryKey: teacherProfileKeys.admin(),
     queryFn: () => profileApiClient.getAdminProfile(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3, // Only retry 3 times instead of infinite
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    enabled, // Allow disabling the query
   })
 }
 
 // Hook to fetch school information
 export function useSchoolInformation() {
   return useQuery({
-    queryKey: profileKeys.school(),
+    queryKey: teacherProfileKeys.school(),
     queryFn: () => profileApiClient.getSchoolInformation(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -41,7 +42,7 @@ export function useSchoolInformation() {
 // Hook to fetch session configuration
 export function useSessionConfiguration() {
   return useQuery({
-    queryKey: profileKeys.sessions(),
+    queryKey: teacherProfileKeys.sessions(),
     queryFn: () => profileApiClient.getSessionConfiguration(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -51,7 +52,7 @@ export function useSessionConfiguration() {
 // Hook to fetch class levels
 export function useClassLevels() {
   return useQuery({
-    queryKey: profileKeys.classLevels(),
+    queryKey: teacherProfileKeys.classLevels(),
     queryFn: () => profileApiClient.getClassLevels(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -61,7 +62,7 @@ export function useClassLevels() {
 // Hook to fetch class levels and arms
 export function useClassLevelsAndArms() {
   return useQuery({
-    queryKey: profileKeys.classLevelsAndArms(),
+    queryKey: teacherProfileKeys.classLevelsAndArms(),
     queryFn: () => profileApiClient.getClassLevelsAndArms(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -77,7 +78,7 @@ export function useUpdatePersonalInfo() {
       profileApiClient.updatePersonalInfo(data),
     onSuccess: () => {
       // Invalidate and refetch admin profile
-      queryClient.invalidateQueries({ queryKey: profileKeys.admin() })
+      queryClient.invalidateQueries({ queryKey: teacherProfileKeys.admin() })
     },
     onError: (error) => {
       console.error('Failed to update personal info:', error)
@@ -94,7 +95,7 @@ export function useUpdateSchoolInfo() {
       profileApiClient.updateSchoolInformation(data),
     onSuccess: () => {
       // Invalidate and refetch school information
-      queryClient.invalidateQueries({ queryKey: profileKeys.school() })
+      queryClient.invalidateQueries({ queryKey: teacherProfileKeys.school() })
     },
     onError: (error) => {
       console.error('Failed to update school info:', error)
@@ -111,7 +112,7 @@ export function useUpdateSessionConfig() {
       profileApiClient.updateSessionConfiguration(data),
     onSuccess: () => {
       // Invalidate and refetch session configuration
-      queryClient.invalidateQueries({ queryKey: profileKeys.sessions() })
+      queryClient.invalidateQueries({ queryKey: teacherProfileKeys.sessions() })
     },
     onError: (error) => {
       console.error('Failed to update session configuration:', error)

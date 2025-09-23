@@ -122,18 +122,61 @@ export default function ClassDetailPage() {
         if (foundClass) {
           try {
             const [levelId, armId] = foundClass.id.split('-'); // Extract level ID and arm ID
+            
+            console.log('🎯 [TeacherClassDetail] Starting subject fetch for:', {
+              foundClass: {
+                id: foundClass.id,
+                name: foundClass.name,
+                levelId,
+                armId
+              },
+              timestamp: new Date().toISOString()
+            });
+            
+            console.log('📡 [TeacherClassDetail] Calling getSubjectsForClass with:', { levelId, armId });
             const classSubjects = await subjectsApiClient.getSubjectsForClass(levelId, armId);
             
-            const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => ({
-              id: subject.id,
-              name: subject.name,
-              icon: `/assets/${subject.name.toLowerCase().replace(/\s+/g, '')}.svg`,
-              bgColor: ['bg-purple-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'][index % 4],
-            }));
+            console.log('🔄 [TeacherClassDetail] Raw subjects received:', {
+              subjectsCount: classSubjects.length,
+              rawSubjects: classSubjects
+            });
+            
+            const transformedSubjects: Subject[] = classSubjects.map((subject: any, index: number) => {
+              const iconName = subject.name.toLowerCase().replace(/\s+/g, '');
+              const bgColor = ['bg-purple-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'][index % 4];
+              
+              const transformed = {
+                id: subject.id,
+                name: subject.name,
+                icon: `/assets/${iconName}.svg`,
+                bgColor: bgColor,
+              };
+              
+              console.log(`🎨 [TeacherClassDetail] Transformed subject ${index + 1}:`, {
+                original: subject,
+                transformed: transformed,
+                iconName,
+                bgColor
+              });
+              
+              return transformed;
+            });
+            
+            console.log('✅ [TeacherClassDetail] Final transformed subjects:', {
+              totalSubjects: transformedSubjects.length,
+              transformedSubjects,
+              subjectNames: transformedSubjects.map(s => s.name)
+            });
             
             setSubjects(transformedSubjects);
+            
           } catch (subjectError) {
-            console.log('No subjects found for this class, keeping empty array');
+            console.log('📭 [TeacherClassDetail] No subjects found for this specific class/arm:', {
+              foundClassId: foundClass.id,
+              error: subjectError,
+              errorMessage: subjectError instanceof Error ? subjectError.message : 'Unknown error',
+              result: 'Setting empty subjects array - user can add subjects for this arm'
+            });
             setSubjects([]);
           }
         }

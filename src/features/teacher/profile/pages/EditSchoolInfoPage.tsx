@@ -43,7 +43,7 @@ export default function EditSchoolInfoPage() {
   const { data: schoolInfo, isLoading } = useSchoolInformation();
   const updateSchoolInfoMutation = useUpdateSchoolInfo();
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<SchoolInfoFormData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<SchoolInfoFormData>({
     resolver: zodResolver(schoolInfoSchema),
     values: {
       schoolName: schoolInfo?.schoolName || "",
@@ -152,7 +152,7 @@ export default function EditSchoolInfoPage() {
       <div className="bg-white rounded-lg shadow-sm border p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <SchoolBasicFields register={register} errors={errors} />
-          <SchoolLocationFields register={register} />
+          <SchoolLocationFields register={register} setValue={setValue} watch={watch} />
           <SchoolFileUploads
             logoPreview={logoPreview}
             signaturePreview={signaturePreview}

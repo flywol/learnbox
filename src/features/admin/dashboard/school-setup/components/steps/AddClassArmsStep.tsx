@@ -21,15 +21,17 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
     getClassArms,
     previousStep,
     deleteAllArmsForClass,
-    addCustomArmToAllClasses,
+    handleCustomArmAdd,
   } = useClassArmsLogic(onComplete);
 
   const handleCustomArmClick = () => {
     setShowCustomModal(true);
   };
 
-  const handleCustomArmAdd = (armNames: string[]) => {
-    addCustomArmToAllClasses(armNames);
+  const handleCustomArmSubmit = (armNames: string[]) => {
+    armNames.forEach(armName => {
+      handleCustomArmAdd(armName);
+    });
     setShowCustomModal(false);
   };
 
@@ -72,7 +74,7 @@ export default function AddClassArmsStep({ onComplete }: ClassArmsProps) {
         <CustomArmModal
           isOpen={showCustomModal}
           onClose={() => setShowCustomModal(false)}
-          onSubmit={handleCustomArmAdd}
+          onSubmit={handleCustomArmSubmit}
           className=""
         />
       )}

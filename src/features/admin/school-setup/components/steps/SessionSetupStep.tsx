@@ -7,18 +7,53 @@ import { Calendar, CalendarDays, BookOpen, Clock } from "lucide-react";
 import { useSessionStore } from "../../store/sessionStore";
 import schoolSetupApiClient from "@/features/admin/dashboard/api/schoolSetupApiClient";
 
-// Session validation schema
+// Session validation schema with date validation
 const sessionSchema = z.object({
-  name: z.string().min(1, "Session name is required"),
-  firstTermName: z.string().min(1, "First term name is required"),
-  secondTermName: z.string().min(1, "Second term name is required"),
-  thirdTermName: z.string().min(1, "Third term name is required"),
+  name: z.string().min(1, "Session name is required").max(50, "Session name too long"),
+  firstTermName: z.string().min(1, "First term name is required").max(30, "Term name too long"),
+  secondTermName: z.string().min(1, "Second term name is required").max(30, "Term name too long"),
+  thirdTermName: z.string().min(1, "Third term name is required").max(30, "Term name too long"),
   firstTermStartDate: z.string().min(1, "First term start date is required"),
   firstTermEndDate: z.string().min(1, "First term end date is required"),
   secondTermStartDate: z.string().min(1, "Second term start date is required"),
   secondTermEndDate: z.string().min(1, "Second term end date is required"),
   thirdTermStartDate: z.string().min(1, "Third term start date is required"),
   thirdTermEndDate: z.string().min(1, "Third term end date is required"),
+}).refine((data) => {
+  const firstStart = new Date(data.firstTermStartDate);
+  const firstEnd = new Date(data.firstTermEndDate);
+  return firstEnd > firstStart;
+}, {
+  message: "First term end date must be after start date",
+  path: ["firstTermEndDate"]
+}).refine((data) => {
+  const secondStart = new Date(data.secondTermStartDate);
+  const secondEnd = new Date(data.secondTermEndDate);
+  return secondEnd > secondStart;
+}, {
+  message: "Second term end date must be after start date",
+  path: ["secondTermEndDate"]
+}).refine((data) => {
+  const thirdStart = new Date(data.thirdTermStartDate);
+  const thirdEnd = new Date(data.thirdTermEndDate);
+  return thirdEnd > thirdStart;
+}, {
+  message: "Third term end date must be after start date",
+  path: ["thirdTermEndDate"]
+}).refine((data) => {
+  const firstEnd = new Date(data.firstTermEndDate);
+  const secondStart = new Date(data.secondTermStartDate);
+  return secondStart >= firstEnd;
+}, {
+  message: "Second term must start after first term ends",
+  path: ["secondTermStartDate"]
+}).refine((data) => {
+  const secondEnd = new Date(data.secondTermEndDate);
+  const thirdStart = new Date(data.thirdTermStartDate);
+  return thirdStart >= secondEnd;
+}, {
+  message: "Third term must start after second term ends",
+  path: ["thirdTermStartDate"]
 });
 
 type SessionFormData = z.infer<typeof sessionSchema>;
@@ -84,7 +119,22 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
         onComplete();
       }
     } catch (error: unknown) {
-      setApiError(error instanceof Error ? error.message : "Failed to create session");
+      let errorMessage = "Failed to create session";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'response' in error) {
+        const apiError = error as any;
+        if (apiError.response?.data?.message) {
+          errorMessage = apiError.response.data.message;
+        } else if (apiError.response?.status === 400) {
+          errorMessage = "Invalid session data. Please check your inputs.";
+        } else if (apiError.response?.status === 409) {
+          errorMessage = "A session with this name already exists.";
+        }
+      }
+      
+      setApiError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -107,8 +157,14 @@ const SessionSetupStep = ({ onComplete }: SessionSetupStepProps) => {
 
       {/* API Error */}
       {apiError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {apiError}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3">
+          <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-white text-xs font-bold">!</span>
+          </div>
+          <div>
+            <p className="font-medium">Session Creation Failed</p>
+            <p className="text-sm">{apiError}</p>
+          </div>
         </div>
       )}
 

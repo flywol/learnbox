@@ -49,8 +49,7 @@ export default function SchoolInfoStep() {
 		schoolInfo,
 		authSchoolDomain,
 		user,
-		signupData,
-		updateSchoolInfo
+		signupData
 	});
 
 	const onSubmit = async (data: SchoolInfoFormData) => {

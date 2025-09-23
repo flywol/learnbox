@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AddClassArmsStep from "../components/steps/AddClassArmsStep";
 import AddClassLevelsStep from "../components/steps/AddClassLevelsStep";
 import CreateSessionStep from "../components/steps/CreateSessionStep";
@@ -17,21 +17,34 @@ const steps = [
 
 export default function CompleteSetupPage() {
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 	const {
 		currentStep,
 		isCompleted,
 		markAsCompleted,
 		clearStorageAfterCompletion,
+		setCurrentStep,
 	} = useSchoolSetupStore();
+
+	// Handle direct navigation to specific step
+	useEffect(() => {
+		const stepParam = searchParams.get('step');
+		if (stepParam) {
+			const stepNumber = parseInt(stepParam, 10);
+			if (stepNumber >= 1 && stepNumber <= 4) {
+				setCurrentStep(stepNumber);
+			}
+		}
+	}, [searchParams, setCurrentStep]);
 
 	const CurrentStepComponent = steps[currentStep - 1].component;
 
-	// Redirect if already completed
+	// Redirect if already completed (but allow step override)
 	useEffect(() => {
-		if (isCompleted) {
+		if (isCompleted && !searchParams.get('step')) {
 			navigate("/dashboard");
 		}
-	}, [isCompleted, navigate]);
+	}, [isCompleted, navigate, searchParams]);
 
 	const handleComplete = async () => {
 		// This is called from the final step (AddClassArmsStep)

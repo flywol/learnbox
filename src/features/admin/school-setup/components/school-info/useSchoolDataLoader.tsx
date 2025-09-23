@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import { z } from "zod";
-import { profileApiClient } from "@/features/admin/profile/api/profileApiClient";
+import { useAdminProfile } from "@/features/admin/profile/hooks/useProfile";
 import { completeSchoolInfoSchema } from "@/features/admin/dashboard/schema/dashboardSchema";
 
 type SchoolInfoFormData = z.infer<typeof completeSchoolInfoSchema>;
@@ -12,7 +12,6 @@ interface UseSchoolDataLoaderProps {
   authSchoolDomain: string | null;
   user: any;
   signupData: any;
-  updateSchoolInfo: (data: any) => void;
 }
 
 export function useSchoolDataLoader({
@@ -20,13 +19,13 @@ export function useSchoolDataLoader({
   schoolInfo,
   authSchoolDomain,
   user,
-  signupData,
-  updateSchoolInfo
+  signupData
 }: UseSchoolDataLoaderProps) {
+  const { data: adminProfile, isSuccess } = useAdminProfile();
+
   useEffect(() => {
-    const loadBackendData = async () => {
-      try {
-        const adminProfile = await profileApiClient.getAdminProfile();
+    const loadBackendData = () => {
+      if (isSuccess && adminProfile) {
         
         const fieldMappings = [
           { backend: adminProfile.school?.schoolName, field: 'schoolName' as const },
@@ -43,18 +42,14 @@ export function useSchoolDataLoader({
         ];
 
         fieldMappings.forEach(({ backend, field }) => {
-          if (backend) {
+          if (backend && !schoolInfo[field]) {
             setValue(field, backend);
-            updateSchoolInfo({ [field]: backend });
           }
         });
 
-        if (adminProfile.school?.learnboxUrl) {
+        if (adminProfile.school?.learnboxUrl && !schoolInfo.learnboxUrl) {
           setValue("schoolDomain", adminProfile.school.learnboxUrl);
-          updateSchoolInfo({ learnboxUrl: adminProfile.school.learnboxUrl });
         }
-      } catch (error) {
-        // Backend call failed, fall back to existing logic
       }
       
       // Set school domain from auth store or signup data if not already set from backend
@@ -62,7 +57,6 @@ export function useSchoolDataLoader({
         const domainToUse = authSchoolDomain || signupData?.learnboxUrl;
         if (domainToUse) {
           setValue("schoolDomain", domainToUse);
-          updateSchoolInfo({ learnboxUrl: domainToUse });
         }
       }
 
@@ -107,5 +101,5 @@ export function useSchoolDataLoader({
     };
 
     loadBackendData();
-  }, [setValue, schoolInfo, authSchoolDomain, user, signupData, updateSchoolInfo]);
+  }, [adminProfile, isSuccess, setValue, authSchoolDomain, user, signupData]);
 }

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Outlet } from "react-router-dom";
+import { ProfileProvider } from "../contexts/ProfileContext";
 
 interface Props {
 	children?: ReactNode;
@@ -9,7 +10,8 @@ interface Props {
 
 export default function DashboardLayout({ children }: Props) {
 	return (
-		<div className="h-screen bg-gray-50 flex flex-col">
+		<ProfileProvider>
+			<div className="h-screen bg-gray-50 flex flex-col">
 			{/* Full width header */}
 			<Header />
 			{/* Sidebar and main content below header */}
@@ -20,7 +22,8 @@ export default function DashboardLayout({ children }: Props) {
 						{children || <Outlet />}
 					</div>
 				</main>
+				</div>
 			</div>
-		</div>
+		</ProfileProvider>
 	);
 }

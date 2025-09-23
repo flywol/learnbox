@@ -15,10 +15,10 @@ export function ClassroomRoutes() {
       <Route path="/classroom" element={<ClassroomOverviewPage />} />
       <Route path="/classroom/add-event" element={<AddEventPage />} />
       <Route path="/classroom/add-timetable" element={<AddTimetablePage />} />
-      <Route path="/classroom/:classId" element={<ClassDetailPage />} />
-      <Route path="/classroom/:classId/subject/:subjectId" element={<SubjectDetailPage />} />
-      <Route path="/classroom/:classId/subject/:subjectId/assignment/:assignmentId" element={<AssignmentDetailPage />} />
-      <Route path="/classroom/:classId/subject/:subjectId/quiz/:quizId" element={<QuizDetailPage />} />
+      <Route path="/classroom/:classId/:armId" element={<ClassDetailPage />} />
+      <Route path="/classroom/:classId/:armId/subject/:subjectId" element={<SubjectDetailPage />} />
+      <Route path="/classroom/:classId/:armId/subject/:subjectId/assignment/:assignmentId" element={<AssignmentDetailPage />} />
+      <Route path="/classroom/:classId/:armId/subject/:subjectId/quiz/:quizId" element={<QuizDetailPage />} />
     </>
   );
 }

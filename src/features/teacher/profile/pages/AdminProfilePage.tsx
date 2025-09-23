@@ -26,11 +26,14 @@ export default function AdminProfilePage() {
     employeeId: 'TCH001',
     school: {
       id: 'school-1',
-      name: 'Lakeridge Mountain High School',
-      address: '123 Education Drive, Lagos, Nigeria',
-      phone: '+234 1 234 5678',
-      email: 'info@lakeridge.edu',
-      website: 'www.lakeridge.edu'
+      schoolName: 'Lakeridge Mountain High School',
+      schoolShortName: 'LMHS',
+      schoolAddress: '123 Education Drive, Lagos, Nigeria',
+      schoolPhone: '+234 1 234 5678',
+      schoolEmail: 'info@lakeridge.edu',
+      schoolWebsite: 'www.lakeridge.edu',
+      schoolLogo: null,
+      schoolMotto: 'Excellence in Learning'
     }
   };
 
