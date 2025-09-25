@@ -43,12 +43,8 @@ class TimetableApiClient extends BaseApiClient {
 
   // Create or update timetable
   async createTimetable(data: CreateTimetableRequest): Promise<TimetableData> {
-    try {
-      const response = await this.post<CreateTimetableResponse>("/timetable", data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.post<CreateTimetableResponse>("/timetable", data);
+    return response.data;
   }
 
   // Get timetable for a specific class
@@ -98,6 +94,7 @@ class TimetableApiClient extends BaseApiClient {
       }));
     } catch (error) {
       // Return default subjects if API doesn't exist
+      console.log('API not available, using default subjects:', error);
       return [
         { id: '1', name: 'Mathematics', color: 'bg-blue-100 text-blue-800', icon: '/assets/maths.svg' },
         { id: '2', name: 'English', color: 'bg-green-100 text-green-800', icon: '/assets/english.svg' },
@@ -118,21 +115,13 @@ class TimetableApiClient extends BaseApiClient {
 
   // Edit existing timetable by ID
   async editTimetable(timetableId: string, data: CreateTimetableRequest): Promise<TimetableData> {
-    try {
-      const response = await this.put<CreateTimetableResponse>(`/timetable/${timetableId}`, data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.put<CreateTimetableResponse>(`/timetable/${timetableId}`, data);
+    return response.data;
   }
 
   // Delete timetable by ID
   async deleteTimetable(timetableId: string): Promise<void> {
-    try {
-      await this.delete(`/timetable/${timetableId}`);
-    } catch (error) {
-      throw error;
-    }
+    await this.delete(`/timetable/${timetableId}`);
   }
 
   // Get all class levels for timetable creation (focuses on class level, not individual arms)

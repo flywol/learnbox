@@ -4,8 +4,11 @@ import { ChevronDown } from "lucide-react";
 import { africanCountriesStates, type Country, type CountryState } from "@/common/data/africanCountriesStates";
 
 interface CountryStateSelectProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: UseFormRegister<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   watch: UseFormWatch<any>;
   countryFieldName?: string;
   stateFieldName?: string;

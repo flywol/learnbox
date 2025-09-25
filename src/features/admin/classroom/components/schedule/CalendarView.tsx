@@ -54,7 +54,7 @@ const CalendarError = ({ message }: { message: string }) => (
   </div>
 );
 
-export default function CalendarView({}: CalendarViewProps) {
+export default function CalendarView(_props: CalendarViewProps) {
   const navigate = useNavigate();
   // State for current viewing month/year
   const [currentDate, setCurrentDate] = useState(new Date());

@@ -57,9 +57,10 @@ export function useTeacherDashboard() {
   };
 
   // Filter schedule based on selected day
-  const getScheduleForDay = (_day: string) => {
+  const getScheduleForDay = (day: string) => {
     // For now, return same schedule for all days
     // TODO: Implement day-specific schedule filtering
+    console.log('Getting schedule for day:', day);
     return mockClassSchedule;
   };
 
