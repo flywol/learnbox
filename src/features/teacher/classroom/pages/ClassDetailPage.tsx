@@ -277,9 +277,6 @@ export default function ClassDetailPage() {
     setSubjects(prev => [...prev, ...newSubjects]);
   };
 
-  const handleShowSuccess = () => {
-    setShowSuccessModal(true);
-  };
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
@@ -298,7 +295,6 @@ export default function ClassDetailPage() {
         classArmId={classData.id.split('-')[1]}
         onBack={handleBackFromAddSubject}
         onAddSubjects={handleAddSubjects}
-        onShowSuccess={handleShowSuccess}
       />
     );
   }

@@ -18,37 +18,44 @@ import { TeacherRoutes } from "./routes/TeacherRoutes";
 // Error and loading components
 import { UnauthorizedPage, NotFoundPage, LoadingSpinner, LayoutNotFoundPage } from "./components/ErrorPages";
 
+// Toast components
+import { ToastProvider } from "./hooks/use-toast";
+import { Toaster } from "./components/ui/toast";
+
 export default function App() {
   return (
     <SecurityWrapper>
       <HydrationGate>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            {PublicRoutes()}
-            {DashboardRoutes()}
-            
-            {/* Role-based routes */}
-            {AdminRoutes()}
-            {TeacherRoutes()}
-            
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              {ClassroomRoutes()}
-              {UserRoutes()}
-              {ProfileRoutes()}
-              {PaymentRoutes()}
-              <Route path="*" element={<LayoutNotFoundPage />} />
-            </Route>
+        <ToastProvider>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {PublicRoutes()}
+              {DashboardRoutes()}
+              
+              {/* Role-based routes */}
+              {AdminRoutes()}
+              {TeacherRoutes()}
+              
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {ClassroomRoutes()}
+                {UserRoutes()}
+                {ProfileRoutes()}
+                {PaymentRoutes()}
+                <Route path="*" element={<LayoutNotFoundPage />} />
+              </Route>
 
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+          <Toaster />
+        </ToastProvider>
       </HydrationGate>
     </SecurityWrapper>
   );

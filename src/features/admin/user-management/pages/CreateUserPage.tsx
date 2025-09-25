@@ -2,33 +2,30 @@ import { useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreateUserForm from "../components/CreateUserForm";
-import UserCreatedModal from "../components/UserCreatedModal";
 import { userApiClient } from "../api/userApiClient";
 import type { CreateUserFormData } from "../schemas/userSchema";
+import { useToast } from "../../../../hooks/use-toast";
 
 export default function CreateUserPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [createdUser, setCreatedUser] = useState<{ name: string; role: CreateUserFormData["role"] } | null>(null);
   const formRef = useRef<{ reset: () => void }>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (data: CreateUserFormData) => {
     setLoading(true);
     try {
       await userApiClient.createUser(data);
       
-      // Store user info for modal
-      setCreatedUser({
-        name: data.fullName,
-        role: data.role
-      });
-      
-      // Show success modal
-      setShowSuccessModal(true);
-      
       // Clear the form
       formRef.current?.reset();
+      
+      // Show success toast
+      toast({
+        variant: "success",
+        title: "User Created Successfully!",
+        description: `${data.fullName} has been created as a ${data.role.toLowerCase()}. Login credentials sent via email.`
+      });
       
     } catch (error) {
       console.error("Failed to create user:", error);
@@ -36,11 +33,6 @@ export default function CreateUserPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCloseModal = () => {
-    setShowSuccessModal(false);
-    setCreatedUser(null);
   };
 
   return (
@@ -60,16 +52,6 @@ export default function CreateUserPage() {
       <div className="bg-white rounded-lg shadow-sm p-4">
         <CreateUserForm ref={formRef} onSubmit={handleSubmit} loading={loading} />
       </div>
-
-      {/* Success Modal */}
-      {createdUser && (
-        <UserCreatedModal
-          isOpen={showSuccessModal}
-          onClose={handleCloseModal}
-          userRole={createdUser.role}
-          userName={createdUser.name}
-        />
-      )}
     </div>
   );
 }

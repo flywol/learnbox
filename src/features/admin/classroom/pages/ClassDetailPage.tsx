@@ -313,16 +313,6 @@ export default function ClassDetailPage() {
     setSubjects(prev => [...prev, ...newSubjects]);
   };
 
-  const handleShowSuccess = () => {
-    console.log('🎉 [ClassDetail] handleShowSuccess called - showing success modal');
-    setShowSuccessModal(true);
-    
-    // Ensure we return to the subject list view after showing success
-    setTimeout(() => {
-      console.log('🔄 [ClassDetail] Auto-returning to subject view after success');
-      setShowAddSubjectView(false);
-    }, 2000); // Give user time to see the success modal
-  };
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
@@ -341,7 +331,6 @@ export default function ClassDetailPage() {
         classArmId={armId!}
         onBack={handleBackFromAddSubject}
         onAddSubjects={handleAddSubjects}
-        onShowSuccess={handleShowSuccess}
       />
     );
   }

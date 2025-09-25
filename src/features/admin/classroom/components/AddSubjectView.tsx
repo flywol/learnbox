@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Plus, Minus, Loader2 } from 'lucide-react';
 import { subjectsApiClient } from '../../user-management/api/subjectsApiClient';
 import FailureModal from '../../../../common/components/FailureModal';
+import { useToast } from '../../../../hooks/use-toast';
 
 interface Subject {
   id: string;
@@ -15,7 +16,6 @@ interface AddSubjectViewProps {
   classArmId: string;
   onBack: () => void;
   onAddSubjects: (subjects: Subject[]) => void;
-  onShowSuccess: () => void;
 }
 
 // Available subjects with their icons and colors
@@ -26,12 +26,13 @@ const AVAILABLE_SUBJECTS = [
   { id: 'chemistry', name: 'Chemistry', icon: '/assets/chem.svg', bgColor: 'bg-yellow-500' },
 ];
 
-export default function AddSubjectView({ classId, classArmId, onBack, onAddSubjects, onShowSuccess }: AddSubjectViewProps) {
+export default function AddSubjectView({ classId, classArmId, onBack, onAddSubjects }: AddSubjectViewProps) {
   const [subjectInputs, setSubjectInputs] = useState([{ id: 1, value: '' }]);
   const [nextId, setNextId] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFailureModal, setShowFailureModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleAddInput = () => {
     setSubjectInputs([...subjectInputs, { id: nextId, value: '' }]);
@@ -132,10 +133,14 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
       setNextId(2);
       setError(null);
       
-      // Show success modal
-      onShowSuccess();
+      // Show success toast
+      toast({
+        variant: "success",
+        title: "Success!",
+        description: `Successfully added ${validSubjects.length} subject${validSubjects.length > 1 ? 's' : ''} to the class.`
+      });
       
-      console.log('🎉 [AddSubject] Subject addition completed successfully - form cleared and success shown');
+      console.log('🎉 [AddSubject] Subject addition completed successfully - form cleared and success toast shown');
       
     } catch (err) {
       console.error('❌ [AddSubject] Subject addition failed:', {
