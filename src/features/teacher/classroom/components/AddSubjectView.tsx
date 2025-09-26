@@ -104,7 +104,6 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
       });
       
     } catch (err) {
-      console.error('Failed to add subjects:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(`Failed to add subjects: ${errorMessage}`);
       setShowFailureModal(true);

@@ -30,35 +30,20 @@ const RoleSelectionPage = () => {
 	const navigate = useNavigate();
 
 	const handleSelectRole = (role: Role) => {
-		console.log("🎭 RoleSelectionPage: User selected role", { role });
 		setSelectedRoleLocal(role);
 	};
 
 	const handleSubmit = () => {
-		console.log("🎭 RoleSelectionPage: Submit clicked", { selectedRole });
 		
 		if (selectedRole) {
-			console.log("🎭 RoleSelectionPage: Setting role in auth store", { selectedRole });
 			setRole(selectedRole);
-			
-			// Verify role was set by checking store immediately
-			const currentStoreState = useAuthStore.getState();
-			console.log("🎭 RoleSelectionPage: Auth store state after setRole", {
-				storeSelectedRole: currentStoreState.selectedRole,
-				originalRole: selectedRole,
-				matches: currentStoreState.selectedRole === selectedRole
-			});
 			
 			// Teachers go to onboarding first, others go to school setup
 			if (selectedRole === "TEACHER") {
-				console.log("🎭 RoleSelectionPage: Navigating teacher to /onboarding");
 				navigate("/onboarding");
 			} else {
-				console.log("🎭 RoleSelectionPage: Navigating non-teacher to /school-setup", { selectedRole });
 				navigate("/school-setup");
 			}
-		} else {
-			console.warn("🎭 RoleSelectionPage: No role selected, cannot submit");
 		}
 	};
 

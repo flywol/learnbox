@@ -79,31 +79,12 @@ const initialLoginContext: LoginContext = {
 
 // Helper function to get the appropriate auth client based on current role
 const getAuthClientForRole = (selectedRole: Role | null) => {
-	console.log("🏪 AuthStore: Getting auth client for role", { 
-		selectedRole,
-		roleType: typeof selectedRole,
-		isNull: selectedRole === null,
-		isUndefined: selectedRole === undefined
-	});
 	
-	// Let's also check the current store state
-	const currentState = useAuthStore.getState();
-	console.log("🏪 AuthStore: Current store state during client request", {
-		storeSelectedRole: currentState.selectedRole,
-		paramSelectedRole: selectedRole,
-		storeRoleType: typeof currentState.selectedRole,
-		rolesMatch: currentState.selectedRole === selectedRole
-	});
 	
 	if (selectedRole === "TEACHER") {
-		console.log("🏪 AuthStore: Auth client obtained for role", { 
-			selectedRole, 
-			clientType: "TeacherAuthApiClient" 
-		});
 		return teacherAuthApiClient;
 	}
 	
-	console.log("🏪 AuthStore: Using AuthApiClient for role", { selectedRole });
 	// Use base auth client for ADMIN and other roles
 	return authApiClient;
 };
@@ -158,20 +139,7 @@ export const useAuthStore = create<AuthState>()(
 
 			// Role and school management
 			setRole: (role) => {
-				console.log("🏪 AuthStore: Setting role", { 
-					previousRole: get().selectedRole, 
-					newRole: role,
-					roleType: typeof role 
-				});
 				set({ selectedRole: role });
-				
-				// Verify role was set correctly
-				const currentRole = get().selectedRole;
-				console.log("🏪 AuthStore: Role set verification", { 
-					setRole: role, 
-					currentRole,
-					matches: role === currentRole 
-				});
 			},
 
 			setSchoolDomain: (domain) => {
@@ -183,17 +151,12 @@ export const useAuthStore = create<AuthState>()(
 			verifySchoolDomain: async (domain) => {
 				try {
 					const state = get();
-					console.log("🏪 AuthStore: Starting school domain verification", { 
-						domain, 
-						selectedRole: state.selectedRole 
-					});
 					
 					const authClient = getAuthClientForRole(state.selectedRole);
 					const response = await authClient.verifyDomain({
 						schoolDomain: domain,
 					});
 					
-					console.log("🏪 AuthStore: School domain verification response", response);
 
 					// Check if school exists in response (indicates verification success)
 					const isVerified = !!(
@@ -215,26 +178,12 @@ export const useAuthStore = create<AuthState>()(
 
 			// Flow state management
 			clearAllFlowStates: () => {
-				console.log("🏪 AuthStore: clearAllFlowStates called");
-				const currentState = get();
-				console.log("🏪 AuthStore: State before clearing flow states", {
-					selectedRole: currentState.selectedRole,
-					passwordResetEmail: currentState.passwordResetEmail,
-					passwordResetStep: currentState.passwordResetStep
-				});
 				
 				set({
 					passwordResetEmail: null,
 					passwordResetStep: null,
 				});
 				
-				const newState = get();
-				console.log("🏪 AuthStore: State after clearing flow states", {
-					selectedRole: newState.selectedRole,
-					passwordResetEmail: newState.passwordResetEmail,
-					passwordResetStep: newState.passwordResetStep,
-					roleChanged: currentState.selectedRole !== newState.selectedRole
-				});
 			},
 
 			// Core authentication
@@ -249,18 +198,14 @@ export const useAuthStore = create<AuthState>()(
 			// Fix for authStore.ts - Complete logout with storage clearing
 
 			logout: async () => {
-				console.log("🏪 AuthStore: Starting logout");
 
 				try {
 					// Call API logout using the appropriate client
 					const state = get();
-					console.log("🏪 AuthStore: Logout for role", { selectedRole: state.selectedRole });
 					
 					const authClient = getAuthClientForRole(state.selectedRole);
 					await authClient.logout();
-					console.log("🏪 AuthStore: API logout successful");
 				} catch (error) {
-					console.error("🏪 AuthStore: API logout failed", error);
 					// Continue with local cleanup even if API call fails
 				}
 

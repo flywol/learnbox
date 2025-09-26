@@ -61,13 +61,6 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 	} = authState;
 
 	// Log current auth state whenever useAuth is called
-	console.log("🎣 useAuth: Hook called with current state", {
-		selectedRole,
-		roleType: typeof selectedRole,
-		isAuthenticated,
-		hasUser: !!user,
-		loadingState
-	});
 
 	// Check access permissions
 	const hasAccess = useCallback(() => {
@@ -82,28 +75,18 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 	// Enhanced login function - delegates to auth store which has factory pattern
 	const login = useCallback(
 		async (email: string, password: string, rememberMe: boolean = false) => {
-			console.log("🎣 useAuth: Delegating login to auth store", { 
-				email, 
-				selectedRole, 
-				rememberMe 
-			});
 			
 			setLoadingState("submitting");
 
 			try {
 				// Simple client selection
 				const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
-				console.log("🎣 useAuth: Using auth client for role", { selectedRole });
 				
 				const response = await authClient.login(
 					{ email, password },
 					rememberMe
 				);
 				
-				console.log("🎣 useAuth: Login response received", {
-					hasData: !!response.data,
-					hasUser: !!response.data?.user
-				});
 
 				// Transform user data
 				const transformedUser = transformUserData(response.data.user);
@@ -142,7 +125,6 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 			await storeLogout();
 			navigate(redirectTo);
 		} catch (error) {
-			console.error("Logout error:", error);
 			navigate(redirectTo);
 		}
 	}, [storeLogout, navigate, redirectTo]);

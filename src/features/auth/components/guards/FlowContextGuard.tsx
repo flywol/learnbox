@@ -22,11 +22,6 @@ export const FlowContextGuard = ({ children, flowType }: FlowContextGuardProps) 
 
 	useEffect(() => {
 		const currentPath = location.pathname;
-		console.log("🛡️ FlowContextGuard: Effect triggered", { 
-			flowType, 
-			currentPath,
-			passwordResetStep
-		});
 		
 		// Define flow compatibility matrix
 		const shouldClearStates = (() => {
@@ -59,10 +54,7 @@ export const FlowContextGuard = ({ children, flowType }: FlowContextGuardProps) 
 			}
 		})();
 
-		console.log("🛡️ FlowContextGuard: Should clear states?", { shouldClearStates });
-		
 		if (shouldClearStates) {
-			console.log("🛡️ FlowContextGuard: Clearing flow states");
 			clearAllFlowStates();
 		}
 	}, [flowType, location.pathname, clearAllFlowStates, passwordResetStep]);

@@ -126,7 +126,6 @@ class TeacherAuthApiClient extends BaseApiClient {
 			);
 			return response;
 		} catch (error) {
-			console.error("🍎 TeacherAuthApiClient: Teacher forgot password failed", error);
 			const apiError = error as ApiErrorResponse;
 
 			if (apiError.status === 400) {
@@ -156,7 +155,6 @@ class TeacherAuthApiClient extends BaseApiClient {
 			);
 			return response;
 		} catch (error) {
-			console.error("🍎 TeacherAuthApiClient: Teacher OTP verification failed", error);
 			throw error;
 		}
 	}
@@ -172,7 +170,6 @@ class TeacherAuthApiClient extends BaseApiClient {
 			);
 			return response;
 		} catch (error) {
-			console.error("🍎 TeacherAuthApiClient: Teacher password reset failed", error);
 			throw error;
 		}
 	}

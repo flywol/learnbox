@@ -74,19 +74,15 @@ const EventItem = ({ event }: { event: EventResponse }) => {
 
 // Main Events Section Component
 export default function EventsSection() {
-  console.log('EventsSection component rendered');
-  
   const { data: events, isLoading, error } = useQuery({
     queryKey: ['events'],
     queryFn: () => {
-      console.log('Events query function called');
       return eventsApiClient.getEvents();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  console.log('EventsSection state:', { events, isLoading, error });
 
   // Filter and sort events for dashboard display
   const upcomingEvents = events
@@ -94,12 +90,6 @@ export default function EventsSection() {
       const eventDate = apiDateToDate(event.date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      console.log('Filtering event:', { 
-        eventDate: eventDate.toISOString(), 
-        today: today.toISOString(), 
-        eventDateString: event.date,
-        isUpcoming: eventDate >= today 
-      });
       return eventDate >= today;
     })
     .sort((a: EventResponse, b: EventResponse) => {
@@ -109,7 +99,6 @@ export default function EventsSection() {
     })
     .slice(0, 5) || []; // Show max 5 upcoming events
 
-  console.log('Upcoming events after filtering:', upcomingEvents);
 
   if (isLoading) {
     return <LoadingState />;

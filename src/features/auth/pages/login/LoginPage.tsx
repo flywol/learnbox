@@ -107,21 +107,12 @@ const CombinedSchoolLoginPage = () => {
 		setIsLoggingIn(true);
 		setLoginError(null);
 
-		console.log("🔑 LoginPage: Starting login for teacher", { 
-			email: data.email, 
-			selectedRole, 
-			schoolDomain 
-		});
 
 		try {
 			// Use the auth hook which includes the factory pattern
 			const result = await authLogin(data.email, data.password, data.rememberMe || false);
 
 			if (result.success && result.user) {
-				console.log("🔑 LoginPage: Login successful", { 
-					user: result.user, 
-					isFirstTimeLogin: result.isFirstTimeLogin 
-				});
 
 				// Handle unverified users
 				if (!result.user.isVerified) {
@@ -139,12 +130,6 @@ const CombinedSchoolLoginPage = () => {
 				// Ensure auth state is properly set before navigation
 				const checkAndNavigate = () => {
 					const currentAuthState = useAuthStore.getState();
-					console.log("🔑 LoginPage: Checking auth state before navigation", {
-						isAuthenticated: currentAuthState.isAuthenticated,
-						hasUser: !!currentAuthState.user,
-						selectedRole: currentAuthState.selectedRole,
-						userRole: currentAuthState.user?.role
-					});
 					
 					// Verify that authentication state is properly set
 					if (currentAuthState.isAuthenticated && currentAuthState.user) {
@@ -169,7 +154,6 @@ const CombinedSchoolLoginPage = () => {
 						}
 					} else {
 						// State not yet ready, wait a bit more
-						console.log("🔑 LoginPage: Auth state not ready, waiting...");
 						setTimeout(checkAndNavigate, 100);
 					}
 				};
@@ -177,11 +161,9 @@ const CombinedSchoolLoginPage = () => {
 				// Start checking after a brief delay
 				setTimeout(checkAndNavigate, 200);
 			} else {
-				console.error("🔑 LoginPage: Login failed", result.error);
 				setLoginError(result.error || "Login failed. Please check your credentials.");
 			}
 		} catch (error: any) {
-			console.error("🔑 LoginPage: Login exception", error);
 			setLoginError(error.message || "Login failed. Please check your credentials.");
 		} finally {
 			setIsLoggingIn(false);

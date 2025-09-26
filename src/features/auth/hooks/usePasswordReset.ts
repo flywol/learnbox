@@ -49,22 +49,14 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 	// Request password reset (send OTP)
 	const requestPasswordReset = useCallback(
 		async (email: string): Promise<boolean> => {
-			console.log("🔐 usePasswordReset: Starting password reset request", { 
-				email, 
-				selectedRole 
-			});
 			
 			setIsLoading(true);
 			setError(null);
 
 			try {
-				console.log("🔐 usePasswordReset: Getting auth client for role", { selectedRole });
 				// Simple client selection
 			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
-				console.log("🔐 usePasswordReset: Calling forgotPassword");
-				
 				await authClient.forgotPassword({ email });
-				console.log("🔐 usePasswordReset: Password reset request successful");
 
 				setPasswordResetEmail(email);
 				setPasswordResetStep("otp");
@@ -87,28 +79,20 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 				return false;
 			}
 
-			console.log("🔐 usePasswordReset: Starting OTP verification", { 
-				otp, 
-				email: passwordResetEmail, 
-				selectedRole 
-			});
 
 			setIsLoading(true);
 			setError(null);
 
 			try {
-				console.log("🔐 usePasswordReset: Getting auth client for OTP verification");
 				// Simple client selection
 			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
 				await authClient.verifyForgotPasswordOtp({
 					email: passwordResetEmail,
 					otp,
 				});
-				console.log("🔐 usePasswordReset: OTP verification successful");
 				setPasswordResetStep("newPassword");
 				return true;
 			} catch (err: any) {
-				console.error("🔐 usePasswordReset: OTP verification failed", err);
 				setError(err.message || "Invalid or expired OTP");
 				return false;
 			} finally {

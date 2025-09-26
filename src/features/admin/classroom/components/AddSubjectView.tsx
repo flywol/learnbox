@@ -54,18 +54,7 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
   const handleSubmit = async () => {
     const validInputs = subjectInputs.filter(input => input.value.trim());
     
-    console.log('🚀 [AddSubject] Starting subject submission:', {
-      classId,
-      classArmId,
-      totalInputs: subjectInputs.length,
-      validInputs: validInputs.length,
-      inputValues: subjectInputs.map(input => input.value),
-      validValues: validInputs.map(input => input.value.trim()),
-      timestamp: new Date().toISOString()
-    });
-    
     if (validInputs.length === 0) {
-      console.warn('⚠️ [AddSubject] No valid inputs found, aborting submission');
       return;
     }
 
@@ -78,21 +67,12 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
         name: input.value.trim()
       }));
 
-      console.log('📝 [AddSubject] Prepared subjects for API:', {
-        subjectsToAdd,
-        classId,
-        classArmId
-      });
 
       // Call API with separate classId and classArmId
-      const apiResponse = await subjectsApiClient.addSubjectsToClass(classId, classArmId, {
+      await subjectsApiClient.addSubjectsToClass(classId, classArmId, {
         subjects: subjectsToAdd
       });
 
-      console.log('✅ [AddSubject] API call successful:', {
-        apiResponse,
-        addedSubjectCount: subjectsToAdd.length
-      });
 
       // Create UI subjects for immediate display
       const validSubjects = validInputs.map(input => {
@@ -109,26 +89,15 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
           bgColor: predefined?.bgColor || 'bg-gray-500'
         };
 
-        console.log(`🎨 [AddSubject] Created UI subject:`, {
-          inputValue: input.value,
-          matchedPredefined: predefined?.name || 'None',
-          uiSubject
-        });
 
         return uiSubject;
       });
 
-      console.log('🎯 [AddSubject] All UI subjects created:', {
-        totalCreated: validSubjects.length,
-        validSubjects,
-        subjectNames: validSubjects.map(s => s.name)
-      });
 
       // Update UI and show success
       onAddSubjects(validSubjects);
       
       // Clear form state immediately after successful submission
-      console.log('🧹 [AddSubject] Clearing form state after successful submission');
       setSubjectInputs([{ id: 1, value: '' }]);
       setNextId(2);
       setError(null);
@@ -140,24 +109,14 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
         description: `Successfully added ${validSubjects.length} subject${validSubjects.length > 1 ? 's' : ''} to the class.`
       });
       
-      console.log('🎉 [AddSubject] Subject addition completed successfully - form cleared and success toast shown');
       
     } catch (err) {
-      console.error('❌ [AddSubject] Subject addition failed:', {
-        error: err,
-        errorMessage: err instanceof Error ? err.message : 'Unknown error',
-        classId,
-        classArmId,
-        subjectsAttempted: validInputs.map(input => input.value.trim()),
-        errorStack: err instanceof Error ? err.stack : undefined
-      });
       
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(`Failed to add subjects: ${errorMessage}`);
       setShowFailureModal(true);
     } finally {
       setIsSubmitting(false);
-      console.log('🔄 [AddSubject] Submission process completed, isSubmitting set to false');
     }
   };
 
