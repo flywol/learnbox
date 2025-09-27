@@ -22,6 +22,9 @@ const TeacherProfilePage = lazy(() => import("../../features/teacher/profile/pag
 // Notifications (Teacher-specific)
 const TeacherNotificationsPage = lazy(() => import("../../features/teacher/notifications/pages/NotificationsPage"));
 
+// Tasks
+const CreateTaskPage = lazy(() => import("../../features/teacher/tasks/pages/CreateTaskPage"));
+
 export function TeacherRoutes() {
   return (
     <Route
@@ -50,6 +53,9 @@ export function TeacherRoutes() {
       
       {/* Notifications */}
       <Route path="notifications" element={<TeacherNotificationsPage />} />
+      
+      {/* Tasks */}
+      <Route path="tasks/create" element={<CreateTaskPage />} />
       
       {/* Fallback */}
       <Route path="*" element={<LayoutNotFoundPage />} />

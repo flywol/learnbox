@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   teacherActionCards, 
   mockTeacherTasks, 
@@ -42,13 +43,13 @@ const mockTeacherEvents: DashboardEvent[] = [
 ];
 
 export function useTeacherDashboard() {
+  const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState('Today');
   const [loading] = useState(false);
 
   // Action handlers
   const handleAddTask = () => {
-    console.log('Add task clicked');
-    // TODO: Implement add task functionality
+    navigate('/teacher/tasks/create');
   };
 
   const handleDayChange = (day: string) => {
