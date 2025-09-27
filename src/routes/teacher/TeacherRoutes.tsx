@@ -27,6 +27,7 @@ const CreateTaskPage = lazy(() => import("../../features/teacher/tasks/pages/Cre
 
 // Subject Detail
 const SubjectDetailPage = lazy(() => import("../../features/teacher/classroom/pages/SubjectDetailPage"));
+const LessonContentPage = lazy(() => import("../../features/teacher/classroom/pages/LessonContentPage"));
 
 export function TeacherRoutes() {
   return (
@@ -62,6 +63,7 @@ export function TeacherRoutes() {
       
       {/* Subject Detail */}
       <Route path="subject/:subjectId" element={<SubjectDetailPage />} />
+      <Route path="subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
       
       {/* Fallback */}
       <Route path="*" element={<LayoutNotFoundPage />} />

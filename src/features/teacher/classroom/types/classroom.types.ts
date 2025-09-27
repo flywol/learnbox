@@ -154,3 +154,30 @@ export interface TeacherSubject {
 }
 
 export type TeacherClassroomTab = 'subject' | 'schedule';
+
+export type SubjectDetailTab = 'lessons' | 'live-class' | 'quiz' | 'assignment' | 'assessment' | 'students';
+
+export interface CourseOverview {
+  description: string;
+  progress: number;
+}
+
+export interface LessonContent {
+  id: string;
+  title: string;
+  description: string;
+  type: 'video' | 'document' | 'quiz' | 'assignment';
+  icon: string;
+}
+
+export interface SubjectLesson {
+  id: string;
+  number: number;
+  title: string;
+  contents: LessonContent[];
+}
+
+export interface SubjectDetail extends TeacherSubject {
+  courseOverview: CourseOverview;
+  lessons: SubjectLesson[];
+}

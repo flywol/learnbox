@@ -1,4 +1,4 @@
-import type { TeacherSubject, ClassroomStudent, BroadsheetData } from '../types/classroom.types';
+import type { TeacherSubject, ClassroomStudent, BroadsheetData, SubjectDetail } from '../types/classroom.types';
 
 // Teacher subjects - what teachers see in their classroom
 export const mockTeacherSubjects: TeacherSubject[] = [
@@ -161,4 +161,145 @@ export const mockBroadsheetData: BroadsheetData = {
       score: Math.random() > 0.3 ? 50 : null, // Some students have no scores
     }))
   ),
+};
+
+// Detailed subject data with lessons and course overview
+export const mockSubjectDetails: SubjectDetail[] = [
+  {
+    id: 'biology-jss3',
+    name: 'Biology',
+    classLevel: 'SSS 1 Science',
+    studentCount: 40,
+    icon: '🧬',
+    bgColor: 'bg-pink-100',
+    textColor: 'text-pink-900',
+    courseOverview: {
+      description: 'Explore the fascinating world of living organisms, from microscopic cells to complex ecosystems. Dive into the science of life, evolution, and the interconnectedness of all living things.',
+      progress: 58
+    },
+    lessons: [
+      {
+        id: 'lesson-1',
+        number: 1,
+        title: 'Introduction',
+        contents: [
+          {
+            id: 'content-1-1',
+            title: 'Beginning of everything',
+            description: 'Learn about how biology began',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-1-2',
+            title: 'Introduction',
+            description: 'Learn about how biology began',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-1-3',
+            title: 'Life and its characteristics',
+            description: 'Learn about how biology began',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-1-4',
+            title: 'Introduction Quiz',
+            description: 'Lesson 1 quiz',
+            type: 'quiz',
+            icon: '📊'
+          },
+          {
+            id: 'content-1-5',
+            title: 'Introduction',
+            description: 'Lesson 1 assignment',
+            type: 'assignment',
+            icon: '📝'
+          },
+          {
+            id: 'content-1-6',
+            title: 'Introduction',
+            description: 'Take note and download the resources',
+            type: 'document',
+            icon: '📄'
+          }
+        ]
+      },
+      {
+        id: 'lesson-2',
+        number: 2,
+        title: 'Reproduction in Organisms',
+        contents: [
+          {
+            id: 'content-2-1',
+            title: 'Sexual Reproduction',
+            description: 'Understanding sexual reproduction in organisms',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-2-2',
+            title: 'Asexual Reproduction',
+            description: 'Learn about asexual reproduction methods',
+            type: 'document',
+            icon: '📄'
+          }
+        ]
+      },
+      {
+        id: 'lesson-3',
+        number: 3,
+        title: 'Reproduction in Organisms',
+        contents: []
+      },
+      {
+        id: 'lesson-4',
+        number: 4,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-5',
+        number: 5,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-6',
+        number: 6,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-7',
+        number: 7,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-8',
+        number: 8,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-9',
+        number: 9,
+        title: 'Introduction',
+        contents: []
+      },
+      {
+        id: 'lesson-10',
+        number: 10,
+        title: 'Introduction',
+        contents: []
+      }
+    ]
+  }
+];
+
+export const getSubjectDetail = (subjectId: string): SubjectDetail | undefined => {
+  return mockSubjectDetails.find(subject => subject.id === subjectId);
 };

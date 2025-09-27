@@ -1,4 +1,5 @@
 import { ArrowLeft, MessageSquare, Phone } from 'lucide-react';
+import CourseOverviewCard from '../../../../../common/components/CourseOverviewCard';
 
 interface SubjectData {
   name: string;
@@ -27,34 +28,15 @@ export default function SubjectHeader({ subjectData, onBack }: SubjectHeaderProp
         <h1 className="text-2xl font-semibold">{subjectData.name}</h1>
       </div>
 
-      <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-lg p-6 text-white relative overflow-hidden">
-        <div className="absolute right-6 top-6 w-20 h-20 opacity-30">
-          <img src="/assets/maths.svg" alt="Subject" className="w-full h-full object-contain" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2">{subjectData.name}</h2>
-        {subjectData.lessonCount && subjectData.completedLessons !== undefined && (
-          <div className="flex items-center space-x-6 text-sm">
-            <span>Total lessons: {subjectData.lessonCount}</span>
-            <span>Completed: {subjectData.completedLessons}</span>
-          </div>
-        )}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm">Progress</span>
-            <span className="text-sm">{subjectData.progress}%</span>
-          </div>
-          <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
-            <div 
-              className="bg-white rounded-full h-2 transition-all duration-300"
-              style={{ width: `${subjectData.progress}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-right text-sm text-gray-600">{subjectData.progress}%</div>
-      </div>
+      {/* Course Overview Card */}
+      <CourseOverviewCard
+        description={subjectData.description || `Learn about ${subjectData.name} with interactive lessons and exercises. Track your progress and master the concepts at your own pace.`}
+        progress={subjectData.progress}
+        onEdit={() => {
+          // TODO: Implement edit functionality
+          console.log('Edit course overview');
+        }}
+      />
 
       <div className="flex items-center space-x-3">
         <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
