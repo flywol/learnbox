@@ -141,3 +141,16 @@ export interface ContentItem {
 }
 
 export type TabType = 'lessons' | 'live-class' | 'quiz' | 'assignment' | 'assessment';
+
+// Teacher Subject Types
+export interface TeacherSubject {
+  id: string;
+  name: string;
+  classLevel: string;
+  studentCount: number;
+  icon: string;
+  bgColor: string;
+  textColor?: string;
+}
+
+export type TeacherClassroomTab = 'subject' | 'schedule';

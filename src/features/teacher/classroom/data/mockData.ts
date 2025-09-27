@@ -1,78 +1,61 @@
-import type { ClassroomClass, ClassroomStudent, BroadsheetData } from '../types/classroom.types';
+import type { TeacherSubject, ClassroomStudent, BroadsheetData } from '../types/classroom.types';
 
-export const mockClasses: ClassroomClass[] = [
+// Teacher subjects - what teachers see in their classroom
+export const mockTeacherSubjects: TeacherSubject[] = [
   {
-    id: 'jss1',
-    name: 'JSS 1',
-    level: 'JSS',
-    arm: 'A',
-    teacher: {
-      id: 'teacher1',
-      name: 'Andrew Jones',
-    },
-    studentCount: 25,
-    color: 'bg-yellow-100 border-yellow-200',
-  },
-  {
-    id: 'jss2',
-    name: 'JSS 2',
-    level: 'JSS',
-    arm: 'A', 
-    teacher: {
-      id: 'teacher2',
-      name: 'Andrew Jones',
-    },
+    id: 'biology-jss3',
+    name: 'Biology',
+    classLevel: 'JSS3',
     studentCount: 40,
-    color: 'bg-blue-100 border-blue-200',
+    icon: '🧬',
+    bgColor: 'bg-pink-100',
+    textColor: 'text-pink-900'
   },
   {
-    id: 'jss3',
-    name: 'JSS 3',
-    level: 'JSS',
-    arm: 'A',
-    teacher: {
-      id: 'teacher3', 
-      name: 'Andrew Jones',
-    },
+    id: 'chemistry-jss2',
+    name: 'Chemistry',
+    classLevel: 'JSS2',
     studentCount: 40,
-    color: 'bg-green-100 border-green-200',
+    icon: '⚗️',
+    bgColor: 'bg-yellow-100',
+    textColor: 'text-yellow-900'
   },
   {
-    id: 'sss1',
-    name: 'SSS 1',
-    level: 'SSS',
-    arm: 'A',
-    teacher: {
-      id: 'teacher4',
-      name: 'Andrew Jones',
-    },
-    studentCount: 35,
-    color: 'bg-pink-100 border-pink-200',
-  },
-  {
-    id: 'sss2',
-    name: 'SSS 2', 
-    level: 'SSS',
-    arm: 'A',
-    teacher: {
-      id: 'teacher5',
-      name: 'Andrew Jones',
-    },
+    id: 'further-maths-ss1-science',
+    name: 'Further Maths',
+    classLevel: 'SS1 Science',
     studentCount: 40,
-    color: 'bg-cyan-100 border-cyan-200',
+    icon: '📐',
+    bgColor: 'bg-blue-100',
+    textColor: 'text-blue-900'
   },
   {
-    id: 'sss3',
-    name: 'SSS 3',
-    level: 'SSS', 
-    arm: 'A',
-    teacher: {
-      id: 'teacher6',
-      name: 'Andrew Jones',
-    },
+    id: 'chemistry-ss1-art',
+    name: 'Chemistry',
+    classLevel: 'SS1 Art',
     studentCount: 40,
-    color: 'bg-purple-100 border-purple-200',
+    icon: '⚗️',
+    bgColor: 'bg-yellow-100',
+    textColor: 'text-yellow-900'
   },
+  {
+    id: 'further-maths-ss1-science-2',
+    name: 'Further Maths',
+    classLevel: 'SS1 Science',
+    studentCount: 40,
+    icon: '📐',
+    bgColor: 'bg-blue-100',
+    textColor: 'text-blue-900'
+  },
+  {
+    id: 'biology-ss1',
+    name: 'Biology',
+    classLevel: 'SS1',
+    studentCount: 40,
+    icon: '🧬',
+    bgColor: 'bg-pink-100',
+    textColor: 'text-pink-900'
+  }
 ];
 
 export const mockStudents: ClassroomStudent[] = [
