@@ -15,7 +15,7 @@ const teacherMenuItems = [
 	{
 		label: "Overview hub",
 		icon: Home,
-		path: "/dashboard",
+		path: "/teacher/dashboard",
 	},
 	{ 
 		label: "Classroom", 
@@ -50,8 +50,13 @@ export default function TeacherSidebar() {
 		await logout();
 	};
 
-	// Active check — exact or starts with path + "/"
+	// Active check — exact or starts with path + "/" or dashboard default
 	const isMenuActive = (itemPath: string) => {
+		// Handle dashboard/overview default when on /teacher index
+		if (itemPath === "/teacher/dashboard" && location.pathname === "/teacher") {
+			return true;
+		}
+		
 		return (
 			location.pathname === itemPath ||
 			location.pathname.startsWith(itemPath + "/")

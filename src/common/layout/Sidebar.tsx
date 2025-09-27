@@ -16,14 +16,14 @@ const menuItems = [
 	{
 		label: "Overview hub",
 		icon: Home,
-		path: "/dashboard",
+		path: "/admin/dashboard",
 		color: "text-orange-500",
 	},
-	{ label: "Classroom", icon: BookOpen, path: "/classroom" },
-	{ label: "Users", icon: Users, path: "/user-management" },
-	{ label: "School payments", icon: CreditCard, path: "/payments" },
-	{ label: "LearnBox library", icon: Library, path: "/library" },
-	{ label: "Profile", icon: User, path: "/profile" },
+	{ label: "Classroom", icon: BookOpen, path: "/admin/classroom" },
+	{ label: "Users", icon: Users, path: "/admin/users" },
+	{ label: "School payments", icon: CreditCard, path: "/admin/payments" },
+	{ label: "LearnBox library", icon: Library, path: "/admin/library" },
+	{ label: "Profile", icon: User, path: "/admin/profile" },
 ];
 
 export default function Sidebar() {
@@ -37,8 +37,13 @@ export default function Sidebar() {
 		await logout();
 	};
 
-	// Active check — exact or starts with path + "/"
+	// Active check — exact or starts with path + "/" or dashboard default
 	const isMenuActive = (itemPath: string) => {
+		// Handle dashboard/overview default when on /admin index
+		if (itemPath === "/admin/dashboard" && location.pathname === "/admin") {
+			return true;
+		}
+		
 		return (
 			location.pathname === itemPath ||
 			location.pathname.startsWith(itemPath + "/")

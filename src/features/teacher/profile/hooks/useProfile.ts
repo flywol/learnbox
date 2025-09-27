@@ -9,18 +9,18 @@ import type {
 // Query keys for teacher profile
 export const teacherProfileKeys = {
   all: ['teacher-profile'] as const,
-  admin: () => [...teacherProfileKeys.all, 'admin'] as const,
+  profile: () => [...teacherProfileKeys.all, 'profile'] as const,
   school: () => [...teacherProfileKeys.all, 'school'] as const,
   sessions: () => [...teacherProfileKeys.all, 'sessions'] as const,
   classLevels: () => [...teacherProfileKeys.all, 'classLevels'] as const,
   classLevelsAndArms: () => [...teacherProfileKeys.all, 'classLevelsAndArms'] as const,
 }
 
-// Hook to fetch admin profile
-export function useAdminProfile(enabled: boolean = true) {
+// Hook to fetch teacher profile (renamed from useAdminProfile)
+export function useTeacherProfile(enabled: boolean = true) {
   return useQuery({
-    queryKey: teacherProfileKeys.admin(),
-    queryFn: () => profileApiClient.getAdminProfile(),
+    queryKey: teacherProfileKeys.profile(),
+    queryFn: () => profileApiClient.getAdminProfile(), // Keep API method name for compatibility
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3, // Only retry 3 times instead of infinite
@@ -28,6 +28,9 @@ export function useAdminProfile(enabled: boolean = true) {
     enabled, // Allow disabling the query
   })
 }
+
+// Keep useAdminProfile for backward compatibility
+export const useAdminProfile = useTeacherProfile;
 
 // Hook to fetch school information
 export function useSchoolInformation() {
@@ -77,8 +80,8 @@ export function useUpdatePersonalInfo() {
     mutationFn: (data: UpdatePersonalInfoDto) => 
       profileApiClient.updatePersonalInfo(data),
     onSuccess: () => {
-      // Invalidate and refetch admin profile
-      queryClient.invalidateQueries({ queryKey: teacherProfileKeys.admin() })
+      // Invalidate and refetch teacher profile
+      queryClient.invalidateQueries({ queryKey: teacherProfileKeys.profile() })
     },
     onError: (error) => {
       console.error('Failed to update personal info:', error)

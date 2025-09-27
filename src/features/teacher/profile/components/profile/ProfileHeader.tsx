@@ -1,12 +1,13 @@
-import UserAvatar from "../../../../admin/user-management/components/UserAvatar";
+// SECURITY FIX: Using shared component instead of admin-specific import
+import UserAvatar from "../../../../../common/components/UserAvatar";
 
-interface AdminProfile {
+interface TeacherProfile {
   profilePicture?: string | null;
   fullName?: string | null;
 }
 
 interface ProfileHeaderProps {
-  adminProfile?: AdminProfile;
+  adminProfile?: TeacherProfile; // Keep same prop name for compatibility
 }
 
 export default function ProfileHeader({ adminProfile }: ProfileHeaderProps) {
@@ -15,14 +16,14 @@ export default function ProfileHeader({ adminProfile }: ProfileHeaderProps) {
       <div className="relative -mt-16">
         <UserAvatar
           src={adminProfile?.profilePicture}
-          name={adminProfile?.fullName || "Admin"}
+          name={adminProfile?.fullName || "Teacher"}
           size="xl"
           className="border-4 border-white"
         />
       </div>
       <div className="ml-4">
         <h1 className="text-2xl font-bold text-gray-900">
-          {adminProfile?.fullName || "Gabriel Davidson"}
+          {adminProfile?.fullName || "Joe Jameshill"}
         </h1>
       </div>
     </div>

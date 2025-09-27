@@ -65,15 +65,15 @@ export default function AdminProfilePage() {
   const classLevelsLoading = false;
 
   const handleEditPersonalInfo = () => {
-    navigate("/profile/edit-personal");
+    navigate("/teacher/profile/personal");
   };
 
   const handleEditSchoolInfo = () => {
-    navigate("/profile/edit-school");
+    navigate("/teacher/profile/school");
   };
 
   const handleSessionConfig = () => {
-    navigate("/profile/session-config");
+    navigate("/teacher/profile/session");
   };
 
   const handleLogout = () => {

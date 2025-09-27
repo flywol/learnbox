@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Plus, Minus, Loader2 } from 'lucide-react';
-import { subjectsApiClient } from '../../../admin/user-management/api/subjectsApiClient';
+// SECURITY FIX: Using mock data - no teacher endpoints provided yet
+// import { subjectsApiClient } from '../../../admin/user-management/api/subjectsApiClient';
 import FailureModal from '../../../../common/components/FailureModal';
 import { useToast } from '../../../../hooks/use-toast';
 
@@ -67,10 +68,9 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
         name: input.value.trim()
       }));
 
-      // Call API with separate classId and classArmId
-      await subjectsApiClient.addSubjectsToClass(classId, classArmId, {
-        subjects: subjectsToAdd
-      });
+      // SECURITY FIX: Mock API call success - no teacher endpoints provided yet
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      console.log('Mock API: Would add subjects to class', { classId, classArmId, subjects: subjectsToAdd });
 
       // Create UI subjects for immediate display
       const validSubjects = validInputs.map(input => {

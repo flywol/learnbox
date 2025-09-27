@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClassCard from './ClassCard';
 import FailureModal from '../../../../common/components/FailureModal';
-import { userApiClient } from '../../../admin/user-management/api/userApiClient';
+// SECURITY FIX: Using mock data - no teacher endpoints provided yet
+// import { userApiClient } from '../../../admin/user-management/api/userApiClient';
 import type { ClassroomClass } from '../types/classroom.types';
 
 // Helper function to generate colors for different classes
@@ -32,10 +33,48 @@ export default function ClassOverviewTab() {
     const fetchClasses = async () => {
       try {
         setLoading(true);
-        const classLevels = await userApiClient.getClassLevels();
+        
+        // SECURITY FIX: Mock data - no teacher endpoints provided yet
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+        
+        // Mock teacher classes data
+        const mockClassLevels = [
+          {
+            id: 'level-1',
+            class: 'JSS 1',
+            levelName: 'Junior Secondary School 1',
+            arms: [
+              {
+                _id: 'arm-1a',
+                armName: 'A',
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }],
+                studentCount: 35
+              },
+              {
+                _id: 'arm-1b', 
+                armName: 'B',
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }],
+                studentCount: 32
+              }
+            ]
+          },
+          {
+            id: 'level-2',
+            class: 'JSS 2', 
+            levelName: 'Junior Secondary School 2',
+            arms: [
+              {
+                _id: 'arm-2a',
+                armName: 'A',
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }],
+                studentCount: 28
+              }
+            ]
+          }
+        ];
         
         // Transform API data to ClassroomClass format
-        const transformedClasses: ClassroomClass[] = classLevels.flatMap((level: any, levelIndex: number) => {
+        const transformedClasses: ClassroomClass[] = mockClassLevels.flatMap((level: any, levelIndex: number) => {
           if (!level.arms || !Array.isArray(level.arms)) {
             // If no arms, create a single class entry
             return [{
@@ -155,16 +194,16 @@ export default function ClassOverviewTab() {
             </p>
             <div className="space-y-2">
               <button 
-                onClick={() => navigate('/dashboard/complete-school-setup')}
+                onClick={() => navigate('/teacher/dashboard')}
                 className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Set Up Classes
+                Go to Dashboard
               </button>
               <p className="text-xs text-gray-400 mt-2">
-                Or contact your administrator to set up classes
+                Contact your administrator to set up classes
               </p>
             </div>
           </div>

@@ -1,3 +1,4 @@
+// SECURITY FIX: Teacher API client - no admin endpoints
 import BaseApiClient from "@/common/api/baseApiClient";
 import type { 
   AdminProfile, 
@@ -15,111 +16,208 @@ class ProfileApiClient extends BaseApiClient {
     super();
   }
 
-  // Get admin profile (uses token to identify logged-in admin)
+  // SECURITY FIX: Mock teacher profile - no endpoints provided yet
   async getAdminProfile(): Promise<AdminProfile> {
-    const response = await this.get<{ data: { admin: AdminProfile } }>('/admin/admin-by-id');
-    return response.data.admin;
+    // Mock data for teacher profile
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          id: 'teacher-123',
+          fullName: 'Joe Jameshill',
+          email: 'joe@lakeridge.edu',
+          phoneNumber: '+234 803 123 4567',
+          role: 'admin', // Keep type consistent but use teacher data
+          profilePicture: null,
+          gender: 'Male',
+          position: 'Subject Teacher',
+          school: {
+            id: 'school-1',
+            schoolName: 'Lakeridge Mountain High School',
+            schoolShortName: 'LMHS',
+            schoolAddress: '123 Education Drive, Lagos, Nigeria',
+            schoolPhoneNumber: '+234 1 234 5678',
+            schoolEmail: 'info@lakeridge.edu',
+            schoolWebsite: 'www.lakeridge.edu',
+            schoolLogo: undefined,
+            schoolMotto: 'Excellence in Learning'
+          },
+          classes: []
+        });
+      }, 1000);
+    });
   }
 
-  // Update personal information
+  // SECURITY FIX: Mock teacher profile updates - no endpoints provided yet
   async updatePersonalInfo(data: UpdatePersonalInfoDto): Promise<{ message: string }> {
-    // Create FormData for file upload
-    const formData = new FormData();
-    formData.append('fullName', data.fullName);
-    formData.append('email', data.email);
-    
-    if (data.phoneNumber) formData.append('phoneNumber', data.phoneNumber);
-    if (data.gender) formData.append('gender', data.gender);
-    if (data.position) formData.append('position', data.position);
-    if (data.profilePicture) formData.append('profilePicture', data.profilePicture);
-
-    const response = await this.put<{ message: string }>("/admin/update-admin-personal-information", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    console.log('Mock API: Would update teacher personal info', data);
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ message: 'Personal information updated successfully' });
+      }, 1000);
     });
-    
-    return response;
   }
 
-  // Get school information
+  // SECURITY FIX: Mock school information - teachers should see read-only school info
   async getSchoolInformation(): Promise<SchoolInformation> {
-    const response = await this.get<{ data: SchoolInformation }>("/admin/school-information");
-    return response.data;
-  }
-
-  // Update school information
-  async updateSchoolInformation(data: UpdateSchoolInfoDto): Promise<{ message: string }> {
-    const response = await this.put<{ message: string }>("/admin/update-admin-school-information", data);
-    
-    return response;
-  }
-
-  // Get session configuration
-  async getSessionConfiguration(): Promise<SessionConfiguration> {
-    const response = await this.get<{ data: SessionConfiguration }>("/admin/session-configuration");
-    return response.data;
-  }
-
-  // Update session configuration
-  async updateSessionConfiguration(data: UpdateSessionConfigDto): Promise<{ message: string }> {
-    const response = await this.put<{ message: string }>("/admin/update-session-term-configuration", data);
-    return response;
-  }
-
-  // Get class levels overview
-  async getClassLevels(): Promise<ClassLevel[]> {
-    const response = await this.get<{ data: Record<string, unknown>[] }>("/admin/class-levels-overview");
-    const classLevels = response.data;
-    
-    // Keep original structure - don't overwrite the id field
-    return classLevels.map((level: any) => ({
-      ...level,
-      id: level._id,
-      arms: level.arms?.map((arm: any) => ({
-        ...arm,
-        // Keep both id and _id fields - don't overwrite the original id
-        _id: arm._id
-      })) || []
-    }));
-  }
-
-  // Get class levels and arms (Admin only)
-  async getClassLevelsAndArms(): Promise<ClassLevelsAndArmsResponse> {
-    const response = await this.get<{ data: { classLevels: Record<string, unknown>[] } }>("/admin/class-levels-and-arms");
-    
-    // Extract class arms from class levels since API returns nested structure
-    const classArmsFromLevels: any[] = [];
-    
-    // Transform _id to id for frontend consistency
-    const transformedClassLevels = response.data.classLevels.map((level: any) => {
-      const transformedArms = (level.arms || []).map((arm: any) => {
-        const transformedArm = {
-          ...arm,
-          id: arm._id
-        };
-        
-        // Add to flat classArms array for ClassLevelsSection component
-        classArmsFromLevels.push(transformedArm);
-        
-        return transformedArm;
-      });
-
-      return {
-        ...level,
-        id: level._id,
-        arms: transformedArms
-      };
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          id: 'school-1',
+          schoolName: 'Lakeridge Mountain High School',
+          schoolShortName: 'LMHS',
+          schoolAddress: '123 Education Drive, Lagos, Nigeria',
+          schoolPhoneNumber: '+234 1 234 5678',
+          schoolEmail: 'info@lakeridge.edu',
+          schoolWebsite: 'www.lakeridge.edu',
+          schoolLogo: undefined,
+          schoolMotto: 'Excellence in Learning'
+        });
+      }, 1000);
     });
+  }
 
-    const transformedData = {
-      data: {
-        classLevels: transformedClassLevels,
-        classArms: classArmsFromLevels
-      }
-    };
-    
-    return transformedData;
+  // SECURITY FIX: Teachers cannot update school information
+  async updateSchoolInformation(_data: UpdateSchoolInfoDto): Promise<{ message: string }> {
+    throw new Error('Teachers are not authorized to update school information');
+  }
+
+  // SECURITY FIX: Mock session configuration - read-only for teachers
+  async getSessionConfiguration(): Promise<SessionConfiguration> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          currentSession: {
+            id: 'session-1',
+            name: '2023/2024',
+            terms: [
+              {
+                id: 'term-1',
+                name: 'First Term',
+                startDate: '2023-09-01',
+                endDate: '2023-12-15'
+              }
+            ],
+            isActive: true
+          },
+          sessions: [{
+            id: 'session-1',
+            name: '2023/2024',
+            terms: [
+              {
+                id: 'term-1',
+                name: 'First Term',
+                startDate: '2023-09-01',
+                endDate: '2023-12-15'
+              }
+            ],
+            isActive: true
+          }]
+        });
+      }, 1000);
+    });
+  }
+
+  // SECURITY FIX: Teachers cannot update session configuration
+  async updateSessionConfiguration(_data: UpdateSessionConfigDto): Promise<{ message: string }> {
+    throw new Error('Teachers are not authorized to update session configuration');
+  }
+
+  // SECURITY FIX: Mock class levels for teachers - only their assigned classes
+  async getClassLevels(): Promise<ClassLevel[]> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve([
+          {
+            id: 'level-1',
+            levelName: 'Junior Secondary School 1',
+            className: 'JSS 1',
+            arms: [
+              { id: 'arm-1a', armName: 'A' },
+              { id: 'arm-1b', armName: 'B' }
+            ]
+          },
+          {
+            id: 'level-2',
+            levelName: 'Junior Secondary School 2', 
+            className: 'JSS 2',
+            arms: [
+              { id: 'arm-2a', armName: 'A' }
+            ]
+          }
+        ]);
+      }, 1000);
+    });
+  }
+
+  // SECURITY FIX: Mock class levels and arms for teachers
+  async getClassLevelsAndArms(): Promise<ClassLevelsAndArmsResponse> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const mockData = {
+          data: {
+            classLevels: [
+              {
+                id: 'level-1',
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                deleted_at: null,
+                levelName: 'Junior Secondary School 1',
+                class: 'JSS 1',
+                arms: [
+                  { id: 'arm-1', armName: 'A' },
+                  { id: 'arm-2', armName: 'B' }
+                ],
+                studentCount: 67,
+                teacherCount: 1
+              },
+              {
+                id: 'level-2',
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                deleted_at: null,
+                levelName: 'Junior Secondary School 2',
+                class: 'JSS 2',
+                arms: [
+                  { id: 'arm-3', armName: 'A' }
+                ],
+                studentCount: 28,
+                teacherCount: 1
+              }
+            ],
+            classArms: [
+              { 
+                id: 'arm-1', 
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                deleted_at: null,
+                armName: 'A',
+                studentCount: 35, 
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }] 
+              },
+              { 
+                id: 'arm-2', 
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                deleted_at: null,
+                armName: 'B',
+                studentCount: 32, 
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }] 
+              },
+              { 
+                id: 'arm-3', 
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                deleted_at: null,
+                armName: 'A',
+                studentCount: 28, 
+                assignedTeachers: [{ id: 'teacher-1', name: 'Joe Jameshill' }] 
+              }
+            ]
+          }
+        };
+        resolve(mockData);
+      }, 1000);
+    });
   }
 }
 
