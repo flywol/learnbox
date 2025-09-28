@@ -2,20 +2,22 @@ import { Edit } from 'lucide-react';
 
 interface CourseOverviewCardProps {
   description: string;
-  progress: number;
+  progress?: number;
   onEdit?: () => void;
   className?: string;
+  showProgress?: boolean;
 }
 
 export default function CourseOverviewCard({ 
   description, 
-  progress, 
+  progress = 0, 
   onEdit,
-  className = "" 
+  className = "",
+  showProgress = true
 }: CourseOverviewCardProps) {
   return (
     <div 
-      className={`max-w-md rounded-xl p-6 relative bg-no-repeat border border-orange-200 ${className}`}
+      className={`w-1/2 rounded-xl p-6 relative bg-no-repeat border border-orange-200 min-h-[120px] ${className}`}
       style={{ 
         backgroundImage: 'url(/assets/notepad.svg)',
         backgroundPosition: 'bottom 8px right 8px',
@@ -33,22 +35,24 @@ export default function CourseOverviewCard({
         </button>
       )}
       
-      <div className="pr-20">
-        <p className="text-gray-700 text-base leading-relaxed mb-4">
+      <div className="pr-20 flex items-center justify-center h-full">
+        <p className="text-gray-900 text-2xl font-bold text-center">
           {description}
         </p>
         
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+        {showProgress && (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium text-gray-600">
+              {progress}%
+            </span>
           </div>
-          <span className="text-sm font-medium text-gray-600">
-            {progress}%
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );

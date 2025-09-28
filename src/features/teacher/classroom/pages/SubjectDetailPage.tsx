@@ -91,7 +91,10 @@ export default function SubjectDetailPage() {
 
           {/* Add New Lesson Button */}
           <div className="flex justify-end">
-            <button className="flex items-center gap-2 px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
+            <button 
+              onClick={() => navigate(`/teacher/subject/${subjectId}/lesson/add`)}
+              className="flex items-center gap-2 px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+            >
               <span className="text-lg">+</span>
               Add New Lesson
             </button>

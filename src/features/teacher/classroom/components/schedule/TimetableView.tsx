@@ -1,113 +1,15 @@
-import { Plus, Calendar, RefreshCw } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-// import { useNavigate } from 'react-router-dom'; // TODO: Re-enable when teacher-specific routes are implemented
-import { timetableApiClient } from '../../api/timetableApiClient';
-import { convertTimetableToGrid } from '../../utils/timetableUtils';
-import type { TimetableGrid } from '../../types/timetable.types';
+import { Clock } from 'lucide-react';
 
-interface TimetableViewProps {
-  selectedClass: string;
-  onClassChange: (classId: string) => void;
+interface TimetableGridItem {
+  subjectName: string;
+  duration: string;
+  color: string;
+  icon?: string;
 }
 
-// Loading component
-const LoadingTimetable = () => (
-  <div className="space-y-4">
-    <div className="flex justify-between items-center">
-      <div className="flex items-center space-x-4">
-        <div className="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
-        <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
-      </div>
-      <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
-    </div>
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <div className="grid grid-cols-6 gap-4 mb-4">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
-        ))}
-      </div>
-      <div className="space-y-4">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div key={i} className="grid grid-cols-6 gap-4">
-            {Array.from({ length: 6 }, (_, j) => (
-              <div key={j} className="h-20 bg-gray-100 rounded animate-pulse"></div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
+type TimetableGrid = { [key: string]: TimetableGridItem | null };
 
-// Enhanced Error component with better UX
-const TimetableError = ({ message, onRetry, showRetry = true }: { message: string; onRetry: () => void; showRetry?: boolean }) => (
-  <div className="space-y-4">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <span className="text-gray-400">Class:</span>
-        <div className="border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-400">
-          Select class
-        </div>
-      </div>
-      <button
-        disabled
-        className="flex items-center space-x-2 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed"
-      >
-        <Plus className="w-4 h-4" />
-        <span>Add timetable</span>
-      </button>
-    </div>
-    <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load timetable</h3>
-      <p className="text-gray-500 mb-4">{message}</p>
-      {showRetry && (
-        <button
-          onClick={onRetry}
-          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors mx-auto"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Try Again</span>
-        </button>
-      )}
-    </div>
-  </div>
-);
-
-// Empty state component
-const EmptyTimetable = ({ onAddTimetable }: { onAddTimetable: () => void }) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-    <div className="w-32 h-24 mx-auto mb-4">
-      <img 
-        src="/assets/timetable-empty.svg" 
-        alt="No timetable" 
-        className="w-full h-full object-contain"
-        onError={(e) => {
-          // Fallback to icon if image not found
-          (e.target as HTMLImageElement).style.display = 'none';
-          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-        }}
-      />
-      <Calendar className="w-16 h-16 text-gray-400 mx-auto hidden" />
-    </div>
-    <h3 className="text-base font-medium text-gray-900 mb-2">No timetable created yet</h3>
-    <p className="text-sm text-gray-500 text-center max-w-sm mx-auto mb-6">
-      Create a timetable for this class to help students and teachers stay organized.
-    </p>
-    <button
-      onClick={onAddTimetable}
-      className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-    >
-      Create Timetable
-    </button>
-  </div>
-);
-
-export default function TimetableView({
-  selectedClass,
-  onClassChange,
-}: TimetableViewProps) {
-  // const navigate = useNavigate(); // TODO: Re-enable when teacher-specific routes are implemented
+export default function TimetableView() {
   const timeSlots = [
     '08:00am', '09:00am', '10:00am', '11:00am', '12:00pm', 
     '01:00pm', '02:00pm', '03:00pm'
@@ -115,154 +17,178 @@ export default function TimetableView({
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   
-  // Fetch available class levels from API
-  const { 
-    data: availableClasses = [], 
-    isLoading: classesLoading 
-  } = useQuery({
-    queryKey: ['class-levels'],
-    queryFn: () => timetableApiClient.getClassLevels(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-
-  // Use first available class as default if none selected or selected class not found
-  const effectiveClassId = selectedClass && availableClasses.some(cls => cls.id === selectedClass) 
-    ? selectedClass 
-    : availableClasses[0]?.id || '';
-  
-  // Fetch timetable data from API
-  const { 
-    data: timetableData, 
-    isLoading, 
-    error,
-    refetch 
-  } = useQuery({
-    queryKey: ['timetable', effectiveClassId],
-    queryFn: () => timetableApiClient.getTimetable(effectiveClassId),
-    enabled: !!effectiveClassId, // Only run query when we have a valid class ID
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-  
-  // Convert timetable data to grid format
-  const timetableGrid: TimetableGrid = convertTimetableToGrid(timetableData || null);
-  const hasTimetable = timetableData !== null;
-
-  if (isLoading || classesLoading) {
-    return <LoadingTimetable />;
-  }
-
-  if (error) {
-    return <TimetableError message="Please try refreshing the page" onRetry={() => refetch()} />;
-  }
-
-  if (availableClasses.length === 0) {
-    return (
-      <TimetableError 
-        message="No classes found. Please create classes through the school setup first." 
-        onRetry={() => refetch()} 
-        showRetry={false}
-      />
-    );
-  }
+  // Mock teacher timetable data based on the screenshots
+  const mockTimetableGrid: TimetableGrid = {
+    'Monday-08:00am': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Monday-10:00am': {
+      subjectName: 'English',
+      duration: '1hr',
+      color: 'bg-green-100 text-green-800',
+      icon: '📖'
+    },
+    'Monday-12:00pm': {
+      subjectName: 'Chemistry',
+      duration: '1hr',
+      color: 'bg-red-100 text-red-800',
+      icon: '🧪'
+    },
+    'Tuesday-09:00am': {
+      subjectName: 'Biology',
+      duration: '1hr',
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: '🧬'
+    },
+    'Tuesday-11:00am': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Tuesday-01:00pm': {
+      subjectName: 'English',
+      duration: '1hr',
+      color: 'bg-green-100 text-green-800',
+      icon: '📖'
+    },
+    'Tuesday-02:00pm': {
+      subjectName: 'Biology',
+      duration: '1hr',
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: '🧬'
+    },
+    'Tuesday-03:00pm': {
+      subjectName: 'Chemistry',
+      duration: '1hr',
+      color: 'bg-red-100 text-red-800',
+      icon: '🧪'
+    },
+    'Wednesday-08:00am': {
+      subjectName: 'Biology',
+      duration: '1hr',
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: '🧬'
+    },
+    'Wednesday-10:00am': {
+      subjectName: 'Chemistry',
+      duration: '1hr',
+      color: 'bg-red-100 text-red-800',
+      icon: '🧪'
+    },
+    'Wednesday-12:00pm': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Thursday-09:00am': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Thursday-10:00am': {
+      subjectName: 'Chemistry',
+      duration: '1hr',
+      color: 'bg-red-100 text-red-800',
+      icon: '🧪'
+    },
+    'Thursday-01:00pm': {
+      subjectName: 'English',
+      duration: '1hr',
+      color: 'bg-green-100 text-green-800',
+      icon: '📖'
+    },
+    'Thursday-03:00pm': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Friday-08:00am': {
+      subjectName: 'Chemistry',
+      duration: '1hr',
+      color: 'bg-red-100 text-red-800',
+      icon: '🧪'
+    },
+    'Friday-10:00am': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    },
+    'Friday-11:00am': {
+      subjectName: 'Further M...',
+      duration: '1hr',
+      color: 'bg-blue-100 text-blue-800',
+      icon: '📚'
+    }
+  };
   
   return (
     <div className="space-y-4">
-      {/* Class Selector */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <span className="text-gray-600">Class:</span>
-          <select 
-            value={effectiveClassId} 
-            onChange={(e) => onClassChange(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            {availableClasses.map((cls) => (
-              <option key={cls.id} value={cls.id}>{cls.name}</option>
-            ))}
-          </select>
+        <div className="flex items-center space-x-2">
+          <Clock className="w-5 h-5 text-gray-600" />
+          <span className="text-lg font-medium text-gray-900">Your Teaching Schedule</span>
         </div>
-
-        <button
-          onClick={() => console.log('TODO: Implement teacher-specific add timetable functionality')}
-          className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{hasTimetable ? 'Edit timetable' : 'Add timetable'}</span>
-        </button>
       </div>
 
-      {/* Timetable Content */}
-      {!hasTimetable ? (
-        <EmptyTimetable onAddTimetable={() => console.log('TODO: Implement teacher-specific add timetable functionality')} />
-      ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
-            <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
-            {days.map((day) => (
-              <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {/* Time Slots */}
-          {timeSlots.map((time) => (
-            <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
-                {time}
-              </div>
-              {days.map((day) => {
-                const key = `${day}-${time}`;
-                const subject = timetableGrid[key];
-                
-                return (
-                  <div key={key} className="p-2 h-24 flex items-center justify-center">
-                    {subject ? (
-                      <div 
-                        className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-                        onClick={() => console.log('TODO: Implement teacher-specific edit timetable functionality')}
-                        title={`Edit ${subject.subjectName} on ${day} at ${time}`}
-                      >
-                        {subject.icon && (
-                          <div className="w-5 h-5 mb-1 flex-shrink-0">
-                            <img 
-                              src={subject.icon} 
-                              alt={subject.subjectName} 
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div className="text-xs font-semibold mb-1 leading-tight">
-                          {subject.subjectName.length > 10 ? 
-                            `${subject.subjectName.substring(0, 10)}...` : 
-                            subject.subjectName
-                          }
-                        </div>
-                        <div className="text-xs opacity-75 leading-tight">
-                          {subject.duration}
-                        </div>
-                      </div>
-                    ) : (
-                      <div 
-                        className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-transparent rounded-lg transition-all cursor-pointer flex items-center justify-center group"
-                        onClick={() => console.log('TODO: Implement teacher-specific add timetable slot functionality')}
-                        title={`Add subject for ${day} at ${time}`}
-                      >
-                        <div className="text-gray-300 group-hover:text-orange-500 text-xs transition-colors">+</div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+      {/* Timetable Grid */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
+          <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
+          {days.map((day) => (
+            <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
+              {day}
             </div>
           ))}
         </div>
-      )}
+        
+        {/* Time Slots */}
+        {timeSlots.map((time) => (
+          <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
+            <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
+              {time}
+            </div>
+            {days.map((day) => {
+              const key = `${day}-${time}`;
+              const subject = mockTimetableGrid[key];
+              
+              return (
+                <div key={key} className="p-2 h-24 flex items-center justify-center">
+                  {subject ? (
+                    <div 
+                      className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md cursor-pointer`}
+                      title={`${subject.subjectName} on ${day} at ${time}`}
+                    >
+                      <div className="text-lg mb-1 flex-shrink-0">
+                        {subject.icon}
+                      </div>
+                      <div className="text-xs font-semibold mb-1 leading-tight">
+                        {subject.subjectName}
+                      </div>
+                      <div className="text-xs opacity-75 leading-tight">
+                        {subject.duration}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-gray-300 text-xs">Free</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

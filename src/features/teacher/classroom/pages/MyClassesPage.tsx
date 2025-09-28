@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import TeacherSubjectCard from '../components/TeacherSubjectCard';
+import ScheduleTab from '../components/ScheduleTab';
 import { mockTeacherSubjects } from '../data/mockData';
 import type { TeacherClassroomTab } from '../types/classroom.types';
 
@@ -41,12 +42,7 @@ export default function MyClassesPage() {
 				</div>
 			)}
 
-			{activeTab === 'schedule' && (
-				<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-					<h3 className="text-lg font-medium text-gray-900 mb-2">Schedule View</h3>
-					<p className="text-gray-600">Schedule functionality coming soon...</p>
-				</div>
-			)}
+			{activeTab === 'schedule' && <ScheduleTab />}
 		</div>
 	);
 }
