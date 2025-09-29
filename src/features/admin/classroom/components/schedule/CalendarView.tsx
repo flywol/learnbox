@@ -154,7 +154,7 @@ export default function CalendarView(_props: CalendarViewProps) {
         </div>
         
         <button
-          onClick={() => navigate('/classroom/add-event')}
+          onClick={() => navigate('/admin/classroom/add-event')}
           className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
         >
           <Plus className="w-4 h-4" />

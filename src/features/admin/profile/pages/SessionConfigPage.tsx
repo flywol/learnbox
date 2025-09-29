@@ -62,7 +62,7 @@ export default function SessionConfigPage() {
   const onSubmit = (data: SessionConfigFormData) => {
     updateSessionMutation.mutate(data, {
       onSuccess: () => {
-        navigate("/profile");
+        navigate("/admin/profile");
       }
     });
   };
@@ -82,7 +82,7 @@ export default function SessionConfigPage() {
     <div className="max-w-4xl mx-auto p-6">
       <PageHeader 
         title="Session & Term Configuration" 
-        onBack={() => navigate("/profile")} 
+        onBack={() => navigate("/admin/profile")} 
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

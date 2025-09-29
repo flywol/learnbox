@@ -96,14 +96,14 @@ export default function EditPersonalInfoPage() {
   const onSubmit = async (data: PersonalInfoFormData) => {
     try {
       await updatePersonalInfoMutation.mutateAsync(data);
-      navigate("/profile");
+      navigate("/admin/profile");
     } catch (error) {
       console.error("Failed to update profile:", error);
     }
   };
 
   const handleCancel = () => {
-    navigate("/profile");
+    navigate("/admin/profile");
   };
 
   if (isLoading) {

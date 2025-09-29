@@ -26,7 +26,7 @@ export default function QuizDetailPage() {
   ];
 
   const handleBack = () => {
-    navigate(`/classroom/${classId}/subject/${subjectId}`);
+    navigate(`/admin/classroom/${classId}/subject/${subjectId}`);
   };
 
   return (

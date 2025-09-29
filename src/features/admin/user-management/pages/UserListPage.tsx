@@ -10,7 +10,7 @@ export default function UserListPage() {
   };
 
   const handleCreateUser = () => {
-    navigate("/user-management/create");
+    navigate("/admin/users/create");
   };
 
   return (

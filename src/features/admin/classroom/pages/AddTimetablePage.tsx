@@ -198,7 +198,7 @@ export default function AddTimetablePage() {
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
-    navigate('/classroom?tab=schedule&subtab=timetable');
+    navigate('/admin/classroom?tab=schedule&subtab=timetable');
   };
 
   // Show loading state while fetching existing timetable
@@ -216,7 +216,7 @@ export default function AddTimetablePage() {
   }
 
   const handleCancel = () => {
-    navigate('/classroom?tab=schedule&subtab=timetable');
+    navigate('/admin/classroom?tab=schedule&subtab=timetable');
   };
 
   return (

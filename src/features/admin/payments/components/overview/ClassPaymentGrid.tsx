@@ -29,7 +29,7 @@ export default function ClassPaymentGrid({ paymentData, formatCurrency }: ClassP
             <div
               key={classData.level}
               className="bg-white p-4 rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/payments/class/${classData.level.replace(' ', '-').toLowerCase()}`)}
+              onClick={() => navigate(`/admin/payments/class/${classData.level.replace(' ', '-').toLowerCase()}`)}
             >
               <h3 className="text-lg font-semibold mb-3">{classData.level}</h3>
               <div className="flex items-center justify-between">

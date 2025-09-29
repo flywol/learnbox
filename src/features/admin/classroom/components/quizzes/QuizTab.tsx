@@ -11,7 +11,7 @@ export default function QuizTab({ quizzes }: QuizTabProps) {
   const { classId, subjectId } = useParams();
 
   const handleQuizClick = (quiz: Quiz) => {
-    navigate(`/classroom/${classId}/subject/${subjectId}/quiz/${quiz.id}`);
+    navigate(`/admin/classroom/${classId}/subject/${subjectId}/quiz/${quiz.id}`);
   };
 
   if (quizzes.length === 0) {
@@ -28,7 +28,7 @@ export default function QuizTab({ quizzes }: QuizTabProps) {
         </p>
         <div className="space-y-3">
           <button 
-            onClick={() => navigate(`/classroom/${classId}/subject/${subjectId}/quiz/create`)}
+            onClick={() => navigate(`/admin/classroom/${classId}/subject/${subjectId}/quiz/create`)}
             className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

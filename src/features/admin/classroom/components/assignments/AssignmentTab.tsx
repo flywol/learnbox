@@ -11,7 +11,7 @@ export default function AssignmentTab({ assignments }: AssignmentTabProps) {
   const { classId, subjectId } = useParams();
 
   const handleAssignmentClick = (assignment: Assignment) => {
-    navigate(`/classroom/${classId}/subject/${subjectId}/assignment/${assignment.id}`);
+    navigate(`/admin/classroom/${classId}/subject/${subjectId}/assignment/${assignment.id}`);
   };
 
   if (assignments.length === 0) {
@@ -28,7 +28,7 @@ export default function AssignmentTab({ assignments }: AssignmentTabProps) {
         </p>
         <div className="space-y-3">
           <button 
-            onClick={() => navigate(`/classroom/${classId}/subject/${subjectId}/assignment/create`)}
+            onClick={() => navigate(`/admin/classroom/${classId}/subject/${subjectId}/assignment/create`)}
             className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

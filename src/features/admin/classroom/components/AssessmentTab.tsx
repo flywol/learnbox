@@ -44,7 +44,7 @@ export default function AssessmentTab({ students, summary }: AssessmentTabProps)
           </p>
           <div className="space-y-3">
             <button 
-              onClick={() => navigate('/user-management/create/student')}
+              onClick={() => navigate('/admin/users/create/student')}
               className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

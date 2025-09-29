@@ -1,43 +1,37 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
-import { type Subject } from "../api/subjectsApiClient";
+import { type Subject, subjectsApiClient } from "../api/subjectsApiClient";
 
 interface SubjectSelectorProps {
   selectedSubjects: string[];
   onSubjectsChange: (subjects: string[]) => void;
   selectedClasses?: string[];
+  selectedClassArms?: string[];
   error?: string;
 }
 
-export default function SubjectSelector({ selectedSubjects, onSubjectsChange, selectedClasses = [], error }: SubjectSelectorProps) {
+export default function SubjectSelector({ selectedSubjects, onSubjectsChange, selectedClasses = [], selectedClassArms = [], error }: SubjectSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      if (selectedClasses.length === 0) {
-        // If no classes selected, clear subjects
+      // Clear subjects if no class or arm selected
+      if (selectedClasses.length === 0 || selectedClassArms.length === 0) {
         setSubjects([]);
+        setLoading(false);
         return;
       }
 
-      // For now, we can't fetch subjects without arm IDs
-      // This is a limitation of the current API design
-      setSubjects([]);
-      return;
-
       setLoading(true);
       try {
-        // Fetch subjects from all selected classes
-        // Note: This is a temporary solution - we need class arms to get subjects
-        // For now, we'll show a message that class arms are needed
-        const allSubjectsPromises = selectedClasses.map(async (classId) => {
-          // Since we don't have arm IDs here, we can't fetch subjects
-          // This needs to be handled at the API level or UI flow level
-          console.warn(`Cannot fetch subjects for class ${classId} without arm ID`);
-          return [];
-        });
+        // Fetch subjects from all selected class-arm combinations
+        const allSubjectsPromises = selectedClasses.flatMap(classId => 
+          selectedClassArms.map(armId => 
+            subjectsApiClient.getSubjectsForClass(classId, armId)
+          )
+        );
         
         const allSubjectsArrays = await Promise.all(allSubjectsPromises);
         
@@ -54,7 +48,6 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
         setSubjects(uniqueSubjects);
       } catch (error) {
         console.error("Failed to fetch subjects:", error);
-        // Clear subjects on error - no fallback to hardcoded subjects
         setSubjects([]);
       } finally {
         setLoading(false);
@@ -62,7 +55,7 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
     };
 
     fetchSubjects();
-  }, [selectedClasses]);
+  }, [selectedClasses, selectedClassArms]);
 
   const handleSubjectToggle = (subjectId: string) => {
     if (selectedSubjects.includes(subjectId)) {
@@ -133,9 +126,9 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
               <div className="px-4 py-2 text-sm text-gray-500">Loading subjects...</div>
             ) : subjects.length === 0 ? (
               <div className="px-4 py-2 text-sm text-gray-500">
-                {selectedClasses.length === 0 
-                  ? 'Please select classes first to view available subjects' 
-                  : 'Subject selection requires specific class arms. Please contact admin to configure subjects for these classes.'}
+                {selectedClasses.length === 0 || selectedClassArms.length === 0
+                  ? 'Please select classes and arms first to view available subjects'
+                  : 'No subjects configured for the selected class-arm combinations'}
               </div>
             ) : (
               subjects.map((subject) => (
@@ -159,12 +152,6 @@ export default function SubjectSelector({ selectedSubjects, onSubjectsChange, se
 
       {error && (
         <p className="text-sm text-red-600">{error}</p>
-      )}
-      
-      {selectedClasses.length > 0 && subjects.length === 0 && !loading && (
-        <p className="text-xs text-amber-600">
-          Note: Subject assignment requires class arms to be configured. Contact your administrator.
-        </p>
       )}
     </div>
   );

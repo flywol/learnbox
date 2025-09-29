@@ -146,9 +146,14 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 		setError(null);
 
 		try {
-			// Simple client selection
+			// Simple client selection and use proper resend endpoint
 			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
-			await authClient.forgotPassword({ email: passwordResetEmail });
+			
+			if (selectedRole === "TEACHER") {
+				await teacherAuthApiClient.resendPasswordOtp(passwordResetEmail);
+			} else {
+				await authClient.forgotPassword({ email: passwordResetEmail });
+			}
 			return true;
 		} catch (err: any) {
 			setError(err.message || "Failed to resend OTP");

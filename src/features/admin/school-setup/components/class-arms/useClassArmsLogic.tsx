@@ -123,7 +123,7 @@ export function useClassArmsLogic(onComplete?: () => void) {
       await schoolSetupApiClient.createClasses(selectedClassLevels, classArms);
       markAsCompleted();
       clearStorageAfterCompletion();
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
       if (onComplete) {
         onComplete();
       }

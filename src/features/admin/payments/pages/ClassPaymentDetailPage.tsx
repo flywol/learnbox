@@ -168,7 +168,7 @@ const ClassPaymentDetailPage: React.FC = () => {
           {/* Title and Back Button */}
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={() => navigate('/payments')}
+              onClick={() => navigate('/admin/payments')}
               className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded"
             >
               <ChevronLeft className="w-5 h-5" />

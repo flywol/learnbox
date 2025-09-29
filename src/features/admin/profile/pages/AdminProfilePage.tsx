@@ -24,15 +24,15 @@ export default function AdminProfilePage() {
   const classArms = classLevelsData?.data.classArms || [];
 
   const handleEditPersonalInfo = () => {
-    navigate("/profile/edit-personal");
+    navigate("/admin/profile/edit-personal");
   };
 
   const handleEditSchoolInfo = () => {
-    navigate("/profile/edit-school");
+    navigate("/admin/profile/edit-school");
   };
 
   const handleSessionConfig = () => {
-    navigate("/profile/session-config");
+    navigate("/admin/profile/session-config");
   };
 
   const handleLogout = () => {

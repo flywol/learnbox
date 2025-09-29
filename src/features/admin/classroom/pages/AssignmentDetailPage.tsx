@@ -30,7 +30,7 @@ export default function AssignmentDetailPage() {
     if (selectedSubmission) {
       setSelectedSubmission(null);
     } else {
-      navigate(`/classroom/${classId}/subject/${subjectId}`);
+      navigate(`/admin/classroom/${classId}/subject/${subjectId}`);
     }
   };
 

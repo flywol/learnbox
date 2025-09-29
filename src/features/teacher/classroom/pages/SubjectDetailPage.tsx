@@ -61,15 +61,30 @@ export default function SubjectDetailPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch lessons for this subject
+  const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
+
+  // Fetch lessons for this subject using the specific endpoint
   const { data: lessonsData, isLoading: lessonsLoading, error: lessonsError, refetch: refetchLessons } = useQuery({
-    queryKey: ['subject-lessons', subjectId],
-    queryFn: () => lessonsApiClient.getLessons(),
-    enabled: !!subjectId,
+    queryKey: ['subject-lessons', subjectId, subject?.classRef],
+    queryFn: () => {
+      if (!subject?.classRef || !subjectId) {
+        console.error('Missing data for fetching lessons:', { 
+          subjectId, 
+          classRef: subject?.classRef, 
+          subject: subject 
+        });
+        throw new Error('Missing classId or subjectId for fetching lessons');
+      }
+      console.log('Fetching lessons for:', { 
+        classId: subject.classRef, 
+        subjectId,
+        endpoint: `/lessons/class/${subject.classRef}/subject/${subjectId}`
+      });
+      return lessonsApiClient.getLessonsByClassAndSubject(subject.classRef, subjectId);
+    },
+    enabled: !!subjectId && !!subject?.classRef,
     staleTime: 2 * 60 * 1000,
   });
-
-  const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
   const lessons = lessonsData?.lessons || [];
 
   const tabs: { key: SubjectDetailTab; label: string }[] = [
@@ -193,8 +208,17 @@ export default function SubjectDetailPage() {
             </div>
           ) : lessonsError ? (
             <ErrorState 
-              message="Failed to load lessons. Please try again." 
+              message={
+                !subject?.classRef 
+                  ? "This subject is not assigned to a specific class. Please contact your administrator." 
+                  : "Failed to load lessons. Please try again."
+              }
               onRetry={() => refetchLessons()}
+            />
+          ) : !subject?.classRef ? (
+            <ErrorState 
+              message="This subject is not assigned to a specific class. Please contact your administrator to assign this subject to a class." 
+              onRetry={() => window.location.reload()}
             />
           ) : lessons.length === 0 ? (
             <EmptyLessons onAddLesson={() => navigate(`/teacher/subject/${subjectId}/lesson/add`)} />

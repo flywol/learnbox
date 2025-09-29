@@ -19,7 +19,7 @@ export default function SchoolSetupPromptModal({
 
 	const handleContinue = () => {
 		onClose();
-		navigate("/dashboard/complete-school-setup");
+		navigate("/admin/dashboard/complete-school-setup");
 	};
 
 	return (

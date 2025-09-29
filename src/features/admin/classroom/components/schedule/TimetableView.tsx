@@ -184,7 +184,7 @@ export default function TimetableView({
         </div>
 
         <button
-          onClick={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}`)}
+          onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}`)}
           className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -194,7 +194,7 @@ export default function TimetableView({
 
       {/* Timetable Content */}
       {!hasTimetable ? (
-        <EmptyTimetable onAddTimetable={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}`)} />
+        <EmptyTimetable onAddTimetable={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}`)} />
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {/* Header */}
@@ -222,7 +222,7 @@ export default function TimetableView({
                     {subject ? (
                       <div 
                         className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-                        onClick={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
+                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
                         title={`Edit ${subject.subjectName} on ${day} at ${time}`}
                       >
                         {subject.icon && (
@@ -250,7 +250,7 @@ export default function TimetableView({
                     ) : (
                       <div 
                         className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-transparent rounded-lg transition-all cursor-pointer flex items-center justify-center group"
-                        onClick={() => navigate(`/classroom/add-timetable?classId=${effectiveClassId}&day=${day}&time=${time}`)}
+                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&day=${day}&time=${time}`)}
                         title={`Add subject for ${day} at ${time}`}
                       >
                         <div className="text-gray-300 group-hover:text-orange-500 text-xs transition-colors">+</div>

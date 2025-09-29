@@ -29,7 +29,7 @@ export default function CompleteSetupPage() {
 	// Redirect if already completed
 	useEffect(() => {
 		if (isCompleted) {
-			navigate("/dashboard");
+			navigate("/admin/dashboard");
 		}
 	}, [isCompleted, navigate]);
 
@@ -41,7 +41,7 @@ export default function CompleteSetupPage() {
 		// Clear storage after successful completion to avoid crowding storage
 		clearStorageAfterCompletion();
 		
-		navigate("/dashboard");
+		navigate("/admin/dashboard");
 	};
 
 	if (isCompleted) {

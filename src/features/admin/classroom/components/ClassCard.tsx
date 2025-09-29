@@ -9,7 +9,7 @@ export default function ClassCard({ classData }: ClassCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/classroom/${classData.id}`);
+    navigate(`/admin/classroom/${classData.id}`);
   };
 
   return (

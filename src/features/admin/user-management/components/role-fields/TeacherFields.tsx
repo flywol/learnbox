@@ -108,23 +108,12 @@ export default function TeacherFields({ control, register, setValue, errors }: T
         </div>
       </div>
 
-      {/* Multi-select components side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Assigned Classes */}
-        <ClassSelector
-          selectedClasses={assignedClasses}
-          onClassesChange={(classes) => setValue("assignedClasses", classes)}
-          error={errors.assignedClasses?.message}
-        />
-
-        {/* Assigned Subjects */}
-        <SubjectSelector
-          selectedSubjects={assignedSubjects}
-          onSubjectsChange={(subjects) => setValue("assignedSubjects", subjects)}
-          selectedClasses={assignedClasses}
-          error={errors.assignedSubjects?.message}
-        />
-      </div>
+      {/* Assigned Classes - Full width */}
+      <ClassSelector
+        selectedClasses={assignedClasses}
+        onClassesChange={(classes) => setValue("assignedClasses", classes)}
+        error={errors.assignedClasses?.message}
+      />
 
       {/* Assigned Class Arms - Full width */}
       <ClassArmSelector
@@ -132,6 +121,15 @@ export default function TeacherFields({ control, register, setValue, errors }: T
         onClassArmsChange={(classArms) => setValue("assignedClassArms", classArms)}
         selectedClasses={assignedClasses}
         error={errors.assignedClassArms?.message}
+      />
+
+      {/* Assigned Subjects - Full width */}
+      <SubjectSelector
+        selectedSubjects={assignedSubjects}
+        onSubjectsChange={(subjects) => setValue("assignedSubjects", subjects)}
+        selectedClasses={assignedClasses}
+        selectedClassArms={assignedClassArms}
+        error={errors.assignedSubjects?.message}
       />
     </div>
   );

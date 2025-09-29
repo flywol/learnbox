@@ -78,7 +78,7 @@ export default function DashboardPage() {
 			iconSrc: "/assets/add-new.svg",
 			title: "Add new user",
 			description: "Add students, teachers, or parents to your school",
-			onClick: () => navigate("/user-management/create"),
+			onClick: () => navigate("/admin/users/create"),
 		},
 		{
 			iconSrc: "/assets/add-new2.svg", 
@@ -90,13 +90,13 @@ export default function DashboardPage() {
 			iconSrc: "/assets/add-new.svg",
 			title: "School payments", 
 			description: "Manage fees, transactions, and payment records",
-			onClick: () => navigate("/payments"),
+			onClick: () => navigate("/admin/payments"),
 		},
 		{
 			iconSrc: "/assets/add-new2.svg",
 			title: "Session config",
 			description: "Set up academic sessions and terms", 
-			onClick: () => navigate("/profile/session-config"),
+			onClick: () => navigate("/admin/profile/session-config"),
 		},
 	];
 

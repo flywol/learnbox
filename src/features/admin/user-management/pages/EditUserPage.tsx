@@ -20,7 +20,7 @@ export default function EditUserPage() {
 
   // Redirect if no ID
   if (!id) {
-    navigate("/user-management");
+    navigate("/admin/users");
     return null;
   }
 
@@ -43,7 +43,7 @@ export default function EditUserPage() {
       });
       
       // Navigate back to detail view
-      navigate(`/user-management/${currentUser.id}`);
+      navigate(`/admin/users/${currentUser.id}`);
     } catch (err) {
       console.error("Failed to update user:", err);
     }
@@ -51,17 +51,17 @@ export default function EditUserPage() {
 
   const handleCancel = () => {
     if (currentUser) {
-      navigate(`/user-management/${currentUser.id}`);
+      navigate(`/admin/users/${currentUser.id}`);
     } else {
-      navigate("/user-management");
+      navigate("/admin/users");
     }
   };
 
   const handleBack = () => {
     if (currentUser) {
-      navigate(`/user-management/${currentUser.id}`);
+      navigate(`/admin/users/${currentUser.id}`);
     } else {
-      navigate("/user-management");
+      navigate("/admin/users");
     }
   };
 

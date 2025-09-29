@@ -126,7 +126,7 @@ export default function EditSchoolInfoPage() {
   const onSubmit = (data: SchoolInfoFormData) => {
     updateSchoolInfoMutation.mutate(data, {
       onSuccess: () => {
-        navigate("/profile");
+        navigate("/admin/profile");
       }
     });
   };
@@ -146,7 +146,7 @@ export default function EditSchoolInfoPage() {
     <div className="max-w-4xl mx-auto p-6">
       <PageHeader 
         title="Edit School Information" 
-        onBack={() => navigate("/profile")} 
+        onBack={() => navigate("/admin/profile")} 
       />
       
       <div className="bg-white rounded-lg shadow-sm border p-8">

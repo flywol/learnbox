@@ -10,34 +10,6 @@ class UserApiClient extends BaseApiClient {
   // Create a new user
   async createUser(userData: CreateUserFormData): Promise<{ message: string }> {
     try {
-      
-      // Transform data to match API expectations  
-      const { assignedClassArms, ...transformData } = userData as any;
-      
-      // Handle field transformations
-      let transformedData: any = {
-        ...transformData,
-        role: userData.role.toLowerCase() // Convert to lowercase for API
-      };
-
-      // Transform parentGuardianName -> parentName for API (for students)
-      if (userData.role === "Student" && (userData as any).parentGuardianName) {
-        const { parentGuardianName, ...restData } = transformedData;
-        transformedData = {
-          ...restData,
-          parentName: parentGuardianName
-        };
-      }
-
-      // Transform assignedClasses -> assignedClass for API (only for teachers)
-      if (userData.role === "Teacher" && (userData as any).assignedClasses) {
-        const { assignedClasses, ...restData } = transformedData;
-        transformedData = {
-          ...restData,
-          assignedClass: assignedClasses
-        };
-      }
-
       // Determine endpoint based on user role
       let endpoint: string;
       const role = userData.role as "Student" | "Teacher" | "Parent";
@@ -55,7 +27,34 @@ class UserApiClient extends BaseApiClient {
           throw new Error(`Unknown user role: ${role}`);
       }
 
-      const response = await this.post<{ message: string }>(endpoint, transformedData);
+      // Create FormData for multipart/form-data upload
+      const formData = new FormData();
+      
+      // Add all fields to FormData
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key === 'profileImage' && value instanceof File) {
+          // Handle file upload
+          formData.append('profilePicture', value); // API expects 'profilePicture'
+        } else if (key === 'role') {
+          // Convert role to lowercase for API
+          formData.append(key, (value as string).toLowerCase());
+        } else if (key === 'parentGuardianName' && userData.role === 'Student') {
+          // Transform parentGuardianName -> parentName for students
+          formData.append('parentName', value as string);
+        } else if (Array.isArray(value)) {
+          // Handle arrays (assignedClasses, assignedClassArms, assignedSubjects, etc.)
+          value.forEach((item) => formData.append(key, item));
+        } else if (value !== undefined && value !== null && key !== 'profileImage' && key !== 'parentGuardianName') {
+          // Add other fields as strings
+          formData.append(key, value as string);
+        }
+      });
+
+      const response = await this.post<{ message: string }>(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response;
     } catch (error) {
       throw error;

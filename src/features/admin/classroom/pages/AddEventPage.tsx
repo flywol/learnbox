@@ -17,7 +17,7 @@ export default function AddEventPage() {
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
     // Navigate back to the classroom schedule calendar tab
-    navigate('/classroom?tab=schedule&subtab=calendar');
+    navigate('/admin/classroom?tab=schedule&subtab=calendar');
   };
 
   // Handle cancel/back navigation

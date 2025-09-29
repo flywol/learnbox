@@ -19,13 +19,13 @@ export default function UserDetailPage() {
 
   // Redirect if no ID
   if (!id) {
-    navigate("/user-management");
+    navigate("/admin/users");
     return null;
   }
 
   const handleEdit = () => {
     if (currentUser) {
-      navigate(`/user-management/${currentUser.id}/edit`);
+      navigate(`/admin/users/${currentUser.id}/edit`);
     }
   };
 
@@ -43,7 +43,7 @@ export default function UserDetailPage() {
   };
 
   const handleBack = () => {
-    navigate("/user-management");
+    navigate("/admin/users");
   };
 
   if (userDetailLoading) {

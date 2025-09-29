@@ -80,7 +80,7 @@ export function UserTableSection() {
 
     const handleRowClick = useCallback(
         (user: UserListItem) => {
-            navigate(`/user-management/${user.id}`);
+            navigate(`/admin/users/${user.id}`);
         },
         [navigate]
     );
