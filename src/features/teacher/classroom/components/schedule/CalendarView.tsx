@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
@@ -123,7 +123,7 @@ export default function CalendarView() {
   const dayNames = getDayNames();
 
   // Filter events for current month
-  const currentMonthEvents = mockEvents.filter(event => {
+  const currentMonthEvents = mockEvents.filter(() => {
     // For demo purposes, show events in current month
     return true;
   });

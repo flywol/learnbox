@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Calendar, Clock, Upload } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
 
@@ -22,6 +22,8 @@ export default function AddQuizPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [quizFile, setQuizFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -97,7 +99,24 @@ export default function AddQuizPage() {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    console.log('Dropped files:', files);
+    if (files.length > 0) {
+      setQuizFile(files[0]);
+      toast({
+        title: "Quiz File Added",
+        description: `${files[0].name} has been added.`,
+      });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setQuizFile(files[0]);
+      toast({
+        title: "Quiz File Selected",
+        description: `${files[0].name} has been selected.`,
+      });
+    }
   };
 
   return (
@@ -240,34 +259,79 @@ export default function AddQuizPage() {
 
         {/* Right Side - File Upload */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Quiz Questions</h3>
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               isDragging 
                 ? 'border-orange-400 bg-orange-50' 
-                : 'border-gray-300 hover:border-gray-400'
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Upload className="w-8 h-8 text-orange-500" />
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img 
+                  src="/assets/upload.svg" 
+                  alt="Upload quiz file" 
+                  className="w-16 h-16"
+                />
               </div>
               <div>
                 <p className="text-gray-600">
                   Drag and drop or{' '}
-                  <button className="text-orange-500 hover:text-orange-600 underline">
+                  <span className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer">
                     select file
-                  </button>{' '}
+                  </span>{' '}
                   to upload
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Upload quiz questions file (optional)
                 </p>
+                <p className="text-sm text-gray-400">
+                  Supports: PDF, DOC, DOCX, TXT
+                </p>
               </div>
+              
+              {quizFile && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg w-full">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <span className="text-green-600 text-sm">📝</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">{quizFile.name}</p>
+                        <p className="text-xs text-green-600">
+                          {(quizFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQuizFile(null);
+                      }}
+                      className="text-green-600 hover:text-green-800 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileSelect}
+            accept=".pdf,.doc,.docx,.txt"
+          />
         </div>
       </div>
     </div>

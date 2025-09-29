@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Bold, Italic, Underline, List, ListOrdered, Link, Image, Calendar, Clock, Upload } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Bold, Italic, Underline, List, ListOrdered, Link, Image, Calendar, Clock } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
+import { lessonsApiClient } from '../api/lessonsApiClient';
+import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
 
 const addAssignmentSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
+  // Lesson fields
+  lessonTitle: z.string().min(1, "Lesson title is required"),
+  lessonNumber: z.string().min(1, "Lesson number is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  class: z.string().min(1, "Class is required"),
+  classArm: z.string().optional(),
+  // Assignment fields  
+  title: z.string().min(1, "Assignment title is required"),
+  description: z.string().min(1, "Assignment description is required"),
   dueDate: z.string().min(1, "Due date is required"),
   dueTime: z.string().min(1, "Due time is required"),
   acceptLateSubmission: z.boolean().optional(),
@@ -23,6 +33,35 @@ export default function AddAssignmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [acceptLateSubmission, setAcceptLateSubmission] = useState(true);
+  const [contentFile] = useState<File | null>(null);
+  const [assignmentFile, setAssignmentFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch teacher's classes and subjects for form dropdowns
+  const { data: subjectsClassesData } = useQuery({
+    queryKey: ['teacher-subjects-classes'],
+    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Create lesson mutation
+  const createLessonMutation = useMutation({
+    mutationFn: lessonsApiClient.createLesson,
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Lesson with assignment created successfully.",
+      });
+      navigate(`/teacher/subject/${subjectId}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create lesson. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const {
     register,
@@ -31,65 +70,76 @@ export default function AddAssignmentPage() {
   } = useForm<AddAssignmentData>({
     resolver: zodResolver(addAssignmentSchema),
     defaultValues: {
-      title: 'Introduction to biology',
-      description: 'Input detailed instruction for students',
+      lessonTitle: 'Introduction to Biology',
+      lessonNumber: '1',
+      startDate: new Date().toISOString().split('T')[0],
+      class: '',
+      classArm: '',
+      title: 'Biology Assignment',
+      description: 'Complete the following assignment tasks',
       acceptLateSubmission: true
     }
   });
 
-  const handleSaveAndContinue = async (data: AddAssignmentData) => {
-    setIsSubmitting(true);
+  // Helper function to convert date to DD/MM/YYYY format
+  const formatDateToDDMMYYYY = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleSaveAndContinue = async () => {
+    // For now, just show toast since draft functionality may need separate endpoint
+    toast({
+      title: "Draft Saved!",
+      description: "Assignment saved as draft. You can continue editing later.",
+    });
     
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving assignment as draft:', { ...data, acceptLateSubmission });
-      
-      toast({
-        title: "Draft Saved!",
-        description: "Assignment saved as draft. You can continue editing later.",
-      });
-      
-      // Navigate based on whether we're adding to existing lesson or creating new
-      if (lessonId) {
-        navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`);
-      } else {
-        navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
-      }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save draft. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (lessonId) {
+      navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`);
+    } else {
+      navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
     }
   };
 
   const handlePublish = async (data: AddAssignmentData) => {
+    if (!subjectId) {
+      toast({
+        title: "Error",
+        description: "Subject ID is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Publishing assignment:', { ...data, acceptLateSubmission });
-      
-      toast({
-        title: "Published!",
-        description: "Assignment has been published successfully.",
-      });
-      
-      // Navigate based on whether we're adding to existing lesson or creating new
-      if (lessonId) {
-        navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}`);
-      } else {
-        navigate(`/teacher/subject/${subjectId}`);
-      }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to publish assignment. Please try again.",
-        variant: "destructive",
-      });
+      const lessonData = {
+        title: data.lessonTitle,
+        number: data.lessonNumber,
+        startDate: formatDateToDDMMYYYY(data.startDate),
+        subject: subjectId,
+        class: data.class,
+        classArm: data.classArm,
+        contentType: 'assignment' as const,
+        contentTitle: data.title,
+        contentDescription: data.description,
+        file: contentFile || undefined,
+        assignmentTitle: data.title,
+        assignmentDescription: data.description,
+        assignmentDueDate: formatDateToDDMMYYYY(data.dueDate),
+        assignmentDueTime: data.dueTime,
+        acceptLateSubmissions: acceptLateSubmission,
+        assignmentFile: assignmentFile || undefined,
+      };
+
+      await createLessonMutation.mutateAsync(lessonData);
+    } catch (error) {
+      // Error handling is done in the mutation
+      console.error('Failed to create lesson:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +159,24 @@ export default function AddAssignmentPage() {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    console.log('Dropped files:', files);
+    if (files.length > 0) {
+      setAssignmentFile(files[0]);
+      toast({
+        title: "File Added",
+        description: `${files[0].name} has been added to the assignment.`,
+      });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setAssignmentFile(files[0]);
+      toast({
+        title: "File Selected",
+        description: `${files[0].name} has been selected.`,
+      });
+    }
   };
 
   return (
@@ -130,7 +197,104 @@ export default function AddAssignmentPage() {
         {/* Left Side - Form */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-6">
           <form className="space-y-6">
-            {/* Title */}
+            {/* Lesson Section */}
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Lesson Details</h3>
+              
+              {/* Lesson Title */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lesson Title *
+                </label>
+                <input
+                  {...register('lessonTitle')}
+                  type="text"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.lessonTitle ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+                {errors.lessonTitle && (
+                  <p className="mt-1 text-sm text-red-600">{errors.lessonTitle.message}</p>
+                )}
+              </div>
+
+              {/* Lesson Number & Start Date */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Lesson Number *
+                  </label>
+                  <input
+                    {...register('lessonNumber')}
+                    type="text"
+                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.lessonNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.lessonNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.lessonNumber.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date *
+                  </label>
+                  <input
+                    {...register('startDate')}
+                    type="date"
+                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.startDate ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.startDate && (
+                    <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Class & Class Arm */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Class *
+                  </label>
+                  <select
+                    {...register('class')}
+                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.class ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value="">Select a class</option>
+                    {subjectsClassesData?.classes?.map((cls: any) => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.class && (
+                    <p className="mt-1 text-sm text-red-600">{errors.class.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Class Arm (Optional)
+                  </label>
+                  <input
+                    {...register('classArm')}
+                    type="text"
+                    placeholder="e.g., A, B, Alpha"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Assignment Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Assignment Details</h3>
+            </div>
+
+            {/* Assignment Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Title *
@@ -290,43 +454,76 @@ export default function AddAssignmentPage() {
 
           {/* File Upload */}
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Assignment File</h3>
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
                 isDragging 
                   ? 'border-orange-400 bg-orange-50' 
-                  : 'border-gray-300 hover:border-gray-400'
+                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
               }`}
             >
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <img 
                     src="/assets/upload.svg" 
-                    alt="Upload" 
+                    alt="Upload file" 
                     className="w-16 h-16"
-                    onError={(e) => {
-                      // Fallback to icon if SVG not found
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                    }}
                   />
-                  <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center hidden">
-                    <Upload className="w-8 h-8 text-orange-500" />
-                  </div>
                 </div>
                 <div>
                   <p className="text-gray-600">
                     Drag and drop or{' '}
-                    <button className="text-orange-500 hover:text-orange-600 underline">
+                    <span className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer">
                       select file
-                    </button>{' '}
+                    </span>{' '}
                     to upload
                   </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Supports: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG
+                  </p>
                 </div>
+                
+                {assignmentFile && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg w-full">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <span className="text-green-600 text-sm">📄</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-800">{assignmentFile.name}</p>
+                          <p className="text-xs text-green-600">
+                            {(assignmentFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAssignmentFile(null);
+                        }}
+                        className="text-green-600 hover:text-green-800 transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileSelect}
+              accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+            />
           </div>
         </div>
       </div>

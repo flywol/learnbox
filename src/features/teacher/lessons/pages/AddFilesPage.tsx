@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Link, Upload } from 'lucide-react';
+import { ArrowLeft, Link } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
 
@@ -19,6 +19,8 @@ export default function AddFilesPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -93,8 +95,30 @@ export default function AddFilesPage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files);
-    console.log('Dropped files:', files);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length > 0) {
+      setFiles(prev => [...prev, ...droppedFiles]);
+      toast({
+        title: "Files Added",
+        description: `${droppedFiles.length} file(s) have been added.`,
+      });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    if (selectedFiles && selectedFiles.length > 0) {
+      const fileArray = Array.from(selectedFiles);
+      setFiles(prev => [...prev, ...fileArray]);
+      toast({
+        title: "Files Selected",
+        description: `${fileArray.length} file(s) have been selected.`,
+      });
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -181,31 +205,83 @@ export default function AddFilesPage() {
 
         {/* Right Side - File Upload */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Files</h3>
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               isDragging 
                 ? 'border-orange-400 bg-orange-50' 
-                : 'border-gray-300 hover:border-gray-400'
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Upload className="w-8 h-8 text-orange-500" />
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img 
+                  src="/assets/upload.svg" 
+                  alt="Upload files" 
+                  className="w-16 h-16"
+                />
               </div>
               <div>
                 <p className="text-gray-600">
                   Drag and drop or{' '}
-                  <button className="text-orange-500 hover:text-orange-600 underline">
-                    select file
-                  </button>{' '}
+                  <span className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer">
+                    select files
+                  </span>{' '}
                   to upload
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Supports: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, Images
                 </p>
               </div>
             </div>
           </div>
+          
+          {/* Files List */}
+          {files.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <h4 className="text-sm font-medium text-gray-700">Uploaded Files ({files.length})</h4>
+              {files.map((file, index) => (
+                <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <span className="text-green-600 text-sm">📄</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">{file.name}</p>
+                        <p className="text-xs text-green-600">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(index);
+                      }}
+                      className="text-green-600 hover:text-green-800 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.gif"
+          />
         </div>
       </div>
     </div>

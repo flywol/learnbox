@@ -151,6 +151,8 @@ export interface TeacherSubject {
   icon: string;
   bgColor: string;
   textColor?: string;
+  description?: string;
+  color?: string;
 }
 
 export type TeacherClassroomTab = 'subject' | 'schedule';
