@@ -16,7 +16,7 @@ const addAssignmentSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   class: z.string().min(1, "Class is required"),
   classArm: z.string().optional(),
-  // Assignment fields  
+  // Assignment fields
   title: z.string().min(1, "Assignment title is required"),
   description: z.string().min(1, "Assignment description is required"),
   dueDate: z.string().min(1, "Due date is required"),

@@ -1,3 +1,36 @@
+// Teacher Profile Types (from /teacher/profile endpoint)
+export interface TeacherProfileResponse {
+  data: {
+    teacher: {
+      personalInformation: {
+        name: string;
+        email: string;
+        gender: string;
+        phoneNumber: string;
+        dateOfBirth: string;
+        employmentStatus: string;
+        profilePicture?: string;
+      };
+      school: {
+        _id: string;
+        schoolName: string;
+      };
+      classSubjects: Array<{ _id: string }>;
+      assignedClasses: Array<{
+        _id: string;
+        levelName: string;
+        class: string;
+      }>;
+      assignedClassArms: Array<any>;
+      accountInfo: {
+        isVerified: boolean;
+        isActive: boolean;
+        role: string;
+      };
+    };
+  };
+}
+
 // Admin Profile Types
 export interface AdminProfile {
   id: string;

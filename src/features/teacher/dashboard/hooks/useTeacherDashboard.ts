@@ -2,47 +2,14 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   teacherActionCards,
-  mockClassSchedule,
-  mockTeacherStats
 } from '../config/teacherDashboardConfig';
-import type { DashboardEvent } from '@/common/components/dashboard';
 import { useAllTasks } from '@/features/teacher/tasks/hooks/useTeacherTasks';
 import { calculateTimeLabel } from '@/features/teacher/tasks/utils/taskHelpers';
 import type { Task } from '@/features/teacher/tasks/types/task.types';
-
-// Mock events data for teacher dashboard
-const mockTeacherEvents: DashboardEvent[] = [
-  {
-    id: '1',
-    description: "Children's Day",
-    date: '2025-05-27',
-    receivers: 'all'
-  },
-  {
-    id: '2',
-    description: 'Open Day',
-    date: '2025-05-30',
-    receivers: 'all'
-  },
-  {
-    id: '3',
-    description: 'Open Day',
-    date: '2025-05-30',
-    receivers: 'parents'
-  },
-  {
-    id: '4',
-    description: 'Open Day',
-    date: '2025-05-30',
-    receivers: 'students'
-  },
-  {
-    id: '5',
-    description: 'Open Day',
-    date: '2025-05-30',
-    receivers: 'teachers'
-  }
-];
+import { useDashboardData } from './useDashboardData';
+import { useTodayClasses } from '@/features/teacher/classroom/hooks/useTimetable';
+import { transformClassForGrid } from '@/features/teacher/classroom/utils/timetableUtils';
+import type { ClassSchedule } from '../components/RecentClassesSection';
 
 export function useTeacherDashboard() {
   const navigate = useNavigate();
@@ -50,8 +17,14 @@ export function useTeacherDashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  // Fetch tasks from API
+  // Fetch dashboard data from API
+  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useDashboardData();
+
+  // Fetch tasks from API (keeping existing tasks integration)
   const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useAllTasks();
+
+  // Fetch today's classes from API
+  const { data: todayClassesData, isLoading: classesLoading } = useTodayClasses();
 
   // Action handlers
   const handleAddTask = () => {
@@ -60,7 +33,8 @@ export function useTeacherDashboard() {
 
   const handleDayChange = (day: string) => {
     setSelectedDay(day);
-    // TODO: Fetch schedule for selected day
+    // Note: Currently only "Today" is supported by the API
+    // Future: Implement day-specific filtering
   };
 
   const handleTaskClick = (taskId: string) => {
@@ -80,13 +54,34 @@ export function useTeacherDashboard() {
     navigate('/teacher/tasks/edit', { state: { task } });
   };
 
-  // Filter schedule based on selected day
-  const getScheduleForDay = (day: string) => {
-    // For now, return same schedule for all days
-    // TODO: Implement day-specific schedule filtering
-    console.log('Getting schedule for day:', day);
-    return mockClassSchedule;
-  };
+  // Transform today's classes to schedule format
+  const todaySchedule = useMemo((): ClassSchedule[] => {
+    if (!todayClassesData?.classes) return [];
+
+    // Transform and expand each class for each arm
+    const expandedClasses: ClassSchedule[] = [];
+
+    todayClassesData.classes.forEach(classData => {
+      const transformedClasses = transformClassForGrid(classData);
+
+      transformedClasses.forEach(tc => {
+        expandedClasses.push({
+          time: tc.displayStartTime,
+          subject: tc.subjectName,
+          duration: tc.duration,
+          classCode: tc.displayClass,
+          isEmpty: false,
+        });
+      });
+    });
+
+    // Sort by time
+    return expandedClasses.sort((a, b) => {
+      const timeA = a.time.replace(/[ap]m/, '');
+      const timeB = b.time.replace(/[ap]m/, '');
+      return timeA.localeCompare(timeB);
+    });
+  }, [todayClassesData]);
 
   // Transform tasks for dashboard display
   const dashboardTasks = useMemo(() => {
@@ -107,38 +102,56 @@ export function useTeacherDashboard() {
       });
   }, [tasksData]);
 
-  // Calculate task stats
+  // Calculate task stats (from existing tasks API)
   const completedTasks = tasksData?.tasks.filter(t => t.isCompleted).length || 0;
   const totalTasks = tasksData?.total || 0;
+
+  // Transform events from dashboard API
+  const transformedEvents = useMemo(() => {
+    if (!dashboardData?.events) return [];
+    return dashboardData.events.map(event => ({
+      id: event._id,
+      description: event.description,
+      receivers: event.receivers,
+      date: event.date
+    }));
+  }, [dashboardData?.events]);
 
   return {
     // Configuration
     actionCards: teacherActionCards,
 
-    // Stats data (using API for tasks, keeping mock for other stats until those APIs are ready)
+    // Stats data from dashboard API
     stats: {
-      ...mockTeacherStats,
+      totalStudents: dashboardData?.classroomOverview.totalStudents || 0,
+      totalClasses: dashboardData?.classroomOverview.totalClasses || 0,
+      assignmentCreated: dashboardData?.classroomOverview.assignmentsCreated || 0,
+      notGraded: dashboardData?.classroomOverview.assignmentsNotGraded || 0,
+      quizCreated: 0, // No quiz endpoint yet
+      notGradedQuiz: 0, // No quiz endpoint yet
+      overdueCreated: dashboardData?.classroomOverview.overdueCreated || 0,
+      overdueNotGraded: dashboardData?.classroomOverview.overdueNotGraded || 0,
       completedTasks,
       totalTasks,
     },
 
-    // Tasks data from API
+    // Tasks data from API (keeping existing tasks integration)
     tasks: dashboardTasks,
     completedTasks,
     totalTasks,
 
-    // Schedule data
-    schedule: getScheduleForDay(selectedDay),
+    // Schedule data from today's classes API
+    schedule: todaySchedule,
     selectedDay,
 
-    // Events data
-    events: mockTeacherEvents,
-    eventsLoading: false,
-    eventsError: null,
+    // Events data from dashboard API
+    events: transformedEvents,
+    eventsLoading: dashboardLoading,
+    eventsError: dashboardError,
 
     // UI state
-    loading: tasksLoading,
-    error: tasksError,
+    loading: tasksLoading || dashboardLoading || classesLoading,
+    error: tasksError || dashboardError,
 
     // Task modal state
     selectedTask,

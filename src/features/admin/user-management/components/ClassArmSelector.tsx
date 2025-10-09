@@ -40,7 +40,7 @@ export default function ClassArmSelector({ selectedClassArms, onClassArmsChange,
                 id: arm.id,
                 name: arm.name || arm.armName,
                 armName: arm.armName,
-                classLevel: level.levelName,
+                classLevel: level.class || level.levelName, // Use short class name (e.g., "Primary 1")
                 classLevelId: level.id
               });
             });

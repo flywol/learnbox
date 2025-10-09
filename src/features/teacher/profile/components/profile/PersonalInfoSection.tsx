@@ -1,50 +1,57 @@
-interface AdminProfile {
+interface TeacherProfile {
   fullName?: string | null;
   email?: string | null;
   phoneNumber?: string | null;
   gender?: string | null;
   role?: string | null;
+  position?: string | null;
 }
 
 interface PersonalInfoSectionProps {
-  adminProfile?: AdminProfile;
-  onEdit: () => void;
+  teacherProfile?: TeacherProfile;
+  onEdit?: () => void;
+  showSubjects?: boolean;
+  subjects?: Array<{ name: string }>;
 }
 
-export default function PersonalInfoSection({ adminProfile, onEdit }: PersonalInfoSectionProps) {
+export default function PersonalInfoSection({
+  teacherProfile,
+  showSubjects = false,
+  subjects = []
+}: PersonalInfoSectionProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
-        <button
-          onClick={onEdit}
-          className="text-orange-500 hover:text-orange-600 font-medium"
-        >
-          Edit
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
-          <p className="text-gray-900">{adminProfile?.fullName || 'Gabriel Davidson'}</p>
+          <p className="text-gray-900">{teacherProfile?.fullName || 'N/A'}</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-          <p className="text-gray-900">{adminProfile?.email || 'gabrieldavidson@gmail.com'}</p>
+          <p className="text-gray-900">{teacherProfile?.email || 'N/A'}</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">Phone number</label>
-          <p className="text-gray-900">{adminProfile?.phoneNumber || '+234-9070678475'}</p>
+          <p className="text-gray-900">{teacherProfile?.phoneNumber || 'N/A'}</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">Gender</label>
-          <p className="text-gray-900">{adminProfile?.gender || 'Male'}</p>
+          <p className="text-gray-900">{teacherProfile?.gender || 'N/A'}</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">Role</label>
-          <p className="text-gray-900">{adminProfile?.role || 'Admin'}</p>
+          <label className="block text-sm font-medium text-gray-500 mb-1">Employment Status</label>
+          <p className="text-gray-900">{teacherProfile?.position || 'N/A'}</p>
         </div>
+        {showSubjects && subjects.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Subjects</label>
+            <p className="text-gray-900">{subjects.map(s => s.name).join(', ')}</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -32,7 +32,9 @@ const teacherEditSchema = baseEditUserSchema.extend({
   phoneNumber: z.string().min(1, "Phone number is required"),
   employmentStatus: z.enum(["Full time", "Part time", "Contract"]),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
-  // Note: assignedClasses, assignedSubjects would need additional handling
+  assignedClasses: z.array(z.string()).min(1, "At least one class must be assigned"),
+  assignedClassArms: z.array(z.string()).min(1, "At least one class arm must be assigned"),
+  assignedSubjects: z.array(z.string()).min(1, "At least one subject must be assigned"),
 });
 
 const parentEditSchema = baseEditUserSchema.extend({
@@ -60,12 +62,13 @@ interface EditUserFormProps {
 
 export default function EditUserForm({ user, onSubmit, onCancel, loading = false }: EditUserFormProps) {
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(user.profilePicture);
-  
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors }
   } = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
@@ -78,9 +81,13 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
       classArm: user.classArm || "",
       admissionNumber: user.admissionNumber || "",
       parentName: user.parentName || "",
-      // Teacher/Parent fields
+      // Teacher fields
       phoneNumber: user.phoneNumber || "",
       employmentStatus: user.employmentStatus as any || "Full time",
+      assignedClasses: user.assignedClasses || [],
+      assignedClassArms: user.assignedClassArms || [],
+      assignedSubjects: user.assignedSubjects || [],
+      // Parent fields
       relationshipToStudent: user.relationshipToStudent || "",
       // Common fields
       gender: user.gender as any || "Male",
@@ -114,6 +121,8 @@ export default function EditUserForm({ user, onSubmit, onCancel, loading = false
         selectedRole={selectedRole}
         register={register}
         errors={errors}
+        control={control}
+        setValue={setValue}
       />
 
       <EditFormActions onCancel={onCancel} loading={loading} />

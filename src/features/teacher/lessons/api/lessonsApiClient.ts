@@ -84,7 +84,31 @@ class LessonsApiClient extends BaseApiClient {
   }
 
   async getLesson(id: string): Promise<LessonResponse> {
-    return this.get(`/lessons/${id}`);
+    const response: any = await this.get(`/lessons/${id}`);
+    const lesson = response.data.lesson;
+    
+    // Transform API response to match expected interface
+    return {
+      id: lesson._id,
+      title: lesson.title,
+      number: lesson.number,
+      startDate: new Date(lesson.startDate).toLocaleDateString(),
+      subject: lesson.subject?.name || lesson.subject,
+      class: lesson.class?.class || lesson.class,
+      classArm: lesson.classArm?.armName || lesson.classArm,
+      contentType: lesson.content?.type || 'file',
+      contentTitle: lesson.content?.title || lesson.title,
+      contentDescription: lesson.content?.description || '',
+      fileUrl: lesson.content?.url,
+      assignmentTitle: lesson.assignment?.title,
+      assignmentDescription: lesson.assignment?.description,
+      assignmentDueDate: lesson.assignment?.dueDate,
+      assignmentDueTime: lesson.assignment?.dueTime,
+      acceptLateSubmissions: lesson.assignment?.acceptLateSubmissions,
+      assignmentFileUrl: lesson.assignment?.fileUrl,
+      createdAt: lesson.createdAt,
+      updatedAt: lesson.updatedAt
+    };
   }
 
   async updateLesson(id: string, data: UpdateLessonRequest): Promise<LessonResponse> {
@@ -101,19 +125,38 @@ class LessonsApiClient extends BaseApiClient {
   }
 
   async getLessonsByClassAndSubject(
-    classId: string, 
-    subjectId: string, 
+    classId: string,
+    subjectId: string,
     classArmId?: string
   ): Promise<GetLessonsResponse> {
     const params = new URLSearchParams();
     if (classArmId) {
       params.append('classArmId', classArmId);
     }
-    
+
     const queryString = params.toString();
     const url = `/lessons/class/${classId}/subject/${subjectId}${queryString ? `?${queryString}` : ''}`;
+
+    const response: any = await this.get(url);
     
-    return this.get(url);
+    // Transform API response to match expected interface
+    return {
+      lessons: response.data.lessons.map((lesson: any) => ({
+        id: lesson._id,
+        title: lesson.title,
+        number: parseInt(lesson.number, 10),
+        startDate: lesson.startDate,
+        subject: lesson.subject,
+        class: lesson.class,
+        classArm: lesson.classArm,
+        contentType: lesson.content?.type || 'file',
+        contentTitle: lesson.content?.title || lesson.title,
+        contentDescription: lesson.content?.description || '',
+        fileUrl: lesson.content?.url,
+        createdAt: lesson.createdAt,
+        updatedAt: lesson.updatedAt
+      }))
+    };
   }
 }
 

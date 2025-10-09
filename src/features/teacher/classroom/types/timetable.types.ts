@@ -120,7 +120,7 @@ export const TIME_SLOTS = [
 
 export const SUBJECT_COLORS = [
   'bg-blue-100 text-blue-800',
-  'bg-green-100 text-green-800', 
+  'bg-green-100 text-green-800',
   'bg-yellow-100 text-yellow-800',
   'bg-orange-100 text-orange-800',
   'bg-red-100 text-red-800',
@@ -128,3 +128,69 @@ export const SUBJECT_COLORS = [
   'bg-pink-100 text-pink-800',
   'bg-indigo-100 text-indigo-800',
 ] as const;
+
+// Teacher Timetable API Types (for /teacher/today and /teacher/weekly endpoints)
+
+export interface ClassArm {
+  id: string;
+  armName: string;
+  _id: string;
+}
+
+export interface ClassInfo {
+  _id: string;
+  levelName: string;
+  class: string;
+  school: string;
+  arms: ClassArm[];
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
+export interface TeacherClassSchedule {
+  subjectName: string;
+  startTime: string; // Display format like "10:14pm"
+  endTime: string; // Display format like "03:58pm"
+  duration: string; // Like "-16mins" or "1hr"
+  rawStartTime: string; // 24-hour format like "22:14"
+  rawEndTime: string; // 24-hour format like "15:58"
+  classInfo: ClassInfo;
+  classArmInfo?: any | null;
+}
+
+export interface TodayClassesResponse {
+  data: {
+    classes: TeacherClassSchedule[];
+    total: number;
+    currentDay: string;
+    date: string;
+  };
+}
+
+export interface WeeklyScheduleResponse {
+  data: {
+    schedule: {
+      Monday: TeacherClassSchedule[];
+      Tuesday: TeacherClassSchedule[];
+      Wednesday: TeacherClassSchedule[];
+      Thursday: TeacherClassSchedule[];
+      Friday: TeacherClassSchedule[];
+    };
+  };
+}
+
+// Transformed types for UI display
+export interface TransformedClassForGrid {
+  subjectName: string;
+  className: string; // e.g., "Primary 1"
+  armName: string; // e.g., "A"
+  displayClass: string; // e.g., "Primary 1 A"
+  rawStartTime: string; // e.g., "10:14"
+  rawEndTime: string; // e.g., "15:58"
+  displayStartTime: string; // e.g., "10:14am"
+  displayEndTime: string; // e.g., "03:58pm"
+  duration: string; // Calculated duration
+  color: string; // Consistent color based on subject
+  gridSlot: string; // e.g., "10:00" - nearest hour for grid placement
+}

@@ -1,30 +1,30 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface SettingsSectionProps {
-  onSessionConfig: () => void;
+  onSessionConfig?: () => void;
 }
 
-export default function SettingsSection({ onSessionConfig }: SettingsSectionProps) {
+export default function SettingsSection({}: SettingsSectionProps) {
   const [accessibilityExpanded, setAccessibilityExpanded] = useState(false);
-  const [receiveNotifications, setReceiveNotifications] = useState(true);
+  const [receiveNotifications] = useState(true);
 
   return (
     <div>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Settings</h2>
-      
+
       <div className="space-y-4">
-        {/* Receive Notifications */}
+        {/* Receive Notifications - Read-only for now */}
         <div className="flex items-center justify-between py-3">
           <span className="text-gray-900">Receive Notifications</span>
-          <label className="relative inline-flex items-center cursor-pointer">
+          <label className="relative inline-flex items-center cursor-not-allowed opacity-60">
             <input
               type="checkbox"
               checked={receiveNotifications}
-              onChange={(e) => setReceiveNotifications(e.target.checked)}
+              disabled
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
           </label>
         </div>
 
@@ -48,17 +48,6 @@ export default function SettingsSection({ onSessionConfig }: SettingsSectionProp
               <p>• Screen reader support</p>
             </div>
           )}
-        </div>
-
-        {/* Session & Term Configuration */}
-        <div className="py-3">
-          <button
-            onClick={onSessionConfig}
-            className="flex items-center justify-between w-full text-left text-gray-900"
-          >
-            <span>Session & Term Configuration</span>
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
       </div>
     </div>

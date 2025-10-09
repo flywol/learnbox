@@ -85,33 +85,39 @@ export interface UserListItem {
   isActive: boolean;
 }
 
-// Detailed User Types (API response from user-by-id)
+// Detailed User Types (API response from /admin/user-by-id/{userId})
 export interface DetailedUser {
   id: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
+  _id?: string;
   fullName: string;
-  phoneNumber?: string;
   email: string;
   profilePicture: string | null;
-  role: 'student' | 'teacher' | 'parent' | 'admin';
   password?: string;
+  gender?: string;
+  phoneNumber?: string;
+  role: 'student' | 'teacher' | 'parent' | 'admin';
+  dateOfBirth?: string;
+  school?: string;
   isVerified: boolean;
   isActive: boolean;
   isDeleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  refreshToken?: string;
+  __v?: number;
+
   // Student specific fields
   admissionNumber?: string;
   classArm?: string;
   classLevel?: string;
-  gender?: string;
-  dateOfBirth?: string;
   parentName?: string;
+
   // Teacher specific fields
   employmentStatus?: string;
+  assignedSubjects?: string[];
   assignedClasses?: string[];
   assignedClassArms?: string[];
-  assignedSubjects?: string[];
+
   // Parent specific fields
   linkedChildren?: string[];
   relationshipToStudent?: string;

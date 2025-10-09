@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Link } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
+import { lessonsApiClient } from '../api/lessonsApiClient';
+import { useQuery } from '@tanstack/react-query';
+import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
 
 const addVideoSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -22,6 +25,15 @@ export default function AddVideoPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Get subject data to extract class and classArm info
+  const { data: subjectsData } = useQuery({
+    queryKey: ['teacher-subjects-classes'],
+    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
+
   const {
     register,
     handleSubmit,
@@ -29,62 +41,89 @@ export default function AddVideoPage() {
   } = useForm<AddVideoData>({
     resolver: zodResolver(addVideoSchema),
     defaultValues: {
-      title: 'Introduction to biology',
-      description: 'Input detailed instruction for students'
+      title: '',
+      description: ''
     }
   });
 
-  const handleSaveAndContinue = async (data: AddVideoData) => {
-    setIsSubmitting(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving video as draft:', data);
-      
-      toast({
-        title: "Draft Saved!",
-        description: "Video content saved as draft. You can continue editing later.",
-      });
-      
-      // Navigate based on whether we're adding to existing lesson or creating new
-      if (lessonId) {
-        navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`);
-      } else {
-        navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
+  // Check if we have pending lesson data from AddLessonPage
+  useEffect(() => {
+    if (!lessonId) {
+      const pendingLesson = sessionStorage.getItem('pendingLesson');
+      if (!pendingLesson) {
+        toast({
+          title: "Missing Lesson Info",
+          description: "Please start by adding lesson basic information.",
+          variant: "destructive",
+        });
+        navigate(`/teacher/subject/${subjectId}/lesson/add`);
       }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save draft. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  }, [lessonId, subjectId, navigate, toast]);
 
   const handlePublish = async (data: AddVideoData) => {
-    setIsSubmitting(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Publishing video:', data);
-      
+    if (!videoFile) {
       toast({
-        title: "Published!",
-        description: "Video content has been published successfully.",
+        title: "Video Required",
+        description: "Please select a video file to upload.",
+        variant: "destructive",
       });
-      
-      // Navigate based on whether we're adding to existing lesson or creating new
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       if (lessonId) {
-        navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}`);
+        // TODO: Update existing lesson
+        toast({
+          title: "Not Implemented",
+          description: "Updating existing lessons is not yet implemented.",
+          variant: "destructive",
+        });
+        return;
       } else {
-        navigate(`/teacher/subject/${subjectId}`);
+        // Create new lesson with video content
+        const pendingLessonStr = sessionStorage.getItem('pendingLesson');
+        if (!pendingLessonStr || !subject) {
+          throw new Error('Missing required lesson or subject data');
+        }
+
+        const pendingLesson = JSON.parse(pendingLessonStr);
+
+        // Extract class info from subject
+        const classId = subject.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : '';
+
+        await lessonsApiClient.createLesson({
+          title: pendingLesson.title,
+          number: pendingLesson.number,
+          startDate: pendingLesson.startDate,
+          subject: subjectId!,
+          class: classId,
+          classArm: subject.classArm,
+          contentType: 'video',
+          contentTitle: data.title,
+          contentDescription: data.description,
+          file: videoFile,
+        });
+
+        // Clear pending lesson data
+        sessionStorage.removeItem('pendingLesson');
       }
-    } catch {
+
+      toast({
+        title: "Success!",
+        description: "Lesson with video content has been created successfully.",
+        variant: "success",
+      });
+
+      // Navigate to subject detail page
+      navigate(`/teacher/subject/${subjectId}`);
+    } catch (error: any) {
+      console.error('Error creating lesson:', error);
       toast({
         title: "Error",
-        description: "Failed to publish video. Please try again.",
+        description: error?.message || "Failed to create lesson. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -192,24 +231,21 @@ export default function AddVideoPage() {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleSubmit(handleSaveAndContinue)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmitting ? 'Saving...' : 'Save & Continue'}
-              </button>
+            {/* Action Button */}
+            <div>
               <button
                 type="button"
                 onClick={handleSubmit(handlePublish)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={isSubmitting || !videoFile}
+                className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isSubmitting ? 'Publishing...' : 'Publish'}
+                {isSubmitting ? 'Creating Lesson...' : 'Create Lesson'}
               </button>
+              {!videoFile && (
+                <p className="mt-2 text-sm text-gray-500 text-center">
+                  Please upload a video file to continue
+                </p>
+              )}
             </div>
           </form>
         </div>

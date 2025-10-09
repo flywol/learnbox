@@ -245,3 +245,155 @@ export function findTimeConflicts(timetableData: TimetableData): Array<{
   
   return conflicts;
 }
+
+// ===== TEACHER TIMETABLE UTILITIES =====
+
+import type { TeacherClassSchedule, TransformedClassForGrid } from '../types/timetable.types';
+import { SUBJECT_COLORS } from '../types/timetable.types';
+
+/**
+ * Check if a class has valid times (end time must be after start time)
+ */
+export function isValidClassTime(rawStartTime: string, rawEndTime: string): boolean {
+  try {
+    const start = new Date(`1970-01-01T${rawStartTime}:00`);
+    const end = new Date(`1970-01-01T${rawEndTime}:00`);
+    return end > start;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Calculate duration in a human-readable format
+ */
+export function calculateClassDuration(rawStartTime: string, rawEndTime: string): string {
+  if (!rawStartTime || !rawEndTime) return '';
+
+  const start = new Date(`1970-01-01T${rawStartTime}:00`);
+  const end = new Date(`1970-01-01T${rawEndTime}:00`);
+
+  const diffMs = end.getTime() - start.getTime();
+  const diffMins = diffMs / (1000 * 60);
+
+  if (diffMins <= 0) return 'Invalid';
+
+  if (diffMins < 60) {
+    return `${diffMins}mins`;
+  }
+
+  const hours = Math.floor(diffMins / 60);
+  const minutes = diffMins % 60;
+
+  if (minutes === 0) {
+    return `${hours}hr${hours > 1 ? 's' : ''}`;
+  }
+
+  return `${hours}hr${hours > 1 ? 's' : ''} ${minutes}mins`;
+}
+
+/**
+ * Round time to nearest hour for grid slot placement
+ * e.g., "10:14" → "10:00", "14:45" → "15:00"
+ */
+export function roundToNearestHourSlot(time24: string): string {
+  const [hours, minutes] = time24.split(':').map(Number);
+  const roundedHour = minutes >= 30 ? hours + 1 : hours;
+  return `${roundedHour.toString().padStart(2, '0')}:00`;
+}
+
+/**
+ * Get consistent color for a subject based on its name
+ */
+export function getConsistentSubjectColor(subjectName: string): string {
+  // Use a simple hash to get consistent color for same subject
+  let hash = 0;
+  for (let i = 0; i < subjectName.length; i++) {
+    hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % SUBJECT_COLORS.length;
+  return SUBJECT_COLORS[index];
+}
+
+/**
+ * Transform API class data to grid-ready format
+ * Expands each class to separate entries for each arm
+ */
+export function transformClassForGrid(
+  classData: TeacherClassSchedule
+): TransformedClassForGrid[] {
+  // Skip classes with invalid times
+  if (!isValidClassTime(classData.rawStartTime, classData.rawEndTime)) {
+    return [];
+  }
+
+  const { subjectName, rawStartTime, rawEndTime, classInfo } = classData;
+  const className = classInfo.class;
+  const arms = classInfo.arms;
+
+  // If no arms, create one entry without arm
+  if (!arms || arms.length === 0) {
+    return [{
+      subjectName,
+      className,
+      armName: '',
+      displayClass: className,
+      rawStartTime,
+      rawEndTime,
+      displayStartTime: formatTimeFor12Hour(rawStartTime),
+      displayEndTime: formatTimeFor12Hour(rawEndTime),
+      duration: calculateClassDuration(rawStartTime, rawEndTime),
+      color: getConsistentSubjectColor(subjectName),
+      gridSlot: roundToNearestHourSlot(rawStartTime),
+    }];
+  }
+
+  // Create separate entry for each arm
+  return arms.map(arm => ({
+    subjectName,
+    className,
+    armName: arm.armName,
+    displayClass: `${className} ${arm.armName}`,
+    rawStartTime,
+    rawEndTime,
+    displayStartTime: formatTimeFor12Hour(rawStartTime),
+    displayEndTime: formatTimeFor12Hour(rawEndTime),
+    duration: calculateClassDuration(rawStartTime, rawEndTime),
+    color: getConsistentSubjectColor(subjectName),
+    gridSlot: roundToNearestHourSlot(rawStartTime),
+  }));
+}
+
+/**
+ * Transform weekly schedule to grid format
+ */
+export function transformWeeklyScheduleToGrid(
+  schedule: {
+    Monday: TeacherClassSchedule[];
+    Tuesday: TeacherClassSchedule[];
+    Wednesday: TeacherClassSchedule[];
+    Thursday: TeacherClassSchedule[];
+    Friday: TeacherClassSchedule[];
+  }
+): Record<string, TransformedClassForGrid[]> {
+  const grid: Record<string, TransformedClassForGrid[]> = {};
+
+  Object.entries(schedule).forEach(([day, classes]) => {
+    classes.forEach(classData => {
+      const transformedClasses = transformClassForGrid(classData);
+
+      transformedClasses.forEach(transformedClass => {
+        // Create grid key: "Day-TimeSlot" e.g., "Monday-10:00am"
+        const gridKey = `${day}-${formatTimeFor12Hour(transformedClass.gridSlot)}`;
+
+        if (!grid[gridKey]) {
+          grid[gridKey] = [];
+        }
+
+        grid[gridKey].push(transformedClass);
+      });
+    });
+  });
+
+  return grid;
+}

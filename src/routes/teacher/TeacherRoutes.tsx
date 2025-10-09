@@ -17,7 +17,7 @@ const AssignmentListPage = lazy(() => import("../../features/teacher/assignments
 const CreateAssignmentPage = lazy(() => import("../../features/teacher/assignments/pages/CreateAssignmentPage"));
 
 // Profile (Teacher-specific)
-const TeacherProfilePage = lazy(() => import("../../features/teacher/profile/pages/AdminProfilePage"));
+const TeacherProfilePage = lazy(() => import("../../features/teacher/profile/pages/TeacherProfilePage"));
 
 // Notifications (Teacher-specific)
 const TeacherNotificationsPage = lazy(() => import("../../features/teacher/notifications/pages/NotificationsPage"));

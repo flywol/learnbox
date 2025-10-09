@@ -29,7 +29,7 @@ export default function UserBasicInfo({ user }: UserBasicInfoProps) {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Date created</label>
-        <p className="text-gray-900">{formatDate(user.created_at)}</p>
+        <p className="text-gray-900">{user.createdAt ? formatDate(user.createdAt) : 'N/A'}</p>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>

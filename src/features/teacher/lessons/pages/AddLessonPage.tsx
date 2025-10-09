@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { z } from 'zod';
-import { useToast } from '../../../../hooks/use-toast';
 
 const addLessonSchema = z.object({
   title: z.string().min(1, "Lesson title is required"),
@@ -18,8 +16,6 @@ type AddLessonData = z.infer<typeof addLessonSchema>;
 export default function AddLessonPage() {
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -29,31 +25,17 @@ export default function AddLessonPage() {
     resolver: zodResolver(addLessonSchema),
   });
 
-  const onSubmit = async (data: AddLessonData) => {
-    setIsSubmitting(true);
-    
-    try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Creating lesson:', data);
-      
-      toast({
-        title: "Success!",
-        description: "Lesson created successfully. You can now add content to your lesson.",
-      });
-      
-      // Navigate to lesson content selection
-      navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to create lesson. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data: AddLessonData) => {
+    // Store lesson basic info in sessionStorage to be used when creating the lesson with content
+    sessionStorage.setItem('pendingLesson', JSON.stringify({
+      title: data.title,
+      number: data.lessonNumber,
+      startDate: data.scheduleStartDate,
+      scheduleTime: data.scheduleTime,
+    }));
+
+    // Navigate to content selection - the actual API call will happen when content is added
+    navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
   };
 
   const lessonNumbers = Array.from({ length: 20 }, (_, i) => i + 1);
@@ -164,14 +146,13 @@ export default function AddLessonPage() {
             </p>
           </div>
 
-          {/* Save Button */}
+          {/* Continue Button */}
           <div className="mt-6">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full md:w-auto px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full md:w-auto px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
             >
-              {isSubmitting ? 'Creating...' : 'Save'}
+              Continue to Add Content
             </button>
           </div>
         </div>

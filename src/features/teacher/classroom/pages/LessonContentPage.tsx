@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, X } from 'lucide-react';
-import { getSubjectDetail } from '../data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, MessageCircle, X, RefreshCw, AlertCircle } from 'lucide-react';
+import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
 
 export default function LessonContentPage() {
@@ -9,14 +10,30 @@ export default function LessonContentPage() {
   const navigate = useNavigate();
   const [isForumOpen, setIsForumOpen] = useState(false);
 
-  const subject = getSubjectDetail(subjectId!);
-  const lesson = subject?.lessons.find(l => l.id === lessonId);
+  // Fetch lesson details
+  const {
+    data: lesson,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['lesson', lessonId],
+    queryFn: () => {
+      if (!lessonId) {
+        throw new Error('Lesson ID is required');
+      }
+      return lessonsApiClient.getLesson(lessonId);
+    },
+    enabled: !!lessonId,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const getContentIcon = (type: string) => {
     switch (type) {
       case 'video':
         return '▶️';
       case 'document':
+      case 'file':
         return '📄';
       case 'quiz':
         return '📊';
@@ -27,7 +44,22 @@ export default function LessonContentPage() {
     }
   };
 
-  if (!subject || !lesson) {
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+          <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !lesson) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
@@ -40,7 +72,16 @@ export default function LessonContentPage() {
           <h1 className="text-2xl font-bold text-gray-900">Lesson Not Found</h1>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <p className="text-gray-600">The requested lesson could not be found.</p>
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load lesson</h3>
+          <p className="text-gray-600 mb-4">The requested lesson could not be found or failed to load.</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors mx-auto"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Try Again</span>
+          </button>
         </div>
       </div>
     );
@@ -63,55 +104,101 @@ export default function LessonContentPage() {
         {/* Course Overview Card for Lesson */}
         <div className="flex items-center justify-between">
           <CourseOverviewCard
-            description={`Lesson ${lesson.number}`}
+            description={`Lesson ${lesson.number}: ${lesson.title}`}
             showProgress={false}
             onEdit={() => {
-              // TODO: Implement lesson edit functionality
-              console.log('Edit lesson');
+              navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/edit`);
             }}
           />
-          <button 
-            onClick={() => navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`)}
-            className="flex items-center gap-2 px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors ml-6"
-          >
-            <span className="text-lg">+</span>
-            Add New Content
-          </button>
         </div>
 
-        {/* Content Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Content</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {lesson.contents.map((content) => (
-              <div
-                key={content.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center text-orange-600 bg-orange-50 rounded-lg">
-                    {getContentIcon(content.type)}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 mb-1">
-                      {content.title}
-                    </h4>
-                    <p className="text-gray-600 text-sm">
-                      {content.description}
-                    </p>
-                  </div>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <div className="w-4 h-4 text-gray-400">✏️</div>
-                  </button>
-                </div>
+        {/* Lesson Details Section */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Lesson Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Lesson Number</p>
+                <p className="text-base font-medium text-gray-900">{lesson.number}</p>
               </div>
-            ))}
+              <div>
+                <p className="text-sm text-gray-600">Start Date</p>
+                <p className="text-base font-medium text-gray-900">{lesson.startDate}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Subject</p>
+                <p className="text-base font-medium text-gray-900">{lesson.subject}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Class</p>
+                <p className="text-base font-medium text-gray-900">
+                  {lesson.class} {lesson.classArm && `- ${lesson.classArm}`}
+                </p>
+              </div>
+            </div>
           </div>
 
-          {lesson.contents.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-              <p className="text-gray-600">No content available for this lesson yet.</p>
+          {/* Main Content Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Main Content</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 p-4 bg-orange-50 rounded-lg">
+                <div className="w-10 h-10 flex items-center justify-center text-orange-600 bg-white rounded-lg">
+                  {getContentIcon(lesson.contentType)}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900 mb-1">{lesson.contentTitle}</h4>
+                  <p className="text-gray-600 text-sm mb-2">{lesson.contentDescription}</p>
+                  {lesson.fileUrl && (
+                    <a
+                      href={lesson.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-orange-600 hover:text-orange-700 underline"
+                    >
+                      View/Download File
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Assignment Section (if exists) */}
+          {lesson.assignmentTitle && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Assignment</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="w-10 h-10 flex items-center justify-center text-blue-600 bg-white rounded-lg">
+                    📝
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 mb-1">{lesson.assignmentTitle}</h4>
+                    <p className="text-gray-600 text-sm mb-2">{lesson.assignmentDescription}</p>
+                    <div className="flex gap-4 text-sm text-gray-600">
+                      {lesson.assignmentDueDate && (
+                        <span>Due: {lesson.assignmentDueDate} {lesson.assignmentDueTime}</span>
+                      )}
+                      {lesson.acceptLateSubmissions !== undefined && (
+                        <span>
+                          {lesson.acceptLateSubmissions ? '✓ Accepts late submissions' : '✗ No late submissions'}
+                        </span>
+                      )}
+                    </div>
+                    {lesson.assignmentFileUrl && (
+                      <a
+                        href={lesson.assignmentFileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:text-blue-700 underline mt-2 inline-block"
+                      >
+                        View/Download Assignment File
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

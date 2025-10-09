@@ -24,11 +24,17 @@ export function useUsers() {
 // Hook to fetch a specific user by ID
 export function useUser(userId: string | undefined) {
   return useQuery({
-    queryKey: userKeys.detail(userId!),
-    queryFn: () => userApiClient.getUserById(userId!),
-    enabled: !!userId,
+    queryKey: userId ? userKeys.detail(userId) : ['users', 'detail', 'null'],
+    queryFn: () => {
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+      return userApiClient.getUserById(userId);
+    },
+    enabled: !!userId && userId !== 'undefined' && userId.trim() !== '',
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    retry: false, // Don't retry if userId is invalid
   })
 }
 

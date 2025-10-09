@@ -137,27 +137,28 @@ class UserApiClient extends BaseApiClient {
     try {
       const response = await this.get<{ data: { users: any[] } }>("/admin/all-users-list");
       const users = response.data.users || [];
-      
-      // Transform _id to id for frontend consistency
+
+      // API already returns 'id' field, no transformation needed
       return users.map((user: any) => ({
         ...user,
-        id: user._id
+        id: user.id || user._id // Use id if exists, fallback to _id
       }));
     } catch (error) {
       throw error;
     }
   }
 
-  // Get user by ID
+  // Get user by ID (works for all user types: student, teacher, parent)
   async getUserById(userId: string): Promise<DetailedUser> {
     try {
-      const response = await this.get<{ data: { user: any } }>(`/admin/students/${userId}`);
+      const response = await this.get<{ data: { user: any } }>(`/admin/user-by-id/${userId}`);
       const user = response.data.user;
-      
+
       // Transform _id to id for frontend consistency
       return {
         ...user,
-        id: user._id
+        id: user._id,
+        school: user.school // Keep school ID as is
       };
     } catch (error) {
       throw error;

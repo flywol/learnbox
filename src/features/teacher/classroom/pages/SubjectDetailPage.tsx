@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, Video, FileText, Users, ClipboardList, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
 import { subjectsClassesApiClient } from '../api/subjectsClassesApiClient';
+import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import type { SubjectDetailTab } from '../types/classroom.types';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
-import { mockSubjectDetails } from '../data/mockData';
 
 // Empty state components
 const EmptyLessons = ({ onAddLesson }: { onAddLesson: () => void }) => (
@@ -63,19 +63,29 @@ export default function SubjectDetailPage() {
 
   const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
 
-  // Get mock subject detail for lessons (temporary until API is ready)
-  // If exact match not found, use the first mock subject as fallback
-  const mockSubjectDetail = mockSubjectDetails.find(s => s.id === subjectId) || mockSubjectDetails[0];
-  const lessons = mockSubjectDetail?.lessons || [];
+  // Extract classId and classArmId from subject's classRef
+  const classId = subject?.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : undefined;
+  const classArmId = subject?.classArm;
 
-  // Using mock data - no loading/error states needed
-  const lessonsLoading = false;
-
-  console.log('[SubjectDetailPage] Using mock data:', {
-    subjectId,
-    usingFallback: !mockSubjectDetails.find(s => s.id === subjectId),
-    lessonsCount: lessons.length
+  // Fetch lessons for this subject
+  const {
+    data: lessonsData,
+    isLoading: lessonsLoading,
+    error: lessonsError,
+    refetch: refetchLessons
+  } = useQuery({
+    queryKey: ['lessons', classId, subjectId, classArmId],
+    queryFn: () => {
+      if (!classId || !subjectId) {
+        throw new Error('Class ID and Subject ID are required');
+      }
+      return lessonsApiClient.getLessonsByClassAndSubject(classId, subjectId, classArmId);
+    },
+    enabled: !!classId && !!subjectId,
+    staleTime: 5 * 60 * 1000,
   });
+
+  const lessons = lessonsData?.lessons || [];
 
   const tabs: { key: SubjectDetailTab; label: string }[] = [
     { key: 'lessons', label: 'Lessons' },
@@ -163,11 +173,10 @@ export default function SubjectDetailPage() {
           {/* Course Overview Card */}
           <CourseOverviewCard
             description={
-              mockSubjectDetail?.courseOverview.description ||
               subject.description ||
               `Explore the fascinating world of ${subject.name}`
             }
-            progress={mockSubjectDetail?.courseOverview.progress || 0}
+            progress={0}
             onEdit={() => {
               // TODO: Implement edit functionality
               console.log('Edit course overview');
@@ -200,6 +209,11 @@ export default function SubjectDetailPage() {
                 </div>
               ))}
             </div>
+          ) : lessonsError ? (
+            <ErrorState
+              message="Failed to load lessons. Please try again."
+              onRetry={() => refetchLessons()}
+            />
           ) : lessons.length === 0 ? (
             <EmptyLessons onAddLesson={() => navigate(`/teacher/subject/${subjectId}/lesson/add`)} />
           ) : (

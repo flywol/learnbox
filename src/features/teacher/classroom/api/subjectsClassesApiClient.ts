@@ -13,7 +13,12 @@ export interface ClassResponse {
 export interface SubjectResponse {
   _id: string;
   name: string;
-  classRef?: string | null;
+  classRef?: {
+    _id: string;
+    levelName: string;
+    class: string;
+  } | string | null;
+  classArm?: string;
   description?: string;
   color?: string;
   icon?: string;

@@ -4,6 +4,8 @@ import type {
   CreateTimetableResponse,
   TimetableData,
   Subject,
+  TodayClassesResponse,
+  WeeklyScheduleResponse,
 } from "../types/timetable.types";
 
 // Interface for the class levels and arms response
@@ -153,6 +155,36 @@ class TimetableApiClient extends BaseApiClient {
     } catch (error) {
       console.error('Failed to fetch class levels:', error);
       return [];
+    }
+  }
+
+  // ===== TEACHER TIMETABLE ENDPOINTS =====
+
+  /**
+   * GET /api/v1/timetable/teacher/today
+   * Get today's classes for the authenticated teacher
+   */
+  async getTodayClasses(): Promise<TodayClassesResponse['data']> {
+    try {
+      const response = await this.get<TodayClassesResponse>('/timetable/teacher/today');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch today\'s classes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * GET /api/v1/timetable/teacher/weekly
+   * Get weekly schedule for the authenticated teacher
+   */
+  async getWeeklySchedule(): Promise<WeeklyScheduleResponse['data']> {
+    try {
+      const response = await this.get<WeeklyScheduleResponse>('/timetable/teacher/weekly');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch weekly schedule:', error);
+      throw error;
     }
   }
 }

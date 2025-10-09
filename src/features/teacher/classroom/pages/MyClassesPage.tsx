@@ -28,18 +28,52 @@ const getSubjectDefaults = (subjectName: string) => {
 	};
 };
 
+// Generate consistent color based on subject name hash
+const generateSubjectColor = (subjectName: string): string => {
+	const colors = [
+		'bg-blue-100 text-blue-800',
+		'bg-green-100 text-green-800',
+		'bg-yellow-100 text-yellow-800',
+		'bg-red-100 text-red-800',
+		'bg-purple-100 text-purple-800',
+		'bg-indigo-100 text-indigo-800',
+		'bg-pink-100 text-pink-800',
+		'bg-teal-100 text-teal-800',
+		'bg-orange-100 text-orange-800',
+		'bg-cyan-100 text-cyan-800',
+	];
+
+	// Hash the subject name to get consistent color
+	let hash = 0;
+	for (let i = 0; i < subjectName.length; i++) {
+		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	const index = Math.abs(hash) % colors.length;
+	return colors[index];
+};
+
 // Convert API SubjectResponse to TeacherSubject
 const mapSubjectToTeacherSubject = (subject: SubjectResponse): TeacherSubject => {
 	const defaults = getSubjectDefaults(subject.name);
+
+	// Extract class name from classRef if it's an object
+	let className = 'Multiple Classes';
+	if (subject.classRef && typeof subject.classRef === 'object') {
+		className = subject.classRef.class || subject.classRef.levelName || 'Multiple Classes';
+	}
+
+	// Use API color if exists, otherwise generate consistent color
+	const subjectColor = subject.color || generateSubjectColor(subject.name);
+
 	return {
 		id: subject._id,
 		name: subject.name,
 		description: subject.description,
-		classLevel: 'Multiple Classes', // Will be updated when we have class data
+		classLevel: className,
 		studentCount: 0, // Will be updated when we get student count data
 		icon: subject.icon || defaults.icon,
 		bgColor: defaults.bgColor,
-		color: subject.color || defaults.color,
+		color: subjectColor,
 	};
 };
 

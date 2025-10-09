@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Link } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
+import { lessonsApiClient } from '../api/lessonsApiClient';
+import { useQuery } from '@tanstack/react-query';
+import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
 
 const addFilesSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -22,6 +25,15 @@ export default function AddFilesPage() {
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Get subject data to extract class and classArm info
+  const { data: subjectsData } = useQuery({
+    queryKey: ['teacher-subjects-classes'],
+    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
+
   const {
     register,
     handleSubmit,
@@ -29,52 +41,78 @@ export default function AddFilesPage() {
   } = useForm<AddFilesData>({
     resolver: zodResolver(addFilesSchema),
     defaultValues: {
-      title: 'Introduction to biology',
-      description: 'Input detailed instruction for students'
+      title: '',
+      description: ''
     }
   });
 
-  const handleSaveAndContinue = async (data: AddFilesData) => {
-    setIsSubmitting(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving files as draft:', data);
-      
+  // Check if we have pending lesson data from AddLessonPage
+  useEffect(() => {
+    const pendingLesson = sessionStorage.getItem('pendingLesson');
+    if (!pendingLesson) {
       toast({
-        title: "Draft Saved!",
-        description: "Files content saved as draft. You can continue editing later.",
-      });
-      
-      navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save draft. Please try again.",
+        title: "Missing Lesson Info",
+        description: "Please start by adding lesson basic information.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      navigate(`/teacher/subject/${subjectId}/lesson/add`);
     }
-  };
+  }, [subjectId, navigate, toast]);
 
   const handlePublish = async (data: AddFilesData) => {
-    setIsSubmitting(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Publishing files:', data);
-      
+    if (files.length === 0) {
       toast({
-        title: "Published!",
-        description: "Files content has been published successfully.",
+        title: "File Required",
+        description: "Please select at least one file to upload.",
+        variant: "destructive",
       });
-      
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create new lesson with file content
+      const pendingLessonStr = sessionStorage.getItem('pendingLesson');
+      if (!pendingLessonStr || !subject) {
+        throw new Error('Missing required lesson or subject data');
+      }
+
+      const pendingLesson = JSON.parse(pendingLessonStr);
+
+      // Extract class info from subject
+      const classId = subject.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : '';
+
+      // API only accepts one file, so use the first one
+      await lessonsApiClient.createLesson({
+        title: pendingLesson.title,
+        number: pendingLesson.number,
+        startDate: pendingLesson.startDate,
+        subject: subjectId!,
+        class: classId,
+        classArm: subject.classArm,
+        contentType: 'file',
+        contentTitle: data.title,
+        contentDescription: data.description,
+        file: files[0], // API accepts single file
+      });
+
+      // Clear pending lesson data
+      sessionStorage.removeItem('pendingLesson');
+
+      toast({
+        title: "Success!",
+        description: "Lesson with file content has been created successfully.",
+        variant: "success",
+      });
+
+      // Navigate to subject detail page
       navigate(`/teacher/subject/${subjectId}`);
-    } catch {
+    } catch (error: any) {
+      console.error('Error creating lesson:', error);
       toast({
         title: "Error",
-        description: "Failed to publish files. Please try again.",
+        description: error?.message || "Failed to create lesson. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -181,24 +219,21 @@ export default function AddFilesPage() {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleSubmit(handleSaveAndContinue)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmitting ? 'Saving...' : 'Save & Continue'}
-              </button>
+            {/* Action Button */}
+            <div>
               <button
                 type="button"
                 onClick={handleSubmit(handlePublish)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={isSubmitting || files.length === 0}
+                className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isSubmitting ? 'Publishing...' : 'Publish'}
+                {isSubmitting ? 'Creating Lesson...' : 'Create Lesson'}
               </button>
+              {files.length === 0 && (
+                <p className="mt-2 text-sm text-gray-500 text-center">
+                  Please upload at least one file to continue
+                </p>
+              )}
             </div>
           </form>
         </div>

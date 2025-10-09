@@ -159,7 +159,7 @@ export default function TeacherDashboard() {
               <EventsSection
                 events={events}
                 isLoading={eventsLoading}
-                error={eventsError}
+                error={eventsError?.message || null}
                 maxEvents={5}
               />
             </div>

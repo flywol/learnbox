@@ -1,13 +1,8 @@
+import { useMemo } from 'react';
 import { Calendar } from 'lucide-react';
-
-interface TimetableGridItem {
-  subjectName: string;
-  duration: string;
-  color: string;
-  icon?: string;
-}
-
-type TimetableGrid = { [key: string]: TimetableGridItem | null };
+import { useWeeklySchedule } from '../../hooks/useTimetable';
+import { transformWeeklyScheduleToGrid, formatTimeFor12Hour } from '../../utils/timetableUtils';
+import type { TransformedClassForGrid } from '../../types/timetable.types';
 
 // Loading component
 const LoadingTimetable = () => (
@@ -45,131 +40,52 @@ const EmptyTimetable = () => (
 );
 
 export default function TimetableView() {
-  const timeSlots = [
-    '08:00am', '09:00am', '10:00am', '11:00am', '12:00pm',
-    '01:00pm', '02:00pm', '03:00pm'
-  ];
+  // Fetch weekly schedule from API
+  const { data: weeklyData, isLoading, error } = useWeeklySchedule();
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  
-  // Mock teacher timetable data based on the screenshots
-  const mockTimetableGrid: TimetableGrid = {
-    'Monday-08:00am': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Monday-10:00am': {
-      subjectName: 'English',
-      duration: '1hr',
-      color: 'bg-green-100 text-green-800',
-      icon: '📖'
-    },
-    'Monday-12:00pm': {
-      subjectName: 'Chemistry',
-      duration: '1hr',
-      color: 'bg-red-100 text-red-800',
-      icon: '🧪'
-    },
-    'Tuesday-09:00am': {
-      subjectName: 'Biology',
-      duration: '1hr',
-      color: 'bg-yellow-100 text-yellow-800',
-      icon: '🧬'
-    },
-    'Tuesday-11:00am': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Tuesday-01:00pm': {
-      subjectName: 'English',
-      duration: '1hr',
-      color: 'bg-green-100 text-green-800',
-      icon: '📖'
-    },
-    'Tuesday-02:00pm': {
-      subjectName: 'Biology',
-      duration: '1hr',
-      color: 'bg-yellow-100 text-yellow-800',
-      icon: '🧬'
-    },
-    'Tuesday-03:00pm': {
-      subjectName: 'Chemistry',
-      duration: '1hr',
-      color: 'bg-red-100 text-red-800',
-      icon: '🧪'
-    },
-    'Wednesday-08:00am': {
-      subjectName: 'Biology',
-      duration: '1hr',
-      color: 'bg-yellow-100 text-yellow-800',
-      icon: '🧬'
-    },
-    'Wednesday-10:00am': {
-      subjectName: 'Chemistry',
-      duration: '1hr',
-      color: 'bg-red-100 text-red-800',
-      icon: '🧪'
-    },
-    'Wednesday-12:00pm': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Thursday-09:00am': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Thursday-10:00am': {
-      subjectName: 'Chemistry',
-      duration: '1hr',
-      color: 'bg-red-100 text-red-800',
-      icon: '🧪'
-    },
-    'Thursday-01:00pm': {
-      subjectName: 'English',
-      duration: '1hr',
-      color: 'bg-green-100 text-green-800',
-      icon: '📖'
-    },
-    'Thursday-03:00pm': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Friday-08:00am': {
-      subjectName: 'Chemistry',
-      duration: '1hr',
-      color: 'bg-red-100 text-red-800',
-      icon: '🧪'
-    },
-    'Friday-10:00am': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    },
-    'Friday-11:00am': {
-      subjectName: 'Further M...',
-      duration: '1hr',
-      color: 'bg-blue-100 text-blue-800',
-      icon: '📚'
-    }
-  };
 
-  // Mock data - using mock until teacher endpoint is provided
-  const isLoading = false;
-  const hasTimetable = Object.keys(mockTimetableGrid).length > 0;
+  // Transform API data to grid format
+  const timetableGrid = useMemo(() => {
+    if (!weeklyData?.schedule) return {};
+    return transformWeeklyScheduleToGrid(weeklyData.schedule);
+  }, [weeklyData]);
+
+  // Determine time slots dynamically based on actual class times
+  const timeSlots = useMemo(() => {
+    if (!weeklyData?.schedule) {
+      // Default time slots
+      return ['08:00am', '09:00am', '10:00am', '11:00am', '12:00pm', '01:00pm', '02:00pm', '03:00pm'];
+    }
+
+    // Extract all unique time slots from the schedule
+    const allTimes = new Set<string>();
+    Object.values(weeklyData.schedule).flat().forEach(classData => {
+      const [hours] = classData.rawStartTime.split(':').map(Number);
+      allTimes.add(`${hours.toString().padStart(2, '0')}:00`);
+    });
+
+    // Convert to 12-hour format and sort
+    const slots = Array.from(allTimes)
+      .sort()
+      .map(time => formatTimeFor12Hour(time));
+
+    // If no slots found, use defaults
+    return slots.length > 0 ? slots : ['08:00am', '09:00am', '10:00am', '11:00am', '12:00pm', '01:00pm', '02:00pm', '03:00pm'];
+  }, [weeklyData]);
+
+  const hasTimetable = Object.keys(timetableGrid).length > 0;
 
   if (isLoading) {
     return <LoadingTimetable />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 rounded-lg border border-red-200 p-8 text-center">
+        <p className="text-red-600">Failed to load timetable. Please try again later.</p>
+      </div>
+    );
   }
 
   return (
@@ -197,29 +113,32 @@ export default function TimetableView() {
               </div>
               {days.map((day) => {
                 const key = `${day}-${time}`;
-                const subject = mockTimetableGrid[key];
+                const classes = timetableGrid[key] || [];
 
                 return (
                   <div key={key} className="p-2 h-24 flex items-center justify-center">
-                    {subject ? (
-                      <div
-                        className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-                        title={`${subject.subjectName} on ${day} at ${time}`}
-                      >
-                        {subject.icon && (
-                          <div className="text-lg mb-1 flex-shrink-0">
-                            {subject.icon}
+                    {classes.length > 0 ? (
+                      <div className="w-full h-full flex flex-col gap-1 overflow-auto">
+                        {classes.map((classItem: TransformedClassForGrid, index: number) => (
+                          <div
+                            key={`${classItem.subjectName}-${classItem.displayClass}-${index}`}
+                            className={`w-full rounded-lg ${classItem.color} p-2 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+                            title={`${classItem.subjectName} - ${classItem.displayClass}\n${classItem.displayStartTime} - ${classItem.displayEndTime} (${classItem.duration})`}
+                          >
+                            <div className="text-xs font-semibold mb-0.5 leading-tight">
+                              {classItem.subjectName.length > 10 ?
+                                `${classItem.subjectName.substring(0, 10)}...` :
+                                classItem.subjectName
+                              }
+                            </div>
+                            <div className="text-xs opacity-90 leading-tight">
+                              {classItem.displayClass}
+                            </div>
+                            <div className="text-xs opacity-75 leading-tight">
+                              {classItem.displayStartTime}
+                            </div>
                           </div>
-                        )}
-                        <div className="text-xs font-semibold mb-1 leading-tight">
-                          {subject.subjectName.length > 10 ?
-                            `${subject.subjectName.substring(0, 10)}...` :
-                            subject.subjectName
-                          }
-                        </div>
-                        <div className="text-xs opacity-75 leading-tight">
-                          {subject.duration}
-                        </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
