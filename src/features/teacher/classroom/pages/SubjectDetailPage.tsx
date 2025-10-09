@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, Video, FileText, Users, ClipboardList, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
-import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import { subjectsClassesApiClient } from '../api/subjectsClassesApiClient';
 import type { SubjectDetailTab } from '../types/classroom.types';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
+import { mockSubjectDetails } from '../data/mockData';
 
 // Empty state components
 const EmptyLessons = ({ onAddLesson }: { onAddLesson: () => void }) => (
@@ -54,7 +54,7 @@ export default function SubjectDetailPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<SubjectDetailTab>('lessons');
 
-  // Fetch subject details
+  // Fetch subject details and available classes
   const { data: subjectsData, isLoading: subjectsLoading, error: subjectsError } = useQuery({
     queryKey: ['teacher-subjects-classes'],
     queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
@@ -63,29 +63,19 @@ export default function SubjectDetailPage() {
 
   const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
 
-  // Fetch lessons for this subject using the specific endpoint
-  const { data: lessonsData, isLoading: lessonsLoading, error: lessonsError, refetch: refetchLessons } = useQuery({
-    queryKey: ['subject-lessons', subjectId, subject?.classRef],
-    queryFn: () => {
-      if (!subject?.classRef || !subjectId) {
-        console.error('Missing data for fetching lessons:', { 
-          subjectId, 
-          classRef: subject?.classRef, 
-          subject: subject 
-        });
-        throw new Error('Missing classId or subjectId for fetching lessons');
-      }
-      console.log('Fetching lessons for:', { 
-        classId: subject.classRef, 
-        subjectId,
-        endpoint: `/lessons/class/${subject.classRef}/subject/${subjectId}`
-      });
-      return lessonsApiClient.getLessonsByClassAndSubject(subject.classRef, subjectId);
-    },
-    enabled: !!subjectId && !!subject?.classRef,
-    staleTime: 2 * 60 * 1000,
+  // Get mock subject detail for lessons (temporary until API is ready)
+  // If exact match not found, use the first mock subject as fallback
+  const mockSubjectDetail = mockSubjectDetails.find(s => s.id === subjectId) || mockSubjectDetails[0];
+  const lessons = mockSubjectDetail?.lessons || [];
+
+  // Using mock data - no loading/error states needed
+  const lessonsLoading = false;
+
+  console.log('[SubjectDetailPage] Using mock data:', {
+    subjectId,
+    usingFallback: !mockSubjectDetails.find(s => s.id === subjectId),
+    lessonsCount: lessons.length
   });
-  const lessons = lessonsData?.lessons || [];
 
   const tabs: { key: SubjectDetailTab; label: string }[] = [
     { key: 'lessons', label: 'Lessons' },
@@ -172,8 +162,12 @@ export default function SubjectDetailPage() {
         <div className="space-y-6">
           {/* Course Overview Card */}
           <CourseOverviewCard
-            description={subject.description || `Explore the fascinating world of ${subject.name}`}
-            progress={0}
+            description={
+              mockSubjectDetail?.courseOverview.description ||
+              subject.description ||
+              `Explore the fascinating world of ${subject.name}`
+            }
+            progress={mockSubjectDetail?.courseOverview.progress || 0}
             onEdit={() => {
               // TODO: Implement edit functionality
               console.log('Edit course overview');
@@ -206,20 +200,6 @@ export default function SubjectDetailPage() {
                 </div>
               ))}
             </div>
-          ) : lessonsError ? (
-            <ErrorState 
-              message={
-                !subject?.classRef 
-                  ? "This subject is not assigned to a specific class. Please contact your administrator." 
-                  : "Failed to load lessons. Please try again."
-              }
-              onRetry={() => refetchLessons()}
-            />
-          ) : !subject?.classRef ? (
-            <ErrorState 
-              message="This subject is not assigned to a specific class. Please contact your administrator to assign this subject to a class." 
-              onRetry={() => window.location.reload()}
-            />
           ) : lessons.length === 0 ? (
             <EmptyLessons onAddLesson={() => navigate(`/teacher/subject/${subjectId}/lesson/add`)} />
           ) : (

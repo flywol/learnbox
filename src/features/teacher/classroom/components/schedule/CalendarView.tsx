@@ -28,6 +28,27 @@ const isToday = (date: Date): boolean => {
          date.getFullYear() === today.getFullYear();
 };
 
+// Loading component
+const LoadingCalendar = () => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+    </div>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="grid grid-cols-7 gap-4 mb-4">
+        {Array.from({ length: 7 }, (_, i) => (
+          <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-4">
+        {Array.from({ length: 35 }, (_, i) => (
+          <div key={i} className="h-20 bg-gray-100 rounded animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default function CalendarView() {
   // State for current viewing month/year
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -122,11 +143,18 @@ export default function CalendarView() {
 
   const dayNames = getDayNames();
 
+  // Mock data - using mock until teacher endpoint is provided
+  const isLoading = false;
+
   // Filter events for current month
   const currentMonthEvents = mockEvents.filter(() => {
     // For demo purposes, show events in current month
     return true;
   });
+
+  if (isLoading) {
+    return <LoadingCalendar />;
+  }
 
   return (
     <div className="space-y-6">

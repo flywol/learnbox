@@ -1,13 +1,14 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { createTaskSchema, type CreateTaskFormData } from '../schemas/taskSchema';
-import { type TaskType, type RepeatOption } from '../types/task.types';
+import { type TaskType, type RepeatOption, type Task } from '../types/task.types';
 import TimePicker from '../components/ui/TimePicker';
 import { useToast } from '@/hooks/use-toast';
-import { useCreateTask } from '../hooks/useTeacherTasks';
-import { formatTimeForApi, formatDateForApi } from '../utils/taskHelpers';
+import { useUpdateTask } from '../hooks/useTeacherTasks';
+import { formatTimeForApi, formatDateForApi, parseTimeFromApi } from '../utils/taskHelpers';
 
 const taskTypeOptions: TaskType[] = ['Assignment', 'Quiz', 'Class', 'Custom'];
 const repeatOptions: RepeatOption[] = [
@@ -26,10 +27,14 @@ const repeatLabels: Record<RepeatOption, string> = {
   yearly: 'Every year'
 };
 
-export default function CreateTaskPage() {
+export default function EditTaskPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+
+  // Get task from location state
+  const task = location.state?.task as Task | undefined;
 
   const {
     register,
@@ -48,7 +53,28 @@ export default function CreateTaskPage() {
   const watchedTime = watch('scheduleTime');
   const watchedTaskType = watch('taskType');
 
+  // Populate form with existing task data
+  useEffect(() => {
+    if (task) {
+      // Extract date from ISO string (e.g., "2025-01-15T00:00:00Z" -> "2025-01-15")
+      const dateMatch = task.startDate.match(/^(\d{4}-\d{2}-\d{2})/);
+      const startDateFormatted = dateMatch ? dateMatch[1] : '';
+
+      setValue('title', task.title);
+      setValue('description', task.description);
+      setValue('scheduleStartDate', startDateFormatted);
+      setValue('scheduleTime', parseTimeFromApi(task.scheduleTime));
+      setValue('taskType', task.taskType);
+      setValue('repeat', task.repeat);
+    } else {
+      // If no task in state, redirect back to dashboard
+      navigate('/teacher/dashboard');
+    }
+  }, [task, setValue, navigate]);
+
   const onSubmit = async (data: CreateTaskFormData) => {
+    if (!task) return;
+
     try {
       // Transform form data to API format
       const apiData = {
@@ -61,12 +87,12 @@ export default function CreateTaskPage() {
       };
 
       // Call API
-      await createTaskMutation.mutateAsync(apiData);
+      await updateTaskMutation.mutateAsync({ id: task.id, data: apiData });
 
       // Show success toast
       toast({
-        title: "Task created successfully!",
-        description: `"${data.title}" has been added to your tasks.`,
+        title: "Task updated successfully!",
+        description: `"${data.title}" has been updated.`,
       });
 
       // Navigate back to dashboard
@@ -76,12 +102,14 @@ export default function CreateTaskPage() {
       const errorMessage = error instanceof Error ? error.message : "Something went wrong. Please try again.";
 
       toast({
-        title: "Error creating task",
+        title: "Error updating task",
         description: errorMessage,
         variant: "destructive",
       });
     }
   };
+
+  if (!task) return null;
 
   return (
     <div className="space-y-6">
@@ -93,7 +121,7 @@ export default function CreateTaskPage() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Add a Task</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Task</h1>
       </div>
 
       {/* Form */}
@@ -192,7 +220,7 @@ export default function CreateTaskPage() {
               {errors.taskType && (
                 <p className="mt-1 text-sm text-red-600">{errors.taskType.message}</p>
               )}
-              
+
               {/* Custom Task Type Input - Show when Custom is selected */}
               {watchedTaskType === 'Custom' && (
                 <div className="mt-3">
@@ -236,16 +264,23 @@ export default function CreateTaskPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div>
+          {/* Submit Buttons */}
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/teacher/dashboard')}
+              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
-              disabled={createTaskMutation.isPending}
-              className={`w-full md:w-auto px-8 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                createTaskMutation.isPending ? 'cursor-wait' : ''
+              disabled={updateTaskMutation.isPending}
+              className={`px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                updateTaskMutation.isPending ? 'cursor-wait' : ''
               }`}
             >
-              {createTaskMutation.isPending ? 'Creating...' : 'Create'}
+              {updateTaskMutation.isPending ? 'Updating...' : 'Update Task'}
             </button>
           </div>
         </form>

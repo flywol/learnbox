@@ -9,7 +9,7 @@ export const createTaskSchema = z.object({
     required_error: "Task type is required",
   }),
   customTaskType: z.string().optional(),
-  repeat: z.enum(["Does not repeat", "Every day", "Every week", "Every month", "Every year"], {
+  repeat: z.enum(["none", "daily", "weekly", "monthly", "yearly"], {
     required_error: "Repeat option is required",
   }),
 }).refine((data) => {

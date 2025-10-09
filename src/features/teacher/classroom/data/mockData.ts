@@ -251,55 +251,239 @@ export const mockSubjectDetails: SubjectDetail[] = [
       {
         id: 'lesson-3',
         number: 3,
-        title: 'Reproduction in Organisms',
-        contents: []
+        title: 'Cell Structure and Function',
+        contents: [
+          {
+            id: 'content-3-1',
+            title: 'The Cell: Basic Unit of Life',
+            description: 'Introduction to cell structure and organelles',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-3-2',
+            title: 'Plant vs Animal Cells',
+            description: 'Comparing different cell types',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-3-3',
+            title: 'Cell Structure Quiz',
+            description: 'Test your knowledge on cell components',
+            type: 'quiz',
+            icon: '📊'
+          }
+        ]
       },
       {
         id: 'lesson-4',
         number: 4,
-        title: 'Introduction',
-        contents: []
+        title: 'Photosynthesis and Respiration',
+        contents: [
+          {
+            id: 'content-4-1',
+            title: 'The Process of Photosynthesis',
+            description: 'How plants make their own food',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-4-2',
+            title: 'Cellular Respiration',
+            description: 'Energy production in cells',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-4-3',
+            title: 'Photosynthesis Lab Report',
+            description: 'Submit your lab observations',
+            type: 'assignment',
+            icon: '📝'
+          }
+        ]
       },
       {
         id: 'lesson-5',
         number: 5,
-        title: 'Introduction',
-        contents: []
+        title: 'Genetics and Heredity',
+        contents: [
+          {
+            id: 'content-5-1',
+            title: 'Introduction to Genetics',
+            description: 'Understanding DNA and genes',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-5-2',
+            title: 'Mendelian Genetics',
+            description: 'Laws of inheritance',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-5-3',
+            title: 'Punnett Square Practice',
+            description: 'Genetics problem set',
+            type: 'assignment',
+            icon: '📝'
+          },
+          {
+            id: 'content-5-4',
+            title: 'Genetics Quiz',
+            description: 'Assessment on heredity',
+            type: 'quiz',
+            icon: '📊'
+          }
+        ]
       },
       {
         id: 'lesson-6',
         number: 6,
-        title: 'Introduction',
-        contents: []
+        title: 'Evolution and Natural Selection',
+        contents: [
+          {
+            id: 'content-6-1',
+            title: "Darwin's Theory of Evolution",
+            description: 'The origin of species',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-6-2',
+            title: 'Evidence for Evolution',
+            description: 'Fossil records and comparative anatomy',
+            type: 'document',
+            icon: '📄'
+          }
+        ]
       },
       {
         id: 'lesson-7',
         number: 7,
-        title: 'Introduction',
-        contents: []
+        title: 'Ecology and Ecosystems',
+        contents: [
+          {
+            id: 'content-7-1',
+            title: 'Introduction to Ecology',
+            description: 'Organisms and their environment',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-7-2',
+            title: 'Food Chains and Food Webs',
+            description: 'Energy flow in ecosystems',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-7-3',
+            title: 'Ecosystem Project',
+            description: 'Create your own ecosystem model',
+            type: 'assignment',
+            icon: '📝'
+          }
+        ]
       },
       {
         id: 'lesson-8',
         number: 8,
-        title: 'Introduction',
-        contents: []
+        title: 'Human Body Systems',
+        contents: [
+          {
+            id: 'content-8-1',
+            title: 'The Circulatory System',
+            description: 'Blood flow and heart function',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-8-2',
+            title: 'The Respiratory System',
+            description: 'How we breathe',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-8-3',
+            title: 'Body Systems Quiz',
+            description: 'Test your anatomy knowledge',
+            type: 'quiz',
+            icon: '📊'
+          }
+        ]
       },
       {
         id: 'lesson-9',
         number: 9,
-        title: 'Introduction',
-        contents: []
+        title: 'Microorganisms and Disease',
+        contents: [
+          {
+            id: 'content-9-1',
+            title: 'Bacteria, Viruses, and Fungi',
+            description: 'Types of microorganisms',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-9-2',
+            title: 'The Immune System',
+            description: 'How our body fights disease',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-9-3',
+            title: 'Disease Prevention',
+            description: 'Hygiene and vaccination',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-9-4',
+            title: 'Microbiology Assignment',
+            description: 'Research project on pathogens',
+            type: 'assignment',
+            icon: '📝'
+          }
+        ]
       },
       {
         id: 'lesson-10',
         number: 10,
-        title: 'Introduction',
-        contents: []
+        title: 'Review and Final Assessment',
+        contents: [
+          {
+            id: 'content-10-1',
+            title: 'Course Review',
+            description: 'Summary of all topics covered',
+            type: 'video',
+            icon: '▶️'
+          },
+          {
+            id: 'content-10-2',
+            title: 'Study Guide',
+            description: 'Key concepts and terms',
+            type: 'document',
+            icon: '📄'
+          },
+          {
+            id: 'content-10-3',
+            title: 'Final Exam',
+            description: 'Comprehensive biology assessment',
+            type: 'quiz',
+            icon: '📊'
+          }
+        ]
       }
     ]
   }
 ];
 
 export const getSubjectDetail = (subjectId: string): SubjectDetail | undefined => {
-  return mockSubjectDetails.find(subject => subject.id === subjectId);
+  // Try to find exact match first, otherwise return first subject as fallback
+  return mockSubjectDetails.find(subject => subject.id === subjectId) || mockSubjectDetails[0];
 };

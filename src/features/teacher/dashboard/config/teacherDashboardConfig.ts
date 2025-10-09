@@ -1,5 +1,4 @@
 import type { ActionConfig } from '@/common/components/dashboard';
-import type { Task } from '../components/TasksSection';
 import type { ClassSchedule } from '../components/RecentClassesSection';
 
 export const teacherActionCards: ActionConfig[] = [
@@ -11,7 +10,7 @@ export const teacherActionCards: ActionConfig[] = [
     buttonText: 'Add'
   },
   {
-    iconSrc: '/assets/add-new2.svg', 
+    iconSrc: '/assets/add-new2.svg',
     title: 'Add new assignment',
     description: 'Create and assign homework to your students',
     onClick: () => {/* TODO: Implement add assignment */},
@@ -23,43 +22,6 @@ export const teacherActionCards: ActionConfig[] = [
     description: 'Mark student attendance for today\'s classes',
     onClick: () => {/* TODO: Implement attendance */},
     buttonText: 'Start'
-  }
-];
-
-export const mockTeacherTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Attend Live Class',
-    subject: 'Physics',
-    timeLabel: 'Now',
-    urgent: true,
-    hasAction: true,
-    onAction: () => {/* TODO: Navigate to live class */}
-  },
-  {
-    id: '2', 
-    title: 'Assignment Deadline',
-    subject: 'Physics',
-    timeLabel: 'Due in 2hrs 30mins',
-    urgent: true,
-    hasAction: true,
-    onAction: () => {/* TODO: Navigate to assignment */}
-  },
-  {
-    id: '3',
-    title: 'Upcoming Quiz',
-    subject: 'Further Maths',
-    timeLabel: 'Due in 2hrs 30mins',
-    urgent: false,
-    hasAction: false
-  },
-  {
-    id: '4',
-    title: 'Upcoming Quiz', 
-    subject: 'Further Maths',
-    timeLabel: 'Due in 2hrs 30mins',
-    urgent: false,
-    hasAction: false
   }
 ];
 

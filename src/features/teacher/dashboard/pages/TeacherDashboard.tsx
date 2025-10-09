@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { 
-  StatCard, 
+import {
+  StatCard,
   ActionCard,
-  EventsSection 
+  EventsSection
 } from '@/common/components/dashboard';
-import { 
-  Users, 
-  BookOpen, 
-  ClipboardList, 
+import {
+  Users,
+  BookOpen,
+  ClipboardList,
   FileText,
   CheckCircle,
   AlertCircle
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import TasksSection from '../components/TasksSection';
 import RecentClassesSection from '../components/RecentClassesSection';
 import TeacherWelcomeModal from '../../components/TeacherWelcomeModal';
+import TaskDetailModal from '../../tasks/components/TaskDetailModal';
 import { useTeacherDashboard } from '../hooks/useTeacherDashboard';
 
 export default function TeacherDashboard() {
@@ -34,8 +35,12 @@ export default function TeacherDashboard() {
     eventsLoading,
     eventsError,
     loading,
+    selectedTask,
+    isTaskModalOpen,
     handleAddTask,
-    handleDayChange
+    handleDayChange,
+    handleCloseTaskModal,
+    handleEditTask,
   } = useTeacherDashboard();
 
   useEffect(() => {
@@ -162,10 +167,17 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <TeacherWelcomeModal
         isOpen={showWelcomeModal}
         onClose={() => setShowWelcomeModal(false)}
+      />
+
+      <TaskDetailModal
+        isOpen={isTaskModalOpen}
+        onClose={handleCloseTaskModal}
+        task={selectedTask}
+        onEdit={handleEditTask}
       />
     </>
   );

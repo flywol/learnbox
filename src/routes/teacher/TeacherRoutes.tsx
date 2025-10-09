@@ -24,6 +24,7 @@ const TeacherNotificationsPage = lazy(() => import("../../features/teacher/notif
 
 // Tasks
 const CreateTaskPage = lazy(() => import("../../features/teacher/tasks/pages/CreateTaskPage"));
+const EditTaskPage = lazy(() => import("../../features/teacher/tasks/pages/EditTaskPage"));
 
 // Subject Detail
 const SubjectDetailPage = lazy(() => import("../../features/teacher/classroom/pages/SubjectDetailPage"));
@@ -69,6 +70,7 @@ export function TeacherRoutes() {
       
       {/* Tasks */}
       <Route path="tasks/create" element={<CreateTaskPage />} />
+      <Route path="tasks/edit" element={<EditTaskPage />} />
       
       {/* Subject Detail */}
       <Route path="subject/:subjectId" element={<SubjectDetailPage />} />
