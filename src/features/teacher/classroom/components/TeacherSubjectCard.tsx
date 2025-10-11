@@ -15,7 +15,7 @@ export default function TeacherSubjectCard({ subject }: TeacherSubjectCardProps)
   return (
     <div
       onClick={handleClick}
-      className={`${subject.bgColor} rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow relative`}
+      className={`${subject.bgColor} rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow relative border border-gray-200`}
     >
       {/* Class level in top right */}
       <div className="absolute top-4 right-6">

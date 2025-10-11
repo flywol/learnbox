@@ -47,20 +47,18 @@ class TimetableApiClient extends BaseApiClient {
     return response.data;
   }
 
-  // Get timetable for a specific class
-  async getTimetable(classId: string): Promise<TimetableData | null> {
+  // Get timetable for a specific class and class arm
+  async getTimetable(classId: string, classArmId: string): Promise<TimetableData | null> {
     try {
-      const response = await this.get<any>(`/timetable/class/${classId}`);
+      const response = await this.get<any>(`/timetable/class/${classId}/${classArmId}`);
       
-      // Check if response is an array of subject schedules directly
-      if (Array.isArray(response) && response.length > 0) {
-        // The API returns the subjectSchedules array directly
-        const subjectSchedules = response;
+      // Check if response has data property
+      if (response.data && Array.isArray(response.data)) {
+        const subjectSchedules = response.data;
         
-        // Transform to our expected format
         return {
-          classId: classId, // We have the classId from the parameter
-          subjectSchedules: subjectSchedules.map(subject => ({
+          classId: classId,
+          subjectSchedules: subjectSchedules.map((subject: any) => ({
             subjectName: subject.subjectName,
             schedule: subject.schedule.map((slot: any) => ({
               day: slot.day,
@@ -71,9 +69,23 @@ class TimetableApiClient extends BaseApiClient {
         };
       }
       
-      return null; // No timetable found
+      // Check if response is an array directly
+      if (Array.isArray(response)) {
+        return {
+          classId: classId,
+          subjectSchedules: response.map(subject => ({
+            subjectName: subject.subjectName,
+            schedule: subject.schedule.map((slot: any) => ({
+              day: slot.day,
+              startTime: slot.startTime,
+              endTime: slot.endTime
+            }))
+          })),
+        };
+      }
+      
+      return null;
     } catch (error) {
-      // Return null for 404 - no timetable exists yet
       if ((error as any)?.response?.status === 404) {
         return null;
       }
@@ -131,16 +143,56 @@ class TimetableApiClient extends BaseApiClient {
       const classLevels = response.data.classLevels || [];
 
       return classLevels.map(classLevel => ({
-        id: classLevel._id, // Use class._id for timetable API calls
-        name: classLevel.class, // Display name like "Primary 1"
-        levelName: classLevel.levelName, // e.g., "Primary Class"
-        class: classLevel.class, // e.g., "Primary 1"
-        armCount: classLevel.arms.length, // Number of arms in this class
+        id: classLevel._id,
+        name: classLevel.class,
+        levelName: classLevel.levelName,
+        class: classLevel.class,
+        armCount: classLevel.arms.length,
         studentCount: classLevel.studentCount,
         teacherCount: classLevel.teacherCount,
       }));
     } catch (error) {
       console.error('Failed to fetch class levels:', error);
+      return [];
+    }
+  }
+
+  // Get class arms for a specific class
+  async getClassArms(classId: string): Promise<Array<{id: string; name: string}>> {
+    try {
+      const response = await this.get<{ data: { classLevels: ClassLevelWithArms[] } }>("/admin/class-levels-and-arms");
+      const classLevels = response.data.classLevels || [];
+      const classLevel = classLevels.find(cl => cl._id === classId);
+
+      if (classLevel && classLevel.arms.length > 0) {
+        return classLevel.arms.map(arm => ({
+          id: arm._id,
+          name: arm.armName
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch class arms:', error);
+      return [];
+    }
+  }
+  // Get class levels with their arms for dropdown
+  async getClassLevelsWithArms(): Promise<Array<{id: string; name: string; arms: Array<{id: string; name: string}>}>> {
+    try {
+      const response = await this.get<{ data: { classLevels: ClassLevelWithArms[] } }>("/admin/class-levels-and-arms");
+      const classLevels = response.data.classLevels || [];
+
+      return classLevels.map(classLevel => ({
+        id: classLevel._id,
+        name: classLevel.class,
+        arms: classLevel.arms.map(arm => ({
+          id: arm._id,
+          name: arm.armName
+        }))
+      }));
+    } catch (error) {
+      console.error('Failed to fetch class levels with arms:', error);
       return [];
     }
   }

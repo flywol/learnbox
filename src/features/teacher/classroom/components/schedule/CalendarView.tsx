@@ -1,112 +1,83 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: number;
-  type: 'assignment' | 'class' | 'trip' | 'quiz' | 'deadline';
-  color: string;
-}
+// Mock live class data
+const mockLiveClasses = [
+  {
+    id: '1',
+    title: 'Mathematics Live Session',
+    subject: 'Mathematics',
+    class: 'Primary 1 A',
+    date: '2025-01-15',
+    startTime: '09:00',
+    endTime: '10:00',
+    status: 'upcoming' as const,
+    description: 'Algebra basics and problem solving'
+  },
+  {
+    id: '2',
+    title: 'English Grammar Class',
+    subject: 'English',
+    class: 'Primary 1 B',
+    date: '2025-01-15',
+    startTime: '11:00',
+    endTime: '12:00',
+    status: 'now' as const,
+    description: 'Parts of speech and sentence structure'
+  },
+  {
+    id: '3',
+    title: 'Science Experiment',
+    subject: 'Basic Science',
+    class: 'Primary 2 A',
+    date: '2025-01-16',
+    startTime: '14:00',
+    endTime: '15:00',
+    status: 'upcoming' as const,
+    description: 'Simple chemical reactions'
+  },
+  {
+    id: '4',
+    title: 'History Discussion',
+    subject: 'History',
+    class: 'Primary 1 A',
+    date: '2025-01-14',
+    startTime: '10:00',
+    endTime: '11:00',
+    status: 'finished' as const,
+    description: 'Ancient civilizations overview'
+  }
+];
 
-const getMonthName = (month: number): string => {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+const EVENT_COLORS = {
+  upcoming: 'bg-blue-100 text-blue-800',
+  now: 'bg-green-100 text-green-800',
+  finished: 'bg-gray-100 text-gray-600',
+  cancelled: 'bg-red-100 text-red-800'
+};
+
+// Helper functions
+const getMonthName = (month: number) => {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
   return months[month];
 };
 
-const getDayNames = (): string[] => {
-  return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-};
+const getDayNames = () => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const isToday = (date: Date): boolean => {
+const isToday = (date: Date) => {
   const today = new Date();
-  return date.getDate() === today.getDate() &&
-         date.getMonth() === today.getMonth() &&
-         date.getFullYear() === today.getFullYear();
+  return date.toDateString() === today.toDateString();
 };
 
-// Loading component
-const LoadingCalendar = () => (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
-    </div>
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <div className="grid grid-cols-7 gap-4 mb-4">
-        {Array.from({ length: 7 }, (_, i) => (
-          <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-4">
-        {Array.from({ length: 35 }, (_, i) => (
-          <div key={i} className="h-20 bg-gray-100 rounded animate-pulse"></div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
+const isSameDay = (date1: Date, date2: Date) => {
+  return date1.toDateString() === date2.toDateString();
+};
 
 export default function CalendarView() {
-  // State for current viewing month/year
   const [currentDate, setCurrentDate] = useState(new Date());
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
-
-  // Mock calendar events based on the screenshot
-  const mockEvents: CalendarEvent[] = [
-    {
-      id: '1',
-      title: 'Assignment deadline is today',
-      date: 3,
-      type: 'deadline',
-      color: 'bg-red-100 text-red-800'
-    },
-    {
-      id: '2', 
-      title: 'Physics live class',
-      date: 8,
-      type: 'class',
-      color: 'bg-blue-100 text-blue-800'
-    },
-    {
-      id: '3',
-      title: 'Biology quiz due',
-      date: 10,
-      type: 'quiz',
-      color: 'bg-yellow-100 text-yellow-800'
-    },
-    {
-      id: '4',
-      title: 'Class trip',
-      date: 11,
-      type: 'trip',
-      color: 'bg-green-100 text-green-800'
-    },
-    {
-      id: '5',
-      title: 'Physics live class',
-      date: 21,
-      type: 'class',
-      color: 'bg-blue-100 text-blue-800'
-    },
-    {
-      id: '6',
-      title: 'Children\'s day',
-      date: 27,
-      type: 'trip',
-      color: 'bg-purple-100 text-purple-800'
-    },
-    {
-      id: '7',
-      title: 'Biology quiz due',
-      date: 31,
-      type: 'quiz',
-      color: 'bg-yellow-100 text-yellow-800'
-    }
-  ];
 
   // Navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -143,18 +114,11 @@ export default function CalendarView() {
 
   const dayNames = getDayNames();
 
-  // Mock data - using mock until teacher endpoint is provided
-  const isLoading = false;
-
   // Filter events for current month
-  const currentMonthEvents = mockEvents.filter(() => {
-    // For demo purposes, show events in current month
-    return true;
+  const currentMonthEvents = mockLiveClasses.filter((event) => {
+    const eventDate = new Date(event.date);
+    return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
   });
-
-  if (isLoading) {
-    return <LoadingCalendar />;
-  }
 
   return (
     <div className="space-y-6">
@@ -190,6 +154,14 @@ export default function CalendarView() {
             Today
           </button>
         </div>
+        
+        <button
+          onClick={() => alert('Create live class functionality coming soon!')}
+          className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create Live Class</span>
+        </button>
       </div>
 
       {/* Calendar Grid */}
@@ -214,7 +186,10 @@ export default function CalendarView() {
             const isCurrentDay = isToday(dayDate);
             
             // Filter events for this specific day
-            const dayEvents = currentMonthEvents.filter(event => event.date === day);
+            const dayEvents = currentMonthEvents.filter((event) => {
+              const eventDate = new Date(event.date);
+              return isSameDay(eventDate, dayDate);
+            });
 
             return (
               <div 
@@ -230,8 +205,8 @@ export default function CalendarView() {
                   {dayEvents.slice(0, 2).map((event) => (
                     <div 
                       key={event.id}
-                      className={`text-xs px-2 py-1 rounded truncate ${event.color}`}
-                      title={event.title}
+                      className={`text-xs px-2 py-1 rounded truncate ${EVENT_COLORS[event.status]}`}
+                      title={`${event.title} - ${event.class}\n${event.startTime} - ${event.endTime}`}
                     >
                       {event.title}
                     </div>
@@ -250,15 +225,15 @@ export default function CalendarView() {
 
       {/* Events Legend */}
       <div className="flex items-center space-x-6 flex-wrap">
-        <span className="text-sm font-medium text-gray-600">Event types:</span>
+        <span className="text-sm font-medium text-gray-600">Live class status:</span>
         {[
-          { type: 'assignment', label: 'Assignment', color: 'bg-red-100' },
-          { type: 'class', label: 'Live Class', color: 'bg-blue-100' },
-          { type: 'quiz', label: 'Quiz', color: 'bg-yellow-100' },
-          { type: 'trip', label: 'Trip/Event', color: 'bg-green-100' },
-        ].map(({ type, label, color }) => (
+          { type: 'upcoming', label: 'Upcoming' },
+          { type: 'now', label: 'Live Now' },
+          { type: 'finished', label: 'Finished' },
+          { type: 'cancelled', label: 'Cancelled' },
+        ].map(({ type, label }) => (
           <div key={type} className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded ${color}`} />
+            <div className={`w-3 h-3 rounded ${EVENT_COLORS[type as keyof typeof EVENT_COLORS].split(' ')[0]}`} />
             <span className="text-sm text-gray-600">{label}</span>
           </div>
         ))}

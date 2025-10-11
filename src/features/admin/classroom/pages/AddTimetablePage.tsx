@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { timetableApiClient } from '../api/timetableApiClient';
 import { DAYS } from '../types/timetable.types';
 import type { CreateTimetableRequest } from '../types/timetable.types';
-import SuccessModal from '@/common/components/SuccessModal';
+import { useToast } from '@/hooks/use-toast';
 
 // Form type for the simplified design
 type FormData = {
@@ -30,18 +30,19 @@ export default function AddTimetablePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const classId = searchParams.get('classId') || '';
+  const classArmId = searchParams.get('classArmId') || '';
   const prefilledDay = searchParams.get('day') as 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | null;
   const prefilledTime = searchParams.get('time') || '';
   const editSubjectName = searchParams.get('editSubject') || '';
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch existing timetable data
   const { data: existingTimetable, isLoading: isTimetableLoading } = useQuery({
-    queryKey: ['timetable', classId],
-    queryFn: () => timetableApiClient.getTimetable(classId),
-    enabled: !!classId,
+    queryKey: ['timetable', classId, classArmId],
+    queryFn: () => timetableApiClient.getTimetable(classId, classArmId),
+    enabled: !!classId && !!classArmId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -66,10 +67,24 @@ export default function AddTimetablePage() {
 
   const convertedPrefilledTime = convertTimeFormat(prefilledTime);
 
+  // Check if the selected time slot is already occupied
+  const isTimeSlotOccupied = existingTimetable?.subjectSchedules.some(schedule => 
+    schedule.schedule.some(slot => 
+      slot.day === prefilledDay && 
+      slot.startTime <= convertedPrefilledTime && 
+      slot.endTime > convertedPrefilledTime
+    )
+  );
+
   // Determine if we're editing or adding
   const isEditing = !!existingTimetable;
   const isQuickAdd = !!(prefilledDay && convertedPrefilledTime);
   const pageTitle = isEditing ? 'Edit timetable' : isQuickAdd ? 'Add subject' : 'Add timetable';
+
+  // Handle cancel navigation
+  const handleCancel = () => {
+    navigate('/admin/classroom?tab=schedule&subtab=timetable');
+  };
 
   // Initialize form with one subject and one time slot
   const { control, register, handleSubmit, watch, setValue, reset } = useForm<FormData>({
@@ -125,11 +140,21 @@ export default function AddTimetablePage() {
   const createTimetableMutation = useMutation({
     mutationFn: (data: CreateTimetableRequest) => timetableApiClient.createTimetable(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['timetable', classId] });
-      setShowSuccessModal(true);
+      queryClient.invalidateQueries({ queryKey: ['timetable', classId, classArmId] });
+      toast({
+        title: "Success!",
+        description: isEditing ? "Timetable updated successfully!" : "Timetable created successfully!",
+        variant: "success",
+      });
+      navigate('/admin/classroom?tab=schedule&subtab=timetable');
     },
     onError: (error) => {
       console.error('Error creating timetable:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save timetable. Please try again.",
+        variant: "destructive",
+      });
     },
     onSettled: () => {
       setIsSubmitting(false);
@@ -143,6 +168,7 @@ export default function AddTimetablePage() {
     // Transform form data to API format
     const apiData: CreateTimetableRequest = {
       classId: data.classId,
+      classArmId: classArmId,
       subjectSchedules: data.subjects
         .filter(subject => subject.subjectName.trim())
         .map(subject => ({
@@ -196,10 +222,7 @@ export default function AddTimetablePage() {
     }
   };
 
-  const handleSuccessClose = () => {
-    setShowSuccessModal(false);
-    navigate('/admin/classroom?tab=schedule&subtab=timetable');
-  };
+
 
   // Show loading state while fetching existing timetable
   if (isTimetableLoading) {
@@ -215,9 +238,37 @@ export default function AddTimetablePage() {
     );
   }
 
-  const handleCancel = () => {
-    navigate('/admin/classroom?tab=schedule&subtab=timetable');
-  };
+  // Show conflict message if trying to add to occupied time slot
+  if (isQuickAdd && isTimeSlotOccupied && !editSubjectName) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <button
+            onClick={handleCancel}
+            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            <span className="text-lg font-medium">Add subject</span>
+          </button>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Time Slot Occupied</h3>
+          <p className="text-gray-600 mb-6">
+            There is already a subject scheduled for {prefilledDay} at {prefilledTime}. Please choose a different time slot.
+          </p>
+          <button
+            onClick={handleCancel}
+            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            Back to Timetable
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -373,14 +424,7 @@ export default function AddTimetablePage() {
         </form>
       </div>
 
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onClose={handleSuccessClose}
-        title="Success!"
-        message={isEditing ? "Timetable updated successfully!" : "Timetable created successfully!"}
-        buttonText="Continue"
-      />
+
     </div>
   );
 }

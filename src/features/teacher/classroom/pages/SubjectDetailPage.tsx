@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, Video, FileText, Users, ClipboardList, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, FileText, Users, ClipboardList, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import LiveClassTab from '../components/subject-detail/LiveClassTab';
 import { subjectsClassesApiClient } from '../api/subjectsClassesApiClient';
 import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import type { SubjectDetailTab } from '../types/classroom.types';
@@ -244,12 +245,36 @@ export default function SubjectDetailPage() {
         </div>
       )}
 
-      {/* Other tabs with proper empty states */}
+      {/* Live Class Tab */}
       {activeTab === 'live-class' && (
-        <EmptyGeneric 
-          icon={Video}
-          title="No live classes scheduled"
-          description="Live classes will appear here when you schedule them for your students."
+        <LiveClassTab 
+          students={[]} 
+          liveClasses={[
+            {
+              id: '1',
+              title: 'Mathematics Live Session',
+              subject: 'Mathematics - Primary 1',
+              status: 'now',
+              time: '10:00 AM',
+              dueDate: '2025-01-15'
+            },
+            {
+              id: '2',
+              title: 'Mathematics Q&A',
+              subject: 'Mathematics - Primary 1',
+              status: 'upcoming',
+              time: '2:00 PM',
+              dueDate: '2025-01-17'
+            },
+            {
+              id: '3',
+              title: 'Mathematics Review',
+              subject: 'Mathematics - Primary 1',
+              status: 'finished',
+              time: '11:00 AM',
+              dueDate: '2025-01-10'
+            }
+          ]} 
         />
       )}
       

@@ -379,7 +379,12 @@ export function transformWeeklyScheduleToGrid(
   const grid: Record<string, TransformedClassForGrid[]> = {};
 
   Object.entries(schedule).forEach(([day, classes]) => {
-    classes.forEach(classData => {
+    // Filter out classes with invalid times first
+    const validClasses = classes.filter(classData => 
+      isValidClassTime(classData.rawStartTime, classData.rawEndTime)
+    );
+
+    validClasses.forEach(classData => {
       const transformedClasses = transformClassForGrid(classData);
 
       transformedClasses.forEach(transformedClass => {

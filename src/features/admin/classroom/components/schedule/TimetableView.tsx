@@ -115,20 +115,36 @@ export default function TimetableView({
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   
-  // Fetch available class levels from API
+  // Fetch class levels and arms from API
   const { 
-    data: availableClasses = [], 
+    data: classLevelsData = [], 
     isLoading: classesLoading 
   } = useQuery({
-    queryKey: ['class-levels'],
-    queryFn: () => timetableApiClient.getClassLevels(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    queryKey: ['class-levels-arms'],
+    queryFn: () => timetableApiClient.getClassLevelsWithArms(),
+    staleTime: 10 * 60 * 1000,
   });
 
-  // Use first available class as default if none selected or selected class not found
-  const effectiveClassId = selectedClass && availableClasses.some(cls => cls.id === selectedClass) 
-    ? selectedClass 
-    : availableClasses[0]?.id || '';
+  // Flatten class levels and arms into dropdown options
+  const classArmOptions = classLevelsData.flatMap(classLevel => 
+    classLevel.arms.map(arm => ({
+      id: `${classLevel.id}-${arm.id}`,
+      classId: classLevel.id,
+      armId: arm.id,
+      displayName: `${classLevel.name} ${arm.name}`,
+      className: classLevel.name,
+      armName: arm.name
+    }))
+  ).sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+  // Use first available option as default
+  const effectiveSelection = selectedClass && classArmOptions.some(opt => opt.id === selectedClass)
+    ? selectedClass
+    : classArmOptions[0]?.id || '';
+
+  const selectedOption = classArmOptions.find(opt => opt.id === effectiveSelection);
+  const effectiveClassId = selectedOption?.classId || '';
+  const effectiveClassArmId = selectedOption?.armId || '';
   
   // Fetch timetable data from API
   const { 
@@ -137,9 +153,9 @@ export default function TimetableView({
     error,
     refetch 
   } = useQuery({
-    queryKey: ['timetable', effectiveClassId],
-    queryFn: () => timetableApiClient.getTimetable(effectiveClassId),
-    enabled: !!effectiveClassId, // Only run query when we have a valid class ID
+    queryKey: ['timetable', effectiveClassId, effectiveClassArmId],
+    queryFn: () => timetableApiClient.getTimetable(effectiveClassId, effectiveClassArmId),
+    enabled: !!effectiveClassId && !!effectiveClassArmId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -156,7 +172,7 @@ export default function TimetableView({
     return <TimetableError message="Please try refreshing the page" onRetry={() => refetch()} />;
   }
 
-  if (availableClasses.length === 0) {
+  if (classArmOptions.length === 0) {
     return (
       <TimetableError 
         message="No classes found. Please create classes through the school setup first." 
@@ -173,18 +189,18 @@ export default function TimetableView({
         <div className="flex items-center space-x-4">
           <span className="text-gray-600">Class:</span>
           <select 
-            value={effectiveClassId} 
+            value={effectiveSelection} 
             onChange={(e) => onClassChange(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           >
-            {availableClasses.map((cls) => (
-              <option key={cls.id} value={cls.id}>{cls.name}</option>
+            {classArmOptions.map((option) => (
+              <option key={option.id} value={option.id}>{option.displayName}</option>
             ))}
           </select>
         </div>
 
         <button
-          onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}`)}
+          onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}`)}
           className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -194,7 +210,7 @@ export default function TimetableView({
 
       {/* Timetable Content */}
       {!hasTimetable ? (
-        <EmptyTimetable onAddTimetable={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}`)} />
+        <EmptyTimetable onAddTimetable={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}`)} />
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {/* Header */}
@@ -222,7 +238,7 @@ export default function TimetableView({
                     {subject ? (
                       <div 
                         className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
+                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
                         title={`Edit ${subject.subjectName} on ${day} at ${time}`}
                       >
                         {subject.icon && (
@@ -250,7 +266,7 @@ export default function TimetableView({
                     ) : (
                       <div 
                         className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-transparent rounded-lg transition-all cursor-pointer flex items-center justify-center group"
-                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&day=${day}&time=${time}`)}
+                        onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}&day=${day}&time=${time}`)}
                         title={`Add subject for ${day} at ${time}`}
                       >
                         <div className="text-gray-300 group-hover:text-orange-500 text-xs transition-colors">+</div>

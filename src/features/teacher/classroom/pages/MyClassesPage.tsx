@@ -28,19 +28,19 @@ const getSubjectDefaults = (subjectName: string) => {
 	};
 };
 
-// Generate consistent color based on subject name hash
-const generateSubjectColor = (subjectName: string): string => {
-	const colors = [
-		'bg-blue-100 text-blue-800',
-		'bg-green-100 text-green-800',
-		'bg-yellow-100 text-yellow-800',
-		'bg-red-100 text-red-800',
-		'bg-purple-100 text-purple-800',
-		'bg-indigo-100 text-indigo-800',
-		'bg-pink-100 text-pink-800',
-		'bg-teal-100 text-teal-800',
-		'bg-orange-100 text-orange-800',
-		'bg-cyan-100 text-cyan-800',
+// Generate consistent colors based on subject name hash
+const generateSubjectColors = (subjectName: string) => {
+	const colorSets = [
+		{ bgColor: 'bg-blue-50', color: 'bg-blue-100 text-blue-800' },
+		{ bgColor: 'bg-green-50', color: 'bg-green-100 text-green-800' },
+		{ bgColor: 'bg-yellow-50', color: 'bg-yellow-100 text-yellow-800' },
+		{ bgColor: 'bg-red-50', color: 'bg-red-100 text-red-800' },
+		{ bgColor: 'bg-purple-50', color: 'bg-purple-100 text-purple-800' },
+		{ bgColor: 'bg-indigo-50', color: 'bg-indigo-100 text-indigo-800' },
+		{ bgColor: 'bg-pink-50', color: 'bg-pink-100 text-pink-800' },
+		{ bgColor: 'bg-teal-50', color: 'bg-teal-100 text-teal-800' },
+		{ bgColor: 'bg-orange-50', color: 'bg-orange-100 text-orange-800' },
+		{ bgColor: 'bg-cyan-50', color: 'bg-cyan-100 text-cyan-800' },
 	];
 
 	// Hash the subject name to get consistent color
@@ -48,8 +48,8 @@ const generateSubjectColor = (subjectName: string): string => {
 	for (let i = 0; i < subjectName.length; i++) {
 		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
 	}
-	const index = Math.abs(hash) % colors.length;
-	return colors[index];
+	const index = Math.abs(hash) % colorSets.length;
+	return colorSets[index];
 };
 
 // Convert API SubjectResponse to TeacherSubject
@@ -62,8 +62,8 @@ const mapSubjectToTeacherSubject = (subject: SubjectResponse): TeacherSubject =>
 		className = subject.classRef.class || subject.classRef.levelName || 'Multiple Classes';
 	}
 
-	// Use API color if exists, otherwise generate consistent color
-	const subjectColor = subject.color || generateSubjectColor(subject.name);
+	// Use predefined colors if available, otherwise generate consistent colors
+	const colors = subject.color ? { bgColor: defaults.bgColor, color: subject.color } : generateSubjectColors(subject.name);
 
 	return {
 		id: subject._id,
@@ -72,8 +72,8 @@ const mapSubjectToTeacherSubject = (subject: SubjectResponse): TeacherSubject =>
 		classLevel: className,
 		studentCount: 0, // Will be updated when we get student count data
 		icon: subject.icon || defaults.icon,
-		bgColor: defaults.bgColor,
-		color: subjectColor,
+		bgColor: colors.bgColor,
+		color: colors.color,
 	};
 };
 

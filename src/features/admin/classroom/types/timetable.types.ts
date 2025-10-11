@@ -12,6 +12,7 @@ export interface SubjectSchedule {
 
 export interface CreateTimetableRequest {
   classId: string;
+  classArmId?: string;
   subjectSchedules: SubjectSchedule[];
 }
 
