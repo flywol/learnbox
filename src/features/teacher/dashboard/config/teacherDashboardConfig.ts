@@ -1,11 +1,13 @@
 import type { ActionConfig } from '@/common/components/dashboard';
 
-export const teacherActionCards: ActionConfig[] = [
+export const createTeacherActionCards = (handlers: {
+  onAddLiveClass: () => void;
+}): ActionConfig[] => [
   {
     iconSrc: '/assets/add-new.svg',
     title: 'Add live class',
     description: 'Start a live class session with your students',
-    onClick: () => {/* TODO: Implement live class */},
+    onClick: handlers.onAddLiveClass,
     buttonText: 'Add'
   },
   {

@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, FileText, Users, ClipboardList, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, ClipboardList, RefreshCw, AlertCircle } from 'lucide-react';
 import LiveClassTab from '../components/subject-detail/LiveClassTab';
+import AssignmentTab from '../components/assignments/AssignmentTab';
+import AttendanceTab from '../components/attendance/AttendanceTab';
 import { subjectsClassesApiClient } from '../api/subjectsClassesApiClient';
 import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
-import type { SubjectDetailTab } from '../types/classroom.types';
+import { assignmentsApiClient } from '../../assignments/api/assignmentsApiClient';
+import type { SubjectDetailTab, Assignment } from '../types/classroom.types';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
 
 // Empty state components
@@ -64,9 +67,26 @@ export default function SubjectDetailPage() {
 
   const subject = subjectsData?.assignedSubjects.find(s => s._id === subjectId);
 
+  // DEBUG LOGGING
+  console.log('=== SUBJECT DETAIL DEBUG ===');
+  console.log('subjectId from URL:', subjectId);
+  console.log('All subjects:', subjectsData?.assignedSubjects);
+  console.log('Found subject:', subject);
+  console.log('subject.classRef:', subject?.classRef);
+  console.log('typeof subject.classRef:', typeof subject?.classRef);
+
   // Extract classId and classArmId from subject's classRef
-  const classId = subject?.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : undefined;
+  // classRef can be a string (ID), an object, or null
+  const classId = subject?.classRef
+    ? typeof subject.classRef === 'object'
+      ? subject.classRef._id
+      : subject.classRef
+    : undefined;
   const classArmId = subject?.classArm;
+
+  console.log('Extracted classId:', classId);
+  console.log('Extracted classArmId:', classArmId);
+  console.log('=== END DEBUG ===');
 
   // Fetch lessons for this subject
   const {
@@ -87,6 +107,74 @@ export default function SubjectDetailPage() {
   });
 
   const lessons = lessonsData?.lessons || [];
+
+  // Fetch assignments for this subject
+  const {
+    data: assignmentsData,
+    isLoading: assignmentsLoading,
+    error: assignmentsError,
+  } = useQuery({
+    queryKey: ['assignments', 'subject', subjectId],
+    queryFn: () => assignmentsApiClient.getAssignmentsBySubject(subjectId!),
+    enabled: !!subjectId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Transform API assignments to UI format with mock data
+  const assignments: Assignment[] = useMemo(() => {
+    const mockAssignments = [
+      {
+        id: 'mock-assignment-1',
+        title: 'Biology Lab Report',
+        dueDate: 'Due in 3 days',
+        status: 'active' as const,
+      },
+      {
+        id: 'mock-assignment-2', 
+        title: 'Cell Structure Diagram',
+        dueDate: 'Due in 1 day',
+        status: 'overdue' as const,
+      },
+      {
+        id: 'mock-assignment-3',
+        title: 'Photosynthesis Essay',
+        dueDate: 'Expired',
+        status: 'expired' as const,
+      }
+    ];
+
+    if (!assignmentsData?.data?.assignments) return mockAssignments;
+
+    const apiAssignments = assignmentsData.data.assignments.map(assignment => {
+      const now = new Date();
+      const dueDateTime = new Date(assignment.dueTime || assignment.dueDate);
+      const hoursUntilDue = (dueDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      let status: 'active' | 'overdue' | 'expired';
+      let dueText: string;
+
+      if (dueDateTime < now) {
+        status = 'expired';
+        dueText = 'Expired';
+      } else if (hoursUntilDue <= 24) {
+        status = 'overdue';
+        dueText = `Due in ${Math.ceil(hoursUntilDue)}hrs`;
+      } else {
+        status = 'active';
+        const days = Math.ceil(hoursUntilDue / 24);
+        dueText = `Due in ${days}days`;
+      }
+
+      return {
+        id: assignment._id,
+        title: assignment.title,
+        dueDate: dueText,
+        status,
+      };
+    });
+
+    return [...mockAssignments, ...apiAssignments];
+  }, [assignmentsData]);
 
   const tabs: { key: SubjectDetailTab; label: string }[] = [
     { key: 'lessons', label: 'Lessons' },
@@ -247,67 +335,179 @@ export default function SubjectDetailPage() {
 
       {/* Live Class Tab */}
       {activeTab === 'live-class' && (
-        <LiveClassTab 
-          students={[]} 
-          liveClasses={[
-            {
-              id: '1',
-              title: 'Mathematics Live Session',
-              subject: 'Mathematics - Primary 1',
-              status: 'now',
-              time: '10:00 AM',
-              dueDate: '2025-01-15'
-            },
-            {
-              id: '2',
-              title: 'Mathematics Q&A',
-              subject: 'Mathematics - Primary 1',
-              status: 'upcoming',
-              time: '2:00 PM',
-              dueDate: '2025-01-17'
-            },
-            {
-              id: '3',
-              title: 'Mathematics Review',
-              subject: 'Mathematics - Primary 1',
-              status: 'finished',
-              time: '11:00 AM',
-              dueDate: '2025-01-10'
-            }
-          ]} 
-        />
+        <>
+          {!subjectId || !classId ? (
+            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Missing Data</h3>
+              <p className="text-gray-500 mb-2">
+                Cannot load live classes: {!subjectId ? 'Subject ID missing' : 'Class ID missing'}
+              </p>
+              <p className="text-xs text-gray-400 font-mono">
+                subjectId: {subjectId || 'undefined'} | classId: {classId || 'undefined'}
+              </p>
+            </div>
+          ) : (
+            <LiveClassTab
+              subjectId={subjectId}
+              classId={classId}
+              classArmId={classArmId}
+              subjectName={subject?.name || 'Subject'}
+              students={[]}
+            />
+          )}
+        </>
       )}
       
       {activeTab === 'quiz' && (
-        <EmptyGeneric 
+        <EmptyGeneric
           icon={ClipboardList}
           title="No quizzes created"
           description="Create interactive quizzes to test your students' understanding."
         />
       )}
-      
+
       {activeTab === 'assignment' && (
-        <EmptyGeneric 
-          icon={FileText}
-          title="No assignments created"
-          description="Assignments you create will be displayed here for easy management."
-        />
+        <div className="space-y-6">
+          {/* Create Assignment Button */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => navigate(`/teacher/subject/${subjectId}/assignment/create`)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+            >
+              Create new assignment
+            </button>
+          </div>
+
+          {/* Assignment List */}
+          {assignmentsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : assignmentsError ? (
+            <ErrorState
+              message="Failed to load assignments. Please try again."
+              onRetry={() => window.location.reload()}
+            />
+          ) : (
+            <AssignmentTab assignments={assignments} />
+          )}
+        </div>
       )}
-      
+
       {activeTab === 'assessment' && (
-        <EmptyGeneric 
-          icon={BarChart3}
-          title="No assessments available"
-          description="Student assessment data and analytics will be shown here."
-        />
+        <div className="space-y-6">
+          {/* Assessment Summary */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Assessment Overview</h3>
+              <button className="px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors">
+                Export
+              </button>
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-6 gap-4 mb-6 text-center">
+              <div>
+                <p className="text-sm text-gray-600">Attendance: <span className="font-semibold">12</span></p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Assignments: <span className="font-semibold">10</span></p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Quizzes: <span className="font-semibold">10</span></p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">C.A Test: <span className="font-semibold">20</span></p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Exam: <span className="font-semibold">60</span></p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total: <span className="font-semibold">100</span></p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">Grade: A, B, C, D, E, F</p>
+            
+            {/* Assessment Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="text-left p-3 border border-gray-200 font-medium text-gray-700">Student Name</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Attendance</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Assignment</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Quiz</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">C.A Test</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Exam</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Total</th>
+                    <th className="text-center p-3 border border-gray-200 font-medium text-gray-700">Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: 'Jane Doe', attendance: 11, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+                    { name: 'James Doe', attendance: 12, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'B' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: 11, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'C' },
+                    { name: 'James Doe', attendance: 8, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: 10, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'A' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                    { name: 'James Doe', attendance: 11, assignment: 50, quiz: 50, caTest: 50, exam: 50, total: 50, grade: 'B' },
+                    { name: 'James Doe', attendance: '--', assignment: '--', quiz: '--', caTest: '--', exam: '--', total: '--', grade: '--' },
+                  ].map((student, index) => (
+                    <tr key={index}>
+                      <td className="p-3 border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600">
+                              {student.name.split(' ').map(n => n[0]).join('')}
+                            </span>
+                          </div>
+                          <span className="font-medium text-gray-900">{student.name}</span>
+                        </div>
+                      </td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.attendance}</td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.assignment}</td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.quiz}</td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.caTest}</td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.exam}</td>
+                      <td className="text-center p-3 border border-gray-200 text-gray-700">{student.total}</td>
+                      <td className="text-center p-3 border border-gray-200">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          student.grade === 'A' ? 'bg-green-100 text-green-800' :
+                          student.grade === 'B' ? 'bg-blue-100 text-blue-800' :
+                          student.grade === 'C' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {student.grade}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-500">
+              Showing 1 to 15 of 2 entries
+            </div>
+          </div>
+        </div>
       )}
       
       {activeTab === 'students' && (
-        <EmptyGeneric 
-          icon={Users}
-          title="No students enrolled"
-          description="Students enrolled in this subject will appear here."
-        />
+        <AttendanceTab subjectName={subject?.name} />
       )}
     </div>
   );

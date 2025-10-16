@@ -265,11 +265,40 @@ export default function AddAssignmentPage() {
                     }`}
                   >
                     <option value="">Select a class</option>
-                    {subjectsClassesData?.classes?.map((cls: any) => (
-                      <option key={cls.id} value={cls.id}>
-                        {cls.name}
-                      </option>
-                    ))}
+                    {(() => {
+                      // Try classes array first
+                      if (subjectsClassesData?.classes?.length) {
+                        return subjectsClassesData.classes.map((cls: any) => (
+                          <option key={cls.id} value={cls.id}>
+                            {cls.name}
+                          </option>
+                        ));
+                      }
+                      
+                      // Fallback: extract unique classes from assigned subjects
+                      const uniqueClasses = new Map();
+                      subjectsClassesData?.assignedSubjects?.forEach(subject => {
+                        if (subject.classRef && typeof subject.classRef === 'object') {
+                          const classRef = subject.classRef;
+                          uniqueClasses.set(classRef._id, {
+                            id: classRef._id,
+                            name: classRef.class || classRef.levelName
+                          });
+                        }
+                      });
+                      
+                      const classOptions = Array.from(uniqueClasses.values());
+                      
+                      if (classOptions.length === 0) {
+                        return <option disabled>No classes available</option>;
+                      }
+                      
+                      return classOptions.map((cls: any) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.name}
+                        </option>
+                      ));
+                    })()}
                   </select>
                   {errors.class && (
                     <p className="mt-1 text-sm text-red-600">{errors.class.message}</p>

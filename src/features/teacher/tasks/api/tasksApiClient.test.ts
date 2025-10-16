@@ -10,11 +10,11 @@ describe('TasksApiClient', () => {
     _id: 'task-123',
     title: 'Grade Assignments',
     description: 'Grade JSS1 math assignments',
-    taskType: 'grading',
+    taskType: 'Assignment',
     startDate: '2025-01-15',
     scheduleTime: '10:00',
     repeat: 'none',
-    status: 'pending',
+    isCompleted: false,
     userId: 'user-123',
     createdAt: '2025-01-10T00:00:00Z',
     updatedAt: '2025-01-10T00:00:00Z',
@@ -143,7 +143,7 @@ describe('TasksApiClient', () => {
 
   describe('getCompletedTasks', () => {
     it('should fetch completed tasks', async () => {
-      const completedTask = { ...mockApiTask, status: 'completed' };
+      const completedTask = { ...mockApiTask, isCompleted: true };
       const mockResponse = {
         data: {
           tasks: [completedTask],
@@ -156,7 +156,7 @@ describe('TasksApiClient', () => {
       const result = await tasksApiClient.getCompletedTasks();
 
       expect(result.tasks).toHaveLength(1);
-      expect(result.tasks[0].status).toBe('completed');
+      expect(result.tasks[0].isCompleted).toBe(true);
     });
   });
 
@@ -174,7 +174,7 @@ describe('TasksApiClient', () => {
       const result = await tasksApiClient.getPendingTasks();
 
       expect(result.tasks).toHaveLength(1);
-      expect(result.tasks[0].status).toBe('pending');
+      expect(result.tasks[0].isCompleted).toBe(false);
     });
   });
 
@@ -242,7 +242,7 @@ describe('TasksApiClient', () => {
       const createData: CreateTaskRequest = {
         title: 'New Task',
         description: 'Task description',
-        taskType: 'meeting',
+        taskType: 'Class',
         startDate: '2025-01-20',
         scheduleTime: '14:00',
         repeat: 'weekly',
@@ -253,7 +253,7 @@ describe('TasksApiClient', () => {
           task: {
             ...mockApiTask,
             title: 'New Task',
-            taskType: 'meeting',
+            taskType: 'Class',
           },
         },
       };
@@ -312,7 +312,7 @@ describe('TasksApiClient', () => {
         data: {
           task: {
             ...mockApiTask,
-            status: 'completed',
+            isCompleted: true,
           },
         },
       };
@@ -322,7 +322,7 @@ describe('TasksApiClient', () => {
       const result = await tasksApiClient.toggleCompletion('task-123');
 
       expect(result.id).toBe('task-123');
-      expect(result.status).toBe('completed');
+      expect(result.isCompleted).toBe(true);
       expect(mockAxios.history.patch.length).toBe(1);
     });
   });
@@ -346,7 +346,7 @@ describe('TasksApiClient', () => {
       const createData: CreateTaskRequest = {
         title: 'Test',
         description: 'Test',
-        taskType: 'test',
+        taskType: 'Quiz',
         startDate: '2025-01-15',
         scheduleTime: '10:00',
         repeat: 'none',

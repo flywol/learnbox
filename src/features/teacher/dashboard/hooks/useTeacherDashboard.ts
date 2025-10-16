@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  teacherActionCards,
+  createTeacherActionCards,
 } from '../config/teacherDashboardConfig';
 import { useAllTasks } from '@/features/teacher/tasks/hooks/useTeacherTasks';
 import { calculateTimeLabel } from '@/features/teacher/tasks/utils/taskHelpers';
@@ -16,6 +16,7 @@ export function useTeacherDashboard() {
   const [selectedDay, setSelectedDay] = useState('Today');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isLiveClassModalOpen, setIsLiveClassModalOpen] = useState(false);
 
   // Fetch dashboard data from API
   const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useDashboardData();
@@ -52,6 +53,14 @@ export function useTeacherDashboard() {
 
   const handleEditTask = (task: Task) => {
     navigate('/teacher/tasks/edit', { state: { task } });
+  };
+
+  const handleOpenLiveClassModal = () => {
+    setIsLiveClassModalOpen(true);
+  };
+
+  const handleCloseLiveClassModal = () => {
+    setIsLiveClassModalOpen(false);
   };
 
   // Transform today's classes to schedule format
@@ -117,9 +126,14 @@ export function useTeacherDashboard() {
     }));
   }, [dashboardData?.events]);
 
+  // Generate action cards with handlers
+  const actionCards = useMemo(() => createTeacherActionCards({
+    onAddLiveClass: handleOpenLiveClassModal,
+  }), []);
+
   return {
     // Configuration
-    actionCards: teacherActionCards,
+    actionCards,
 
     // Stats data from dashboard API
     stats: {
@@ -157,11 +171,16 @@ export function useTeacherDashboard() {
     selectedTask,
     isTaskModalOpen,
 
+    // Live class modal state
+    isLiveClassModalOpen,
+
     // Action handlers
     handleAddTask,
     handleDayChange,
     handleTaskClick,
     handleCloseTaskModal,
     handleEditTask,
+    handleOpenLiveClassModal,
+    handleCloseLiveClassModal,
   };
 }

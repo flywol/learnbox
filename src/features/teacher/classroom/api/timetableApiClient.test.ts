@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import MockAdapter from 'axios-mock-adapter';
 import { timetableApiClient } from './timetableApiClient';
-import type { CreateTimetableRequest, TimetableData } from '../types/timetable.types';
+import type { CreateTimetableRequest } from '../types/timetable.types';
 
 describe('TimetableApiClient', () => {
   let mockAxios: MockAdapter;
@@ -286,7 +286,7 @@ describe('TimetableApiClient', () => {
 
       expect(result).toEqual(mockResponse.data);
       expect(result.classes).toHaveLength(2);
-      expect(result.classes[0].subject).toBe('Mathematics');
+      expect(result.classes[0].subjectName).toBe('Mathematics');
     });
 
     it('should throw error and log on failure', async () => {

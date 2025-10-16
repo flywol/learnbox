@@ -15,7 +15,7 @@ import {
   useSubmissionDetail,
   useGradeSubmission,
 } from './useAssignments';
-import type { CreateAssignmentRequest, UpdateAssignmentRequest } from '../types/assignment.types';
+import type { CreateAssignmentRequest, UpdateAssignmentRequest, Assignment } from '../types/assignment.types';
 
 // Mock the API client
 vi.mock('../api/assignmentsApiClient', () => ({
@@ -77,11 +77,12 @@ describe('Assignment Hooks', () => {
               class: 'class-123',
               subject: 'subject-456',
               teacher: 'teacher-123',
-              status: 'active',
+              acceptLateSubmissions: false,
               createdAt: '2025-01-10T00:00:00Z',
               updatedAt: '2025-01-10T00:00:00Z',
             },
           ],
+          total: 1,
         },
       };
 
@@ -123,7 +124,7 @@ describe('Assignment Hooks', () => {
         class: 'class-123',
         subject: 'subject-456',
         teacher: 'teacher-123',
-        status: 'active',
+        acceptLateSubmissions: false,
         createdAt: '2025-01-10T00:00:00Z',
         updatedAt: '2025-01-10T00:00:00Z',
       };
@@ -164,11 +165,12 @@ describe('Assignment Hooks', () => {
               dueTime: '23:59',
               class: 'class-123',
               teacher: 'teacher-123',
-              status: 'active',
+              acceptLateSubmissions: false,
               createdAt: '2025-01-10T00:00:00Z',
               updatedAt: '2025-01-10T00:00:00Z',
             },
           ],
+          total: 1,
         },
       };
 
@@ -200,11 +202,12 @@ describe('Assignment Hooks', () => {
               class: 'class-123',
               subject: 'subject-456',
               teacher: 'teacher-123',
-              status: 'active',
+              acceptLateSubmissions: false,
               createdAt: '2025-01-10T00:00:00Z',
               updatedAt: '2025-01-10T00:00:00Z',
             },
           ],
+          total: 1,
         },
       };
 
@@ -232,11 +235,16 @@ describe('Assignment Hooks', () => {
         subject: 'subject-456',
       };
 
-      const mockCreatedAssignment = {
+      const mockCreatedAssignment: Assignment = {
         _id: 'assignment-new',
-        ...newAssignment,
+        title: newAssignment.title,
+        description: newAssignment.description,
+        dueDate: newAssignment.dueDate,
+        dueTime: newAssignment.dueTime,
+        class: newAssignment.class,
+        subject: newAssignment.subject,
         teacher: 'teacher-123',
-        status: 'active',
+        acceptLateSubmissions: false,
         createdAt: '2025-01-10T00:00:00Z',
         updatedAt: '2025-01-10T00:00:00Z',
       };
@@ -293,7 +301,7 @@ describe('Assignment Hooks', () => {
         class: 'class-123',
         subject: 'subject-456',
         teacher: 'teacher-123',
-        status: 'active',
+        acceptLateSubmissions: false,
         createdAt: '2025-01-10T00:00:00Z',
         updatedAt: '2025-01-11T00:00:00Z',
       };

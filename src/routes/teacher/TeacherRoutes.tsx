@@ -12,9 +12,7 @@ const TeacherDashboard = lazy(() => import("../../features/teacher/dashboard/pag
 // Classroom Management (Teacher-specific)
 const MyClassesPage = lazy(() => import("../../features/teacher/classroom/pages/MyClassesPage"));
 
-// Assignments
-const AssignmentListPage = lazy(() => import("../../features/teacher/assignments/pages/AssignmentListPage"));
-const CreateAssignmentPage = lazy(() => import("../../features/teacher/assignments/pages/CreateAssignmentPage"));
+// Note: Assignment routes removed - assignments are now accessed within subject detail pages
 
 // Profile (Teacher-specific)
 const TeacherProfilePage = lazy(() => import("../../features/teacher/profile/pages/TeacherProfilePage"));
@@ -38,6 +36,7 @@ const AddVideoPage = lazy(() => import("../../features/teacher/lessons/pages/Add
 const AddFilesPage = lazy(() => import("../../features/teacher/lessons/pages/AddFilesPage"));
 const AddAssignmentPage = lazy(() => import("../../features/teacher/lessons/pages/AddAssignmentPage"));
 const AddQuizPage = lazy(() => import("../../features/teacher/lessons/pages/AddQuizPage"));
+const CreateLiveClassPage = lazy(() => import("../../features/teacher/classroom/pages/CreateLiveClassPage"));
 
 export function TeacherRoutes() {
   return (
@@ -57,11 +56,7 @@ export function TeacherRoutes() {
       
       {/* Classroom Management */}
       <Route path="classes" element={<MyClassesPage />} />
-      
-      {/* Assignments */}
-      <Route path="assignments" element={<AssignmentListPage />} />
-      <Route path="assignments/create" element={<CreateAssignmentPage />} />
-      
+
       {/* Profile */}
       <Route path="profile" element={<TeacherProfilePage />} />
       
@@ -75,6 +70,12 @@ export function TeacherRoutes() {
       {/* Subject Detail */}
       <Route path="subject/:subjectId" element={<SubjectDetailPage />} />
       <Route path="subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+      
+      {/* Standalone Assignment Creation */}
+      <Route path="subject/:subjectId/assignment/create" element={<AddAssignmentPage />} />
+      
+      {/* Live Class Creation */}
+      <Route path="subject/:subjectId/live-class/create" element={<CreateLiveClassPage />} />
       
       {/* Lesson Management */}
       <Route path="subject/:subjectId/lesson/add" element={<AddLessonPage />} />

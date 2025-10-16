@@ -12,11 +12,14 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import TasksSection from '../components/TasksSection';
 import RecentClassesSection from '../components/RecentClassesSection';
 import TeacherWelcomeModal from '../../components/TeacherWelcomeModal';
 import TaskDetailModal from '../../tasks/components/TaskDetailModal';
+import CreateLiveClassModal from '../../classroom/components/modals/CreateLiveClassModal';
+import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
 import { useTeacherDashboard } from '../hooks/useTeacherDashboard';
 
 export default function TeacherDashboard() {
@@ -37,11 +40,25 @@ export default function TeacherDashboard() {
     loading,
     selectedTask,
     isTaskModalOpen,
+    isLiveClassModalOpen,
     handleAddTask,
     handleDayChange,
     handleCloseTaskModal,
     handleEditTask,
+    handleCloseLiveClassModal,
   } = useTeacherDashboard();
+
+  // Fetch teacher's subjects for live class modal
+  const { data: subjectsData } = useQuery({
+    queryKey: ['teacher-subjects-classes'],
+    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const teacherSubjects = subjectsData?.assignedSubjects.map(s => ({
+    id: s._id,
+    name: s.name
+  })) || [];
 
   useEffect(() => {
     // Show welcome modal for teacher users who haven't seen it
@@ -178,6 +195,12 @@ export default function TeacherDashboard() {
         onClose={handleCloseTaskModal}
         task={selectedTask}
         onEdit={handleEditTask}
+      />
+
+      <CreateLiveClassModal
+        isOpen={isLiveClassModalOpen}
+        onClose={handleCloseLiveClassModal}
+        subjects={teacherSubjects}
       />
     </>
   );

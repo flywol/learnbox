@@ -181,8 +181,17 @@ describe('ProfileApiClient', () => {
     it('updateSessionConfiguration should throw unauthorized error', async () => {
       await expect(
         profileApiClient.updateSessionConfiguration({
-          currentSession: '2024/2025',
-          currentTerm: 'First Term',
+          name: '2024/2025',
+          firstTermName: 'First Term',
+          firstTermStartDate: '2024-09-01',
+          firstTermEndDate: '2024-12-20',
+          secondTermName: 'Second Term',
+          secondTermStartDate: '2025-01-10',
+          secondTermEndDate: '2025-04-10',
+          thirdTermName: 'Third Term',
+          thirdTermStartDate: '2025-04-20',
+          thirdTermEndDate: '2025-07-20',
+          rollOverData: false,
         })
       ).rejects.toThrow('Teachers are not authorized to update session configuration');
     });

@@ -183,3 +183,33 @@ export interface SubjectDetail extends TeacherSubject {
   courseOverview: CourseOverview;
   lessons: SubjectLesson[];
 }
+
+// Attendance Types
+export interface AttendanceRecord {
+  studentId: string;
+  date: string; // ISO date string
+  isPresent: boolean;
+}
+
+export interface MonthlyAttendance {
+  month: number; // 1-12
+  year: number;
+  totalDays: number;
+  records: AttendanceRecord[];
+  scheduledDays?: ('Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday')[]; // Days when subject is taught
+}
+
+export interface StudentAttendanceStats {
+  attendancePercentage: number;
+  totalClasses: number;
+  attendedClasses: number;
+  missedClasses: number;
+  assignmentCompleted: number;
+  assignmentTotal: number;
+  averageTestScore: number;
+  totalGrade: number;
+}
+
+export interface SubjectScheduleConfig {
+  daysPerWeek: ('Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday')[];
+}

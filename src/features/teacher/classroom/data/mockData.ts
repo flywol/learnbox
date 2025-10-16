@@ -1,4 +1,4 @@
-import type { TeacherSubject, ClassroomStudent, BroadsheetData } from '../types/classroom.types';
+import type { TeacherSubject, ClassroomStudent, BroadsheetData, AttendanceRecord, MonthlyAttendance, StudentAttendanceStats, SubjectScheduleConfig } from '../types/classroom.types';
 
 // Teacher subjects - what teachers see in their classroom
 export const mockTeacherSubjects: TeacherSubject[] = [
@@ -165,3 +165,112 @@ export const mockBroadsheetData: BroadsheetData = {
 
 // NOTE: Lesson mock data has been removed - now using real API via lessonsApiClient
 // Lesson data is fetched from /api/v1/teacher/lessons endpoints
+
+// Attendance Mock Data - keeping until attendance endpoint is provided
+
+// Map day names to JS day numbers (0=Sunday, 1=Monday, etc.)
+const DAY_MAP = {
+  'Sunday': 0,
+  'Monday': 1,
+  'Tuesday': 2,
+  'Wednesday': 3,
+  'Thursday': 4,
+  'Friday': 5,
+  'Saturday': 6,
+};
+
+// Helper to get scheduled class dates for a subject in a month
+const getScheduledDatesInMonth = (
+  month: number,
+  year: number,
+  scheduledDays: ('Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday')[]
+): Date[] => {
+  const scheduledDates: Date[] = [];
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const scheduledDayNumbers = scheduledDays.map(day => DAY_MAP[day]);
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay();
+
+    // Only include if this day is in the subject's schedule
+    if (scheduledDayNumbers.includes(dayOfWeek)) {
+      scheduledDates.push(date);
+    }
+  }
+
+  return scheduledDates;
+};
+
+export const generateMockAttendance = (
+  students: ClassroomStudent[],
+  month: number,
+  year: number,
+  scheduleConfig?: SubjectScheduleConfig
+): MonthlyAttendance => {
+  // Default schedule: Mon, Wed, Fri (3 days per week - typical for most subjects)
+  const scheduledDays = scheduleConfig?.daysPerWeek || ['Monday', 'Wednesday', 'Friday'];
+  const scheduledDates = getScheduledDatesInMonth(month, year, scheduledDays);
+  const totalDays = scheduledDates.length;
+
+  const records: AttendanceRecord[] = [];
+
+  students.forEach(student => {
+    // Generate random attendance for each scheduled day
+    scheduledDates.forEach(date => {
+      // Random attendance: ~70% present
+      const isPresent = Math.random() > 0.3;
+
+      records.push({
+        studentId: student.id,
+        date: date.toISOString(),
+        isPresent,
+      });
+    });
+  });
+
+  return {
+    month,
+    year,
+    totalDays,
+    records,
+    scheduledDays,
+  };
+};
+
+// Generate student attendance stats for modal
+export const generateStudentAttendanceStats = (studentId: string, attendanceData: MonthlyAttendance): StudentAttendanceStats => {
+  const studentRecords = attendanceData.records.filter(r => r.studentId === studentId);
+  const attendedClasses = studentRecords.filter(r => r.isPresent).length;
+  const totalClasses = studentRecords.length;
+  const missedClasses = totalClasses - attendedClasses;
+
+  return {
+    attendancePercentage: Math.round((attendedClasses / totalClasses) * 100),
+    totalClasses,
+    attendedClasses,
+    missedClasses,
+    assignmentCompleted: Math.floor(Math.random() * 3) + 1, // Random 1-3
+    assignmentTotal: 5,
+    averageTestScore: Math.floor(Math.random() * 40) + 50, // Random 50-90
+    totalGrade: Math.floor(Math.random() * 30) + 70, // Random 70-100
+  };
+};
+
+// Mock attendance data for JSS2 Biology class (Mon, Wed, Fri schedule)
+export const mockAttendanceData = generateMockAttendance(
+  generateMockStudents('jss2', 18),
+  1, // January
+  2025,
+  { daysPerWeek: ['Monday', 'Wednesday', 'Friday'] }
+);
+
+// Mock subject schedule configurations (for different subjects)
+export const mockSubjectSchedules: Record<string, SubjectScheduleConfig> = {
+  'Biology': { daysPerWeek: ['Monday', 'Wednesday', 'Friday'] },
+  'Chemistry': { daysPerWeek: ['Tuesday', 'Thursday'] },
+  'Mathematics': { daysPerWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
+  'English': { daysPerWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
+  'Physics': { daysPerWeek: ['Monday', 'Thursday'] },
+  'Further Maths': { daysPerWeek: ['Tuesday', 'Wednesday', 'Friday'] },
+};
