@@ -12,13 +12,15 @@ interface RoleSpecificFieldsProps {
   setValue: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  watch: any;
 }
 
-export default function RoleSpecificFields({ control, register, setValue, errors }: RoleSpecificFieldsProps) {
+export default function RoleSpecificFields({ control, register, setValue, errors, watch }: RoleSpecificFieldsProps) {
   const selectedRole = useWatch({ control, name: "role" });
 
   if (selectedRole === "Student") {
-    return <StudentFields register={register} errors={errors} />;
+    return <StudentFields register={register} errors={errors} watch={watch} />;
   }
 
   if (selectedRole === "Teacher") {

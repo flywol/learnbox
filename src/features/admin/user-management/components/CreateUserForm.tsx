@@ -147,6 +147,7 @@ const CreateUserForm = forwardRef<CreateUserFormRef, CreateUserFormProps>(({ onS
             register={register}
             setValue={setValue}
             errors={errors}
+            watch={watch}
           />
         </div>
       )}

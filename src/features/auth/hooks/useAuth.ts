@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/authStore";
 import { Role, User, UserData } from "../types/auth.types";
 import { authApiClient } from "../api/authApiClient";
 import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
+import { studentAuthApiClient } from "../api/studentAuthApiClient";
 
 interface UseAuthOptions {
 	redirectTo?: string;
@@ -79,9 +80,16 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 			setLoadingState("submitting");
 
 			try {
-				// Simple client selection
-				const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
-				
+				// Client selection based on role
+				let authClient;
+				if (selectedRole === "TEACHER") {
+					authClient = teacherAuthApiClient;
+				} else if (selectedRole === "STUDENT") {
+					authClient = studentAuthApiClient;
+				} else {
+					authClient = authApiClient; // ADMIN, PARENT, etc.
+				}
+
 				const response = await authClient.login(
 					{ email, password },
 					rememberMe

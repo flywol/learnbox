@@ -13,6 +13,7 @@ import type {
 } from "../types/auth.types";
 import { authApiClient } from "../api/authApiClient";
 import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
+import { studentAuthApiClient } from "../api/studentAuthApiClient";
 
 interface AuthState {
 	// Core state
@@ -79,13 +80,15 @@ const initialLoginContext: LoginContext = {
 
 // Helper function to get the appropriate auth client based on current role
 const getAuthClientForRole = (selectedRole: Role | null) => {
-	
-	
 	if (selectedRole === "TEACHER") {
 		return teacherAuthApiClient;
 	}
-	
-	// Use base auth client for ADMIN and other roles
+
+	if (selectedRole === "STUDENT") {
+		return studentAuthApiClient;
+	}
+
+	// Use base auth client for ADMIN and other roles (including PARENT)
 	return authApiClient;
 };
 
@@ -314,15 +317,20 @@ export const useAuthStore = create<AuthState>()(
 						authClient = getAuthClientForRole(state.selectedRole);
 						isAuthenticated = authClient.isAuthenticated();
 					} else if (state.user) {
-						// Role not available but user exists, try to determine from user data or check both clients
+						// Role not available but user exists, try to determine from user data or check all clients
 						const teacherAuthCheck = teacherAuthApiClient.isAuthenticated();
+						const studentAuthCheck = studentAuthApiClient.isAuthenticated();
 						const regularAuthCheck = authApiClient.isAuthenticated();
-						
+
 						if (teacherAuthCheck) {
 							authClient = teacherAuthApiClient;
 							isAuthenticated = true;
 							// Restore the selectedRole based on which client has valid tokens
 							set({ selectedRole: "TEACHER" });
+						} else if (studentAuthCheck) {
+							authClient = studentAuthApiClient;
+							isAuthenticated = true;
+							set({ selectedRole: "STUDENT" });
 						} else if (regularAuthCheck) {
 							authClient = authApiClient;
 							isAuthenticated = true;
@@ -373,14 +381,18 @@ export const useAuthStore = create<AuthState>()(
 					const authClient = getAuthClientForRole(state.selectedRole);
 					isAuthenticated = authClient.isAuthenticated();
 				} else if (state.user) {
-					// Role not available but user exists, check both clients
+					// Role not available but user exists, check all clients
 					const teacherAuthCheck = teacherAuthApiClient.isAuthenticated();
+					const studentAuthCheck = studentAuthApiClient.isAuthenticated();
 					const regularAuthCheck = authApiClient.isAuthenticated();
-					
+
 					if (teacherAuthCheck) {
 						isAuthenticated = true;
 						// Restore the selectedRole based on which client has valid tokens
 						set({ selectedRole: "TEACHER" });
+					} else if (studentAuthCheck) {
+						isAuthenticated = true;
+						set({ selectedRole: "STUDENT" });
 					} else if (regularAuthCheck) {
 						isAuthenticated = true;
 						// Could set to other roles, but let's be safe and not assume

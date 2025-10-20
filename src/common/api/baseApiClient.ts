@@ -95,6 +95,7 @@ export class BaseApiClient {
 		const validationEndpoints = [
 			'/auth/login',           // Wrong email/password
 			'/teacher/login',        // Wrong teacher email/password
+			'/student/login',        // Wrong student email/password
 			'/auth/verify-otp',      // Wrong OTP
 			'/auth/resend-otp',      // OTP-related errors
 			'/auth/forgot-password', // Email not found

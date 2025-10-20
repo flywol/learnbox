@@ -306,6 +306,11 @@ export function roundToNearestHourSlot(time24: string): string {
  * Get consistent color for a subject based on its name
  */
 export function getConsistentSubjectColor(subjectName: string): string {
+  // Handle undefined/null subject names
+  if (!subjectName) {
+    return SUBJECT_COLORS[0];
+  }
+
   // Use a simple hash to get consistent color for same subject
   let hash = 0;
   for (let i = 0; i < subjectName.length; i++) {

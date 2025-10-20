@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Gender, ClassLevelData, ClassArmData } from "../../types/user.types";
+import { Gender, ClassLevelData } from "../../types/user.types";
 import { userApiClient } from "../../api/userApiClient";
 
 interface StudentFieldsProps {
@@ -7,18 +7,21 @@ interface StudentFieldsProps {
   register: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  watch: any;
 }
 
-export default function StudentFields({ register, errors }: StudentFieldsProps) {
+export default function StudentFields({ register, errors, watch }: StudentFieldsProps) {
   const [classLevels, setClassLevels] = useState<ClassLevelData[]>([]);
-  const [classArms, setClassArms] = useState<ClassArmData[]>([]);
   const [loadingLevels, setLoadingLevels] = useState(false);
-  const [loadingArms, setLoadingArms] = useState(false);
 
   const genders: Gender[] = ["Male", "Female"];
 
+  // Watch the selected class level
+  const selectedClassLevel = watch("classLevel");
+
   useEffect(() => {
-    // Fetch class levels
+    // Fetch class levels (which includes their arms)
     const fetchClassLevels = async () => {
       setLoadingLevels(true);
       try {
@@ -32,23 +35,12 @@ export default function StudentFields({ register, errors }: StudentFieldsProps) 
       }
     };
 
-    // Fetch class arms
-    const fetchClassArms = async () => {
-      setLoadingArms(true);
-      try {
-        const arms = await userApiClient.getClassArms();
-        setClassArms(Array.isArray(arms) ? arms : []);
-      } catch (error) {
-        console.error("Failed to fetch class arms:", error);
-        setClassArms([]);
-      } finally {
-        setLoadingArms(false);
-      }
-    };
-
     fetchClassLevels();
-    fetchClassArms();
   }, []);
+
+  // Get the selected class level object
+  const selectedClass = classLevels.find(level => level.class === selectedClassLevel);
+  const availableArms = selectedClass?.arms || [];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,11 +87,15 @@ export default function StudentFields({ register, errors }: StudentFieldsProps) 
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Class arm *
         </label>
-        {loadingArms ? (
+        {!selectedClassLevel ? (
+          <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+            Select a class level first
+          </div>
+        ) : loadingLevels ? (
           <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
             Loading class arms...
           </div>
-        ) : classArms && classArms.length > 0 ? (
+        ) : availableArms.length > 0 ? (
           <select
             {...register("classArm")}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
@@ -107,9 +103,9 @@ export default function StudentFields({ register, errors }: StudentFieldsProps) 
             }`}
           >
             <option value="">Select class arm</option>
-            {classArms.map((arm) => (
+            {availableArms.map((arm: any) => (
               <option key={arm.id} value={arm.armName}>
-                {arm.armName}
+                {selectedClassLevel} {arm.armName}
               </option>
             ))}
           </select>

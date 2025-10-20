@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { authApiClient } from "../api/authApiClient";
 import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
+import { studentAuthApiClient } from "../api/studentAuthApiClient";
 
 interface UsePasswordResetReturn {
 	// State
@@ -54,8 +55,15 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				// Simple client selection
-			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				// Client selection based on role
+				let authClient;
+				if (selectedRole === "TEACHER") {
+					authClient = teacherAuthApiClient;
+				} else if (selectedRole === "STUDENT") {
+					authClient = studentAuthApiClient;
+				} else {
+					authClient = authApiClient; // ADMIN, PARENT, etc.
+				}
 				await authClient.forgotPassword({ email });
 
 				setPasswordResetEmail(email);
@@ -84,8 +92,15 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				// Simple client selection
-			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				// Client selection based on role
+				let authClient;
+				if (selectedRole === "TEACHER") {
+					authClient = teacherAuthApiClient;
+				} else if (selectedRole === "STUDENT") {
+					authClient = studentAuthApiClient;
+				} else {
+					authClient = authApiClient; // ADMIN, PARENT, etc.
+				}
 				await authClient.verifyForgotPasswordOtp({
 					email: passwordResetEmail,
 					otp,
@@ -114,8 +129,15 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 			setError(null);
 
 			try {
-				// Simple client selection
-			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
+				// Client selection based on role
+				let authClient;
+				if (selectedRole === "TEACHER") {
+					authClient = teacherAuthApiClient;
+				} else if (selectedRole === "STUDENT") {
+					authClient = studentAuthApiClient;
+				} else {
+					authClient = authApiClient; // ADMIN, PARENT, etc.
+				}
 				await authClient.resetPassword({
 					password: password,
 					confirmPassword: confirmPassword,
@@ -146,13 +168,14 @@ export const usePasswordReset = (): UsePasswordResetReturn => {
 		setError(null);
 
 		try {
-			// Simple client selection and use proper resend endpoint
-			const authClient = selectedRole === "TEACHER" ? teacherAuthApiClient : authApiClient;
-			
+			// Client selection based on role and use proper resend endpoint
 			if (selectedRole === "TEACHER") {
 				await teacherAuthApiClient.resendPasswordOtp(passwordResetEmail);
+			} else if (selectedRole === "STUDENT") {
+				await studentAuthApiClient.resendPasswordOtp(passwordResetEmail);
 			} else {
-				await authClient.forgotPassword({ email: passwordResetEmail });
+				// ADMIN, PARENT - use base client (may not have resend endpoint)
+				await authApiClient.forgotPassword({ email: passwordResetEmail });
 			}
 			return true;
 		} catch (err: any) {

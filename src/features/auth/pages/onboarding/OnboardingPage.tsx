@@ -73,19 +73,19 @@ const onboardingContent = {
 		{
 			title: "Welcome to LearnBox!",
 			description:
-				"Get ready to take control of your learning journey. Let's explore what you can do!",
+				"Dive into the world of interactive learning tailored for young minds.",
 			illustration: "/images/onboarding/student-1.svg",
 		},
 		{
-			title: "Your Learning Hub",
+			title: "Your Digital Classroom",
 			description:
-				"Access your courses, assignments, and track your progress all in one place.",
+				"Discover a world of learning with interactive courses, engaging study materials, and seamless communication with your teachers.",
 			illustration: "/images/onboarding/student-2.svg",
 		},
 		{
-			title: "Start Learning",
+			title: "Connect & Grow",
 			description:
-				"Everything you need to succeed is at your fingertips. Let's begin your educational journey!",
+				"Collaborate with peers, ask teachers questions, and stay updated on assignments and announcements.",
 			illustration: "/images/onboarding/student-3.svg",
 		},
 	],
@@ -130,10 +130,14 @@ const OnboardingPage = () => {
 		if (isLastScreen) {
 			// Complete onboarding
 			markOnboardingComplete();
-			
-			// Teachers go to school-setup, others go to dashboard
+
+			// Navigate to role-specific dashboard
 			if (selectedRole === "TEACHER") {
 				navigate("/school-setup");
+			} else if (selectedRole === "STUDENT") {
+				navigate("/student/dashboard");
+			} else if (selectedRole === "ADMIN") {
+				navigate("/dashboard");
 			} else {
 				navigate("/dashboard");
 			}
@@ -146,10 +150,14 @@ const OnboardingPage = () => {
 	const handleSkip = () => {
 		// Skip entire onboarding
 		markOnboardingComplete();
-		
-		// Teachers go to school-setup, others go to dashboard
+
+		// Navigate to role-specific dashboard
 		if (selectedRole === "TEACHER") {
 			navigate("/school-setup");
+		} else if (selectedRole === "STUDENT") {
+			navigate("/student/dashboard");
+		} else if (selectedRole === "ADMIN") {
+			navigate("/dashboard");
 		} else {
 			navigate("/dashboard");
 		}

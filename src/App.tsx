@@ -8,6 +8,7 @@ import { PublicRoutes } from "./routes/PublicRoutes";
 import { DashboardRoutes } from "./routes/DashboardRoutes";
 import { AdminRoutes } from "./routes/admin/AdminRoutes";
 import { TeacherRoutes } from "./routes/teacher/TeacherRoutes";
+import { StudentRoutes } from "./routes/student/StudentRoutes";
 
 // Error and loading components
 import { UnauthorizedPage, NotFoundPage, LoadingSpinner } from "./components/ErrorPages";
@@ -29,6 +30,7 @@ export default function App() {
               {/* Secure role-based routes */}
               {AdminRoutes()}
               {TeacherRoutes()}
+              {StudentRoutes()}
 
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
               <Route path="*" element={<NotFoundPage />} />
