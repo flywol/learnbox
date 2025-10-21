@@ -253,11 +253,30 @@ import { SUBJECT_COLORS } from '../types/timetable.types';
 
 /**
  * Check if a class has valid times (end time must be after start time)
+ * Handles both HH:mm and HH:mm:ss formats
  */
 export function isValidClassTime(rawStartTime: string, rawEndTime: string): boolean {
   try {
-    const start = new Date(`1970-01-01T${rawStartTime}:00`);
-    const end = new Date(`1970-01-01T${rawEndTime}:00`);
+    // Normalize time format - ensure it has seconds
+    const normalizeTime = (time: string): string => {
+      const parts = time.split(':');
+      if (parts.length === 2) {
+        return `${time}:00`; // Add seconds if missing
+      }
+      return time;
+    };
+
+    const startTime = normalizeTime(rawStartTime);
+    const endTime = normalizeTime(rawEndTime);
+
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+
+    // Check if dates are valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return false;
+    }
+
     return end > start;
   } catch {
     return false;

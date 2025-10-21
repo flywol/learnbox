@@ -66,7 +66,7 @@ export default function NotificationDropdown({ onNotificationPageClick }: Notifi
 					<div className="max-h-80 overflow-y-auto">
 						{isLoading && (
 							<div className="p-8 text-center">
-								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto mb-2"></div>
 								<p className="text-sm text-gray-500">Loading notifications...</p>
 							</div>
 						)}
@@ -76,7 +76,7 @@ export default function NotificationDropdown({ onNotificationPageClick }: Notifi
 								<p className="text-sm text-red-600">{error}</p>
 								<button
 									onClick={fetchNotifications}
-									className="text-blue-600 hover:text-blue-700 text-sm mt-1"
+									className="text-orange-600 hover:text-orange-700 text-sm mt-1"
 								>
 									Try again
 								</button>
@@ -97,8 +97,8 @@ export default function NotificationDropdown({ onNotificationPageClick }: Notifi
 								onClick={() => handleNotificationClick(notification)}
 							>
 								<div className="flex items-start gap-3">
-									<div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-										<span className="text-blue-600 text-sm font-medium">
+									<div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+										<span className="text-orange-600 text-sm font-medium">
 											{notification.title.charAt(0)}
 										</span>
 									</div>
@@ -112,7 +112,7 @@ export default function NotificationDropdown({ onNotificationPageClick }: Notifi
 											</span>
 										</div>
 										{!notification.isRead && (
-											<div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+											<div className="w-2 h-2 bg-orange-500 rounded-full mt-1"></div>
 										)}
 									</div>
 								</div>
@@ -123,7 +123,7 @@ export default function NotificationDropdown({ onNotificationPageClick }: Notifi
 					<div className="p-4 border-t border-gray-100">
 						<button
 							onClick={onNotificationPageClick}
-							className="w-full text-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+							className="w-full text-center text-orange-600 hover:text-orange-700 font-medium text-sm"
 						>
 							See more
 						</button>

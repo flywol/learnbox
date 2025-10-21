@@ -11,8 +11,8 @@ describe('TasksApiClient', () => {
     title: 'Grade Assignments',
     description: 'Grade JSS1 math assignments',
     taskType: 'Assignment',
-    startDate: '2025-01-15',
-    scheduleTime: '10:00',
+    startDate: '2025-01-15T00:00:00.000Z',
+    scheduleTime: '2025-01-15T10:00:00.000Z',
     repeat: 'none',
     isCompleted: false,
     userId: 'user-123',
@@ -187,13 +187,13 @@ describe('TasksApiClient', () => {
         },
       };
 
-      mockAxios.onGet('/tasks/by-type/grading').reply(200, mockResponse);
+      mockAxios.onGet('/tasks/by-type/Assignment').reply(200, mockResponse);
 
-      const result = await tasksApiClient.getTasksByType('grading');
+      const result = await tasksApiClient.getTasksByType('Assignment');
 
       expect(result.tasks).toHaveLength(1);
-      expect(result.tasks[0].taskType).toBe('grading');
-      expect(mockAxios.history.get[0].url).toBe('/tasks/by-type/grading');
+      expect(result.tasks[0].taskType).toBe('Assignment');
+      expect(mockAxios.history.get[0].url).toBe('/tasks/by-type/Assignment');
     });
   });
 

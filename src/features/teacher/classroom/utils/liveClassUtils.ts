@@ -121,9 +121,10 @@ export const formatDuration = (hours: number, minutes: number): string => {
 
 /**
  * Validate Google Meet link
+ * Format: https://meet.google.com/xxx-xxxx-xxx
  */
 export const isValidGoogleMeetLink = (url: string): boolean => {
-  const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z\-]+$/i;
+  const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{3}$/i;
   return googleMeetPattern.test(url);
 };
 

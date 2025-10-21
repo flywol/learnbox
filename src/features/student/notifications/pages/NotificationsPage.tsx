@@ -39,12 +39,12 @@ export default function NotificationsPage() {
 				<div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
 					<div className="flex items-center gap-4">
 						<h1 className="text-xl font-semibold text-gray-900">Notifications</h1>
-						{isLoading && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+						{isLoading && <Loader2 className="w-4 h-4 animate-spin text-orange-500" />}
 					</div>
 					{unreadCount > 0 && !isLoading && (
 						<button
 							onClick={handleMarkAllAsRead}
-							className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+							className="text-orange-600 hover:text-orange-700 font-medium text-sm"
 						>
 							Mark all as read
 						</button>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
 				<div className="divide-y divide-gray-100">
 					{isLoading && notifications.length === 0 && (
 						<div className="p-12 text-center">
-							<Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
+							<Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
 							<p className="text-gray-500">Loading notifications...</p>
 						</div>
 					)}
@@ -85,13 +85,13 @@ export default function NotificationsPage() {
 						<div
 							key={notification.id}
 							className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
-								!notification.isRead ? 'bg-blue-50/30' : ''
+								!notification.isRead ? 'bg-orange-50/30' : ''
 							}`}
 							onClick={() => handleNotificationClick(notification)}
 						>
 							<div className="flex items-start gap-4">
-								<div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-									<span className="text-blue-600 font-medium">
+								<div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+									<span className="text-orange-600 font-medium">
 										{notification.title.charAt(0)}
 									</span>
 								</div>
@@ -105,7 +105,7 @@ export default function NotificationsPage() {
 												{formatTimeAgo(notification.created_at)}
 											</span>
 											{!notification.isRead && (
-												<div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+												<div className="w-2 h-2 bg-orange-500 rounded-full"></div>
 											)}
 										</div>
 									</div>

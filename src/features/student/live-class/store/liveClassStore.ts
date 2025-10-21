@@ -19,7 +19,7 @@ const mockLiveClasses: LiveClass[] = [
     teacher: 'Mrs. Johnson',
     startTime: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString(), // 2.5 hours from now
     duration: '1 hour 30 minutes',
-    classLink: 'https://meet.google.com/xyz-uvwx-yz',
+    classLink: 'https://meet.google.com/xyz-uvwx-yzz',
     status: 'upcoming',
   },
   {
@@ -37,7 +37,7 @@ const mockLiveClasses: LiveClass[] = [
     teacher: 'Dr. Brown',
     startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
     duration: '1 hour 30 minutes',
-    classLink: 'https://meet.google.com/che-mist-ry',
+    classLink: 'https://meet.google.com/che-mist-ryy',
     status: 'upcoming',
   },
   {
