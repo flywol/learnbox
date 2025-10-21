@@ -377,7 +377,7 @@ describe('TasksApiClient', () => {
       expect(task).toHaveProperty('title');
       expect(task).toHaveProperty('description');
       expect(task).toHaveProperty('taskType');
-      expect(task).toHaveProperty('status');
+      expect(task).toHaveProperty('isCompleted');
     });
   });
 });
