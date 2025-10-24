@@ -1,0 +1,482 @@
+import { create } from 'zustand';
+import {
+  StudentSubject,
+  StudentLesson,
+  StudentQuiz,
+  StudentAssignment,
+  ClassSchedule,
+  ForumMessage,
+} from '../types/classroom.types';
+
+interface ClassroomState {
+  subjects: StudentSubject[];
+  lessons: Record<string, StudentLesson[]>; // subjectId -> lessons
+  quizzes: StudentQuiz[];
+  assignments: StudentAssignment[];
+  schedules: ClassSchedule[];
+  forumMessages: Record<string, ForumMessage[]>; // lessonId -> messages
+
+  // Actions
+  getSubjectById: (id: string) => StudentSubject | undefined;
+  getLessonsBySubject: (subjectId: string) => StudentLesson[];
+  getQuizzesBySubject: (subjectId: string) => StudentQuiz[];
+  markLessonComplete: (lessonId: string, subjectId: string) => void;
+  markContentItemComplete: (lessonId: string, subjectId: string, contentItemId: string) => void;
+  addForumMessage: (lessonId: string, message: Omit<ForumMessage, 'id' | 'timestamp'>) => void;
+}
+
+// Mock subjects data
+const mockSubjects: StudentSubject[] = [
+  {
+    id: 'subject-1',
+    name: 'Biology',
+    icon: '🧬',
+    bgColor: 'bg-green-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-2',
+    name: 'Further Mathematics',
+    icon: '📐',
+    bgColor: 'bg-red-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 56,
+  },
+  {
+    id: 'subject-3',
+    name: 'English',
+    icon: '📚',
+    bgColor: 'bg-blue-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-4',
+    name: 'Chemistry',
+    icon: '⚗️',
+    bgColor: 'bg-purple-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-5',
+    name: 'Economics',
+    icon: '💰',
+    bgColor: 'bg-teal-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 56,
+  },
+  {
+    id: 'subject-6',
+    name: 'Geography',
+    icon: '🌍',
+    bgColor: 'bg-lime-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-7',
+    name: 'Civic Education',
+    icon: '🏛️',
+    bgColor: 'bg-indigo-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 56,
+  },
+  {
+    id: 'subject-8',
+    name: 'Mathematics',
+    icon: '🔢',
+    bgColor: 'bg-orange-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-9',
+    name: 'Computer Science',
+    icon: '💻',
+    bgColor: 'bg-rose-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-10',
+    name: 'Agriculture',
+    icon: '🌾',
+    bgColor: 'bg-green-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 56,
+  },
+  {
+    id: 'subject-11',
+    name: 'History',
+    icon: '📜',
+    bgColor: 'bg-cyan-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+  {
+    id: 'subject-12',
+    name: 'Food and Nutrition',
+    icon: '🍎',
+    bgColor: 'bg-pink-100',
+    teacher: 'Andrew Jones',
+    currentLesson: 9,
+    totalLessons: 16,
+    progressPercentage: 58,
+  },
+];
+
+// Mock lessons for Biology
+const mockBiologyLessons: StudentLesson[] = [
+  {
+    id: 'lesson-1',
+    number: 1,
+    title: 'Introduction',
+    description: 'Introduction to Biology',
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+    isLocked: false,
+    isCompleted: true,
+    contentItems: [
+      {
+        id: 'content-1',
+        type: 'video',
+        title: 'Beginning of everything',
+        description: 'Learn about how biology began',
+        isCompleted: false,
+      },
+      {
+        id: 'content-2',
+        type: 'document',
+        title: 'Introduction',
+        description: 'Learn about how biology began',
+        isCompleted: false,
+      },
+      {
+        id: 'content-3',
+        type: 'video',
+        title: 'Life and its characteristics',
+        description: 'Learn about how biology began',
+        isCompleted: false,
+      },
+      {
+        id: 'content-4',
+        type: 'quiz',
+        title: 'Introduction Quiz',
+        description: 'Lesson 1 quiz',
+        isCompleted: true,
+      },
+      {
+        id: 'content-5',
+        type: 'assignment',
+        title: 'Introduction',
+        description: 'Lesson 1 assignment',
+        isCompleted: true,
+      },
+      {
+        id: 'content-6',
+        type: 'document',
+        title: 'Introduction',
+        description: 'Take note and download the resources',
+        isCompleted: false,
+      },
+    ],
+  },
+  {
+    id: 'lesson-2',
+    number: 2,
+    title: 'Reproduction in Organisms',
+    startDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: false,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-3',
+    number: 3,
+    title: 'Reproduction in Organisms',
+    startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: false,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-4',
+    number: 4,
+    title: 'Introduction',
+    startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: false,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-5',
+    number: 5,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now - LOCKED
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-6',
+    number: 6,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now - LOCKED
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-7',
+    number: 7,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-8',
+    number: 8,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-9',
+    number: 9,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+  {
+    id: 'lesson-10',
+    number: 10,
+    title: 'Introduction',
+    startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    isLocked: true,
+    isCompleted: false,
+    contentItems: [],
+  },
+];
+
+// Mock quizzes
+const mockQuizzes: StudentQuiz[] = [
+  {
+    id: 'quiz-1',
+    title: 'Week 2 Quiz',
+    subjectId: 'subject-1',
+    dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
+    status: 'pending',
+  },
+  {
+    id: 'quiz-2',
+    title: 'Everyday physics',
+    subjectId: 'subject-1',
+    dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'submitted',
+    submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'quiz-3',
+    title: 'Everyday physics',
+    subjectId: 'subject-1',
+    dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'graded',
+    score: 60,
+    totalPoints: 100,
+    submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+// Mock assignments
+const mockAssignments: StudentAssignment[] = [
+  {
+    id: 'assignment-1',
+    title: 'Biology Assignment 1',
+    subjectId: 'subject-1',
+    subjectName: 'Biology',
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'pending',
+    description: 'Complete the assignment on cell structure',
+  },
+  {
+    id: 'assignment-2',
+    title: 'Mathematics Assignment 2',
+    subjectId: 'subject-8',
+    subjectName: 'Mathematics',
+    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'submitted',
+    submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+// Mock schedules
+const mockSchedules: ClassSchedule[] = [
+  {
+    id: 'schedule-1',
+    subjectId: 'subject-1',
+    subjectName: 'Biology',
+    teacher: 'Andrew Jones',
+    day: 'Monday',
+    startTime: '09:00',
+    endTime: '10:00',
+    location: 'Room 101',
+  },
+  {
+    id: 'schedule-2',
+    subjectId: 'subject-8',
+    subjectName: 'Mathematics',
+    teacher: 'Andrew Jones',
+    day: 'Monday',
+    startTime: '10:15',
+    endTime: '11:15',
+    location: 'Room 102',
+  },
+  {
+    id: 'schedule-3',
+    subjectId: 'subject-3',
+    subjectName: 'English',
+    teacher: 'Andrew Jones',
+    day: 'Tuesday',
+    startTime: '09:00',
+    endTime: '10:00',
+    location: 'Room 103',
+  },
+];
+
+// Mock forum messages
+const mockForumMessages: Record<string, ForumMessage[]> = {
+  'lesson-1': [
+    {
+      id: 'msg-1',
+      senderId: 'teacher-1',
+      senderName: 'Mr Akande',
+      senderRole: 'TEACHER',
+      message: 'Do you all understand?',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'msg-2',
+      senderId: 'student-2',
+      senderName: 'Praise Peters',
+      senderRole: 'STUDENT',
+      message: 'Can you explain it sir?',
+      timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'msg-3',
+      senderId: 'teacher-1',
+      senderName: 'Mr Akande',
+      senderRole: 'TEACHER',
+      message: 'Do you all understand?',
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    },
+  ],
+};
+
+export const useClassroomStore = create<ClassroomState>((set, get) => ({
+  subjects: mockSubjects,
+  lessons: {
+    'subject-1': mockBiologyLessons,
+  },
+  quizzes: mockQuizzes,
+  assignments: mockAssignments,
+  schedules: mockSchedules,
+  forumMessages: mockForumMessages,
+
+  getSubjectById: (id: string) => {
+    return get().subjects.find((subject) => subject.id === id);
+  },
+
+  getLessonsBySubject: (subjectId: string) => {
+    return get().lessons[subjectId] || [];
+  },
+
+  getQuizzesBySubject: (subjectId: string) => {
+    return get().quizzes.filter((quiz) => quiz.subjectId === subjectId);
+  },
+
+  markLessonComplete: (lessonId: string, subjectId: string) => {
+    set((state) => {
+      const subjectLessons = state.lessons[subjectId] || [];
+      const updatedLessons = subjectLessons.map((lesson) =>
+        lesson.id === lessonId ? { ...lesson, isCompleted: true } : lesson
+      );
+
+      return {
+        lessons: {
+          ...state.lessons,
+          [subjectId]: updatedLessons,
+        },
+      };
+    });
+  },
+
+  markContentItemComplete: (lessonId: string, subjectId: string, contentItemId: string) => {
+    set((state) => {
+      const subjectLessons = state.lessons[subjectId] || [];
+      const updatedLessons = subjectLessons.map((lesson) => {
+        if (lesson.id === lessonId) {
+          const updatedContentItems = lesson.contentItems.map((item) =>
+            item.id === contentItemId ? { ...item, isCompleted: true } : item
+          );
+          return { ...lesson, contentItems: updatedContentItems };
+        }
+        return lesson;
+      });
+
+      return {
+        lessons: {
+          ...state.lessons,
+          [subjectId]: updatedLessons,
+        },
+      };
+    });
+  },
+
+  addForumMessage: (lessonId: string, message: Omit<ForumMessage, 'id' | 'timestamp'>) => {
+    set((state) => {
+      const lessonMessages = state.forumMessages[lessonId] || [];
+      const newMessage: ForumMessage = {
+        ...message,
+        id: `msg-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+      };
+
+      return {
+        forumMessages: {
+          ...state.forumMessages,
+          [lessonId]: [...lessonMessages, newMessage],
+        },
+      };
+    });
+  },
+}));

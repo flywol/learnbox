@@ -30,6 +30,17 @@ const LiveClassPage = lazy(
 	() => import("../../features/student/live-class/pages/LiveClassPage")
 );
 
+// Classroom
+const ClassroomPage = lazy(
+	() => import("../../features/student/classroom/pages/ClassroomPage")
+);
+const SubjectDetailPage = lazy(
+	() => import("../../features/student/classroom/pages/SubjectDetailPage")
+);
+const LessonContentPage = lazy(
+	() => import("../../features/student/classroom/pages/LessonContentPage")
+);
+
 export function StudentRoutes() {
 	return (
 		<Route
@@ -56,6 +67,11 @@ export function StudentRoutes() {
 
 			{/* Live Class */}
 			<Route path="live-class" element={<LiveClassPage />} />
+
+			{/* Classroom */}
+			<Route path="classroom" element={<ClassroomPage />} />
+			<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
+			<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
 
 			{/* Fallback */}
 			<Route path="*" element={<LayoutNotFoundPage />} />
