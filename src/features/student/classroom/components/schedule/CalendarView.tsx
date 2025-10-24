@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock events data - keeping until events endpoint is provided
 const mockEvents = [
@@ -53,12 +53,6 @@ export default function CalendarView() {
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-  // Check if date is today
-  const isToday = (day: number) => {
-    const today = new Date();
-    return today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
-  };
 
   // Filter events for specific day
   const getEventsForDay = (day: number) => {

@@ -8,7 +8,7 @@ import { ClassroomTab } from "../types/classroom.types";
 export default function ClassroomPage() {
 	const navigate = useNavigate();
 	const [activeTab, setActiveTab] = useState<ClassroomTab>("subject");
-	const { subjects, schedules, assignments } = useClassroomStore();
+	const { subjects, assignments } = useClassroomStore();
 
 	const tabs: { id: ClassroomTab; label: string }[] = [
 		{ id: "subject", label: "Subject" },
