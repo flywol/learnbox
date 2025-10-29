@@ -1,9 +1,26 @@
-import { Plus, Calendar, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, ChevronsRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { timetableApiClient } from '../../api/timetableApiClient';
 import { convertTimetableToGrid } from '../../utils/timetableUtils';
 import type { TimetableGrid } from '../../types/timetable.types';
+
+// Helper function to get subject icon
+const getSubjectIcon = (subjectName: string): string => {
+  const lowerName = subjectName.toLowerCase();
+  if (lowerName.includes('math') || lowerName.includes('further')) return '📚';
+  if (lowerName.includes('english') || lowerName.includes('literature')) return '🟢';
+  if (lowerName.includes('biology') || lowerName.includes('bio')) return '🧬';
+  if (lowerName.includes('chemistry') || lowerName.includes('chem')) return '🧪';
+  if (lowerName.includes('physics')) return '⚛️';
+  if (lowerName.includes('history')) return '📜';
+  if (lowerName.includes('geography')) return '🌍';
+  if (lowerName.includes('art')) return '🎨';
+  if (lowerName.includes('music')) return '🎵';
+  if (lowerName.includes('sport') || lowerName.includes('physical')) return '⚽';
+  if (lowerName.includes('computer') || lowerName.includes('ict')) return '💻';
+  return '📖'; // default book icon
+};
 
 interface TimetableViewProps {
   selectedClass: string;
@@ -226,50 +243,41 @@ export default function TimetableView({
           {/* Time Slots */}
           {timeSlots.map((time) => (
             <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
-                {time}
+              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center gap-2">
+                <span>{time}</span>
+                <ChevronsRight className="w-4 h-4 text-orange-500" />
               </div>
               {days.map((day) => {
                 const key = `${day}-${time}`;
                 const subject = timetableGrid[key];
-                
+
                 return (
-                  <div key={key} className="p-2 h-24 flex items-center justify-center">
+                  <div key={key} className="p-3 h-24 flex items-center justify-center">
                     {subject ? (
-                      <div 
-                        className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+                      <div
+                        className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-2.5 transition-all hover:shadow-md cursor-pointer min-w-0"
                         onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}&editSubject=${subject.subjectName}&day=${day}&time=${time}`)}
                         title={`Edit ${subject.subjectName} on ${day} at ${time}`}
                       >
-                        {subject.icon && (
-                          <div className="w-5 h-5 mb-1 flex-shrink-0">
-                            <img 
-                              src={subject.icon} 
-                              alt={subject.subjectName} 
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div className="text-xs font-semibold mb-1 leading-tight">
-                          {subject.subjectName.length > 10 ? 
-                            `${subject.subjectName.substring(0, 10)}...` : 
-                            subject.subjectName
-                          }
+                        <div className="text-2xl flex-shrink-0">
+                          {getSubjectIcon(subject.subjectName)}
                         </div>
-                        <div className="text-xs opacity-75 leading-tight">
-                          {subject.duration}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+                            {subject.subjectName}
+                          </div>
+                          <div className="text-xs text-gray-500 leading-tight mt-0.5">
+                            {subject.duration}
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div 
-                        className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-transparent rounded-lg transition-all cursor-pointer flex items-center justify-center group"
+                      <div
+                        className="w-full h-full hover:bg-orange-50 hover:border-orange-200 border border-dashed border-gray-200 rounded-lg transition-all cursor-pointer flex items-center justify-center group"
                         onClick={() => navigate(`/admin/classroom/add-timetable?classId=${effectiveClassId}&classArmId=${effectiveClassArmId}&day=${day}&time=${time}`)}
                         title={`Add subject for ${day} at ${time}`}
                       >
-                        <div className="text-gray-300 group-hover:text-orange-500 text-xs transition-colors">+</div>
+                        <Plus className="w-5 h-5 text-gray-300 group-hover:text-orange-500 transition-colors" />
                       </div>
                     )}
                   </div>

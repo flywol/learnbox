@@ -1,8 +1,25 @@
 import { useMemo } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronsRight } from 'lucide-react';
 import { useWeeklySchedule } from '../../hooks/useTimetable';
 import { transformWeeklyScheduleToGrid, formatTimeFor12Hour } from '../../utils/timetableUtils';
 import type { TransformedClassForGrid } from '../../types/timetable.types';
+
+// Helper function to get subject icon
+const getSubjectIcon = (subjectName: string): string => {
+  const lowerName = subjectName.toLowerCase();
+  if (lowerName.includes('math') || lowerName.includes('further')) return '📚';
+  if (lowerName.includes('english') || lowerName.includes('literature')) return '🟢';
+  if (lowerName.includes('biology') || lowerName.includes('bio')) return '🧬';
+  if (lowerName.includes('chemistry') || lowerName.includes('chem')) return '🧪';
+  if (lowerName.includes('physics')) return '⚛️';
+  if (lowerName.includes('history')) return '📜';
+  if (lowerName.includes('geography')) return '🌍';
+  if (lowerName.includes('art')) return '🎨';
+  if (lowerName.includes('music')) return '🎵';
+  if (lowerName.includes('sport') || lowerName.includes('physical')) return '⚽';
+  if (lowerName.includes('computer') || lowerName.includes('ict')) return '💻';
+  return '📖'; // default book icon
+};
 
 // Loading component
 const LoadingTimetable = () => (
@@ -108,43 +125,42 @@ export default function TimetableView() {
           {/* Time Slots */}
           {timeSlots.map((time) => (
             <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm">
-                {time}
+              <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center gap-2">
+                <span>{time}</span>
+                <ChevronsRight className="w-4 h-4 text-orange-500" />
               </div>
               {days.map((day) => {
                 const key = `${day}-${time}`;
                 const classes = timetableGrid[key] || [];
 
                 return (
-                  <div key={key} className="p-2 h-24 flex items-center justify-center">
+                  <div key={key} className="p-3 h-24 flex items-start justify-center overflow-auto">
                     {classes.length > 0 ? (
-                      <div className="w-full h-full flex flex-col gap-1 overflow-auto">
+                      <div className="w-full flex flex-col gap-2">
                         {classes.map((classItem: TransformedClassForGrid, index: number) => (
                           <div
                             key={`${classItem.subjectName}-${classItem.displayClass}-${index}`}
-                            className={`w-full rounded-lg ${classItem.color} p-2 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+                            className="bg-white border border-gray-200 rounded-lg p-2.5 flex items-center gap-2.5 transition-all hover:shadow-md cursor-pointer min-w-0"
                             title={`${classItem.subjectName} - ${classItem.displayClass}\n${classItem.displayStartTime} - ${classItem.displayEndTime} (${classItem.duration})`}
                           >
-                            <div className="text-xs font-semibold mb-0.5 leading-tight">
-                              {classItem.subjectName.length > 10 ?
-                                `${classItem.subjectName.substring(0, 10)}...` :
-                                classItem.subjectName
-                              }
+                            <div className="text-xl flex-shrink-0">
+                              {getSubjectIcon(classItem.subjectName || '')}
                             </div>
-                            <div className="text-xs opacity-90 leading-tight">
-                              {classItem.displayClass}
-                            </div>
-                            <div className="text-xs opacity-75 leading-tight">
-                              {classItem.displayStartTime}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+                                {classItem.subjectName || 'N/A'}
+                              </div>
+                              <div className="text-xs text-gray-600 leading-tight mt-0.5 truncate">
+                                {classItem.displayClass}
+                              </div>
+                              <div className="text-xs text-gray-500 leading-tight mt-0.5">
+                                {classItem.displayStartTime}
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-gray-300 text-xs">-</div>
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}

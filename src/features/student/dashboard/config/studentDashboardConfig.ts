@@ -31,7 +31,7 @@ export const mockStudentDashboardData: StudentDashboardData = {
 			lessonNumber: 9,
 			totalLessons: 16,
 			lastAccessed: "10 mins ago",
-			color: "#D4F4DD", // Light green
+			color: "bg-green-100", // Light green
 		},
 		{
 			id: "2",
@@ -41,7 +41,7 @@ export const mockStudentDashboardData: StudentDashboardData = {
 			lessonNumber: 9,
 			totalLessons: 16,
 			lastAccessed: "10 mins ago",
-			color: "#FFE8D6", // Light orange
+			color: "bg-orange-100", // Light orange
 		},
 		{
 			id: "3",
@@ -51,17 +51,17 @@ export const mockStudentDashboardData: StudentDashboardData = {
 			lessonNumber: 9,
 			totalLessons: 16,
 			lastAccessed: "45 mins ago",
-			color: "#D6F0F0", // Light cyan
+			color: "bg-cyan-100", // Light cyan
 		},
 		{
 			id: "4",
-			subjectName: "Physics",
+			subjectName: "Chemistry",
 			subjectIcon: "⚗️",
 			progress: 58,
 			lessonNumber: 9,
 			totalLessons: 16,
 			lastAccessed: "45 mins ago",
-			color: "#E8DEFF", // Light purple
+			color: "bg-purple-100", // Light purple
 		},
 	],
 	tasks: [

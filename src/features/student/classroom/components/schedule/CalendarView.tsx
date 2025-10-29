@@ -3,13 +3,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock events data - keeping until events endpoint is provided
 const mockEvents = [
-  { id: '1', date: '2025-10-03', description: 'Assignment deadline is today', type: 'assignment', color: 'bg-orange-100 text-orange-700' },
-  { id: '2', date: '2025-10-08', description: 'Physics live class', type: 'class', color: 'bg-blue-100 text-blue-700' },
-  { id: '3', date: '2025-10-11', description: 'Class trip', type: 'event', color: 'bg-purple-100 text-purple-700' },
-  { id: '4', date: '2025-10-10', description: 'Biology quiz due', type: 'assignment', color: 'bg-orange-100 text-orange-700' },
-  { id: '5', date: '2025-10-21', description: 'Physics live class', type: 'class', color: 'bg-blue-100 text-blue-700' },
-  { id: '6', date: '2025-10-27', description: "Children's day", type: 'event', color: 'bg-purple-100 text-purple-700' },
-  { id: '7', date: '2025-10-31', description: 'Biology quiz due', type: 'assignment', color: 'bg-orange-100 text-orange-700' },
+  { id: '1', date: '2025-10-03', description: 'Assignment deadline is today', type: 'assignment' },
+  { id: '2', date: '2025-10-08', description: 'Physics live class', type: 'class' },
+  { id: '3', date: '2025-10-11', description: 'Class trip', type: 'event' },
+  { id: '4', date: '2025-10-10', description: 'Biology quiz due', type: 'assignment' },
+  { id: '5', date: '2025-10-21', description: 'Physics live class', type: 'class' },
+  { id: '6', date: '2025-10-27', description: "Children's day", type: 'event' },
+  { id: '7', date: '2025-10-31', description: 'Biology quiz due', type: 'assignment' },
 ];
 
 export default function CalendarView() {
@@ -103,21 +103,21 @@ export default function CalendarView() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="space-y-2">
         {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-0 border-b border-gray-200">
+        <div className="grid grid-cols-7 gap-2">
           {dayNames.map((day) => (
-            <div key={day} className="p-3 bg-gray-50 text-center font-medium text-gray-600 text-sm">
+            <div key={day} className="p-3 text-center font-medium text-gray-600 text-sm">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-0">
+        <div className="grid grid-cols-7 gap-2">
           {calendarDays.map((day, index) => {
             if (!day) {
-              return <div key={index} className="h-24 border-b border-r border-gray-100 bg-red-50" />;
+              return <div key={index} className="h-28 rounded-lg" style={{ backgroundColor: '#FFF5F0' }} />;
             }
 
             const dayEvents = getEventsForDay(day);
@@ -126,28 +126,24 @@ export default function CalendarView() {
             return (
               <div
                 key={index}
-                className="p-2 h-24 border-b border-r border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="p-3 h-28 rounded-lg hover:opacity-90 cursor-pointer transition-all"
+                style={{ backgroundColor: '#FFEFE9' }}
               >
-                <div className={`text-sm font-medium mb-1 ${
-                  hasEvent ? 'text-red-600' : 'text-gray-900'
+                <div className={`text-sm mb-2 ${
+                  hasEvent ? 'font-bold text-gray-900' : 'font-normal text-gray-600'
                 }`}>
                   {day}
                 </div>
                 <div className="space-y-1">
-                  {dayEvents.slice(0, 2).map((event) => (
+                  {dayEvents.map((event) => (
                     <div
                       key={event.id}
-                      className={`text-xs px-2 py-1 rounded truncate ${event.color.replace(/text-\w+-\d+/, 'text-gray-900')}`}
+                      className="text-xs bg-white rounded-full px-2 py-1 text-gray-700 leading-tight truncate"
                       title={event.description}
                     >
                       {event.description}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
-                    <div className="text-xs text-gray-500 px-2">
-                      +{dayEvents.length - 2} more
-                    </div>
-                  )}
                 </div>
               </div>
             );

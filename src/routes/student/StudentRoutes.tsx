@@ -40,6 +40,20 @@ const SubjectDetailPage = lazy(
 const LessonContentPage = lazy(
 	() => import("../../features/student/classroom/pages/LessonContentPage")
 );
+const AssignmentDetailPage = lazy(
+	() => import("../../features/student/classroom/pages/AssignmentDetailPage")
+);
+const SubmittedAssignmentPage = lazy(
+	() => import("../../features/student/classroom/pages/SubmittedAssignmentPage")
+);
+
+// Assessment
+const AssessmentPage = lazy(
+	() => import("../../features/student/assessment/pages/AssessmentPage")
+);
+const GradeBreakdownPage = lazy(
+	() => import("../../features/student/assessment/pages/GradeBreakdownPage")
+);
 
 export function StudentRoutes() {
 	return (
@@ -72,6 +86,12 @@ export function StudentRoutes() {
 			<Route path="classroom" element={<ClassroomPage />} />
 			<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
 			<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+			<Route path="classroom/assignment/:assignmentId" element={<AssignmentDetailPage />} />
+			<Route path="classroom/assignment/:assignmentId/submitted" element={<SubmittedAssignmentPage />} />
+
+			{/* Assessment */}
+			<Route path="assessment" element={<AssessmentPage />} />
+			<Route path="assessment/:subjectId" element={<GradeBreakdownPage />} />
 
 			{/* Fallback */}
 			<Route path="*" element={<LayoutNotFoundPage />} />

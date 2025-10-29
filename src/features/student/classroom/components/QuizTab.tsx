@@ -141,15 +141,15 @@ export default function QuizTab({ quizzes }: QuizTabProps) {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-6 border-b border-gray-200">
         {filters.map((filter) => (
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-4 py-2 font-medium transition-colors ${
+            className={`pb-3 font-medium transition-colors border-b-2 ${
               activeFilter === filter.id
-                ? 'text-orange-600 border-b-2 border-orange-600'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'text-gray-900 border-gray-900'
+                : 'text-gray-500 border-transparent hover:text-gray-700'
             }`}
           >
             {filter.label}

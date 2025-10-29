@@ -57,15 +57,15 @@ export default function SubjectDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-6 border-b border-gray-200">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`pb-3 font-medium transition-colors border-b-2 ${
               activeTab === tab.id
-                ? 'text-orange-600 border-b-2 border-orange-600'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'text-gray-900 border-gray-900'
+                : 'text-gray-500 border-transparent hover:text-gray-700'
             }`}
           >
             {tab.label}
@@ -75,18 +75,18 @@ export default function SubjectDetailPage() {
 
       {/* Lesson Tab */}
       {activeTab === 'lesson' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Progress Card */}
-          <div className="bg-white rounded-lg border border-orange-200 p-6">
-            <p className="text-gray-700 mb-4">{subjectDescription}</p>
-            <div className="relative">
-              <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="rounded-lg border-l-4 border-orange-500 p-5" style={{ backgroundColor: '#FFF0F0' }}>
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">{subjectDescription}</p>
+            <div className="space-y-2">
+              <div className="w-full bg-gray-300 rounded-full h-2">
                 <div
                   className="bg-orange-500 h-2 rounded-full transition-all"
                   style={{ width: `${subject.progressPercentage || 0}%` }}
                 />
               </div>
-              <p className="text-sm text-gray-600 mt-2 text-right">{subject.progressPercentage}%</p>
+              <p className="text-sm font-medium text-gray-900 text-right">{subject.progressPercentage}%</p>
             </div>
           </div>
 
@@ -94,10 +94,10 @@ export default function SubjectDetailPage() {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-200 rounded-full" />
+                <div className="w-10 h-10 bg-gray-300 rounded-full" />
                 <div>
-                  <p className="text-sm text-gray-600">Teacher:</p>
-                  <p className="font-semibold text-gray-900">{subject.teacher}</p>
+                  <p className="text-xs text-gray-500 mb-0.5">Teacher:</p>
+                  <p className="text-sm font-semibold text-gray-900">{subject.teacher}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

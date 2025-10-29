@@ -2,32 +2,32 @@ import { ChevronsRight } from 'lucide-react';
 
 // Mock data for student timetable - keeping until timetable endpoint is provided
 const mockTimetableData = {
-  'Monday-08:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
-  'Tuesday-08:00am': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', borderColor: 'border-l-4 border-green-500', iconBg: 'bg-green-500' },
-  'Wednesday-08:00am': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', borderColor: 'border-l-4 border-orange-500', iconBg: 'bg-orange-500' },
-  'Friday-08:00am': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', borderColor: 'border-l-4 border-yellow-500', iconBg: 'bg-yellow-500' },
+  'Monday-08:00am': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
+  'Tuesday-08:00am': { subjectName: 'English', duration: '1hr 30mins', icon: '🟢', iconColor: 'text-green-600' },
+  'Wednesday-08:00am': { subjectName: 'Biology', duration: '50mins', icon: '🧬', iconColor: 'text-orange-600' },
+  'Friday-08:00am': { subjectName: 'Chemistry', duration: '50mins', icon: '🧪', iconColor: 'text-yellow-600' },
 
-  'Tuesday-09:00am': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', borderColor: 'border-l-4 border-orange-500', iconBg: 'bg-orange-500' },
-  'Thursday-09:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
+  'Tuesday-09:00am': { subjectName: 'Biology', duration: '50mins', icon: '🧬', iconColor: 'text-orange-600' },
+  'Thursday-09:00am': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
 
-  'Monday-10:00am': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', borderColor: 'border-l-4 border-green-500', iconBg: 'bg-green-500' },
-  'Wednesday-10:00am': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', borderColor: 'border-l-4 border-yellow-500', iconBg: 'bg-yellow-500' },
-  'Friday-10:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
+  'Monday-10:00am': { subjectName: 'English', duration: '1hr 30mins', icon: '🟢', iconColor: 'text-green-600' },
+  'Wednesday-10:00am': { subjectName: 'Chemistry', duration: '50mins', icon: '🧪', iconColor: 'text-yellow-600' },
+  'Friday-10:00am': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
 
-  'Tuesday-11:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
+  'Tuesday-11:00am': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
 
-  'Monday-12:00pm': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', borderColor: 'border-l-4 border-yellow-500', iconBg: 'bg-yellow-500' },
-  'Wednesday-12:00pm': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
-  'Thursday-12:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', borderColor: 'border-l-4 border-orange-500', iconBg: 'bg-orange-500' },
+  'Monday-12:00pm': { subjectName: 'Chemistry', duration: '50mins', icon: '🧪', iconColor: 'text-yellow-600' },
+  'Wednesday-12:00pm': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
+  'Thursday-12:00pm': { subjectName: 'Biology', duration: '50mins', icon: '🧬', iconColor: 'text-orange-600' },
 
-  'Tuesday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', borderColor: 'border-l-4 border-green-500', iconBg: 'bg-green-500' },
-  'Thursday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', borderColor: 'border-l-4 border-green-500', iconBg: 'bg-green-500' },
+  'Tuesday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', icon: '🟢', iconColor: 'text-green-600' },
+  'Thursday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', icon: '🟢', iconColor: 'text-green-600' },
 
-  'Monday-02:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', borderColor: 'border-l-4 border-orange-500', iconBg: 'bg-orange-500' },
-  'Wednesday-02:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', borderColor: 'border-l-4 border-orange-500', iconBg: 'bg-orange-500' },
+  'Monday-02:00pm': { subjectName: 'Biology', duration: '50mins', icon: '🧬', iconColor: 'text-orange-600' },
+  'Wednesday-02:00pm': { subjectName: 'Biology', duration: '50mins', icon: '🧬', iconColor: 'text-orange-600' },
 
-  'Tuesday-03:00pm': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', borderColor: 'border-l-4 border-yellow-500', iconBg: 'bg-yellow-500' },
-  'Thursday-03:00pm': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', borderColor: 'border-l-4 border-blue-500', iconBg: 'bg-blue-500' },
+  'Tuesday-03:00pm': { subjectName: 'Chemistry', duration: '50mins', icon: '🧪', iconColor: 'text-yellow-600' },
+  'Thursday-03:00pm': { subjectName: 'Further M...', duration: '1hr', icon: '📚', iconColor: 'text-blue-600' },
 };
 
 export default function TimetableView() {
@@ -64,20 +64,22 @@ export default function TimetableView() {
               const subject = mockTimetableData[key as keyof typeof mockTimetableData];
 
               return (
-                <div key={key} className="p-2 h-24 flex items-center justify-center">
+                <div key={key} className="p-3 h-24 flex items-center justify-center">
                   {subject ? (
                     <div
-                      className={`w-full h-full rounded-lg ${subject.color} ${subject.borderColor} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+                      className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-2.5 transition-all hover:shadow-md cursor-pointer min-w-0"
                       title={`${subject.subjectName} - ${subject.duration}`}
                     >
-                      <div className={`w-6 h-6 ${subject.iconBg} rounded-full mb-1 flex items-center justify-center`}>
-                        <div className="w-3 h-3 bg-white rounded-full"></div>
+                      <div className="text-2xl flex-shrink-0">
+                        {subject.icon}
                       </div>
-                      <div className="text-xs font-semibold mb-1 leading-tight">
-                        {subject.subjectName}
-                      </div>
-                      <div className="text-xs opacity-75 leading-tight">
-                        {subject.duration}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+                          {subject.subjectName}
+                        </div>
+                        <div className="text-xs text-gray-500 leading-tight mt-0.5">
+                          {subject.duration}
+                        </div>
                       </div>
                     </div>
                   ) : null}

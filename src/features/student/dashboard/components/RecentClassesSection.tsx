@@ -4,55 +4,25 @@ interface RecentClassesSectionProps {
 	classes: RecentClass[];
 }
 
+// Helper function to convert light bg color to bold progress bar color
+const getProgressBarColor = (bgColor: string): string => {
+	const colorMap: Record<string, string> = {
+		'bg-green-100': 'bg-green-600',
+		'bg-red-100': 'bg-red-600',
+		'bg-blue-100': 'bg-blue-600',
+		'bg-purple-100': 'bg-purple-600',
+		'bg-teal-100': 'bg-teal-600',
+		'bg-lime-100': 'bg-lime-600',
+		'bg-indigo-100': 'bg-indigo-600',
+		'bg-orange-100': 'bg-orange-600',
+		'bg-rose-100': 'bg-rose-600',
+		'bg-cyan-100': 'bg-cyan-600',
+		'bg-pink-100': 'bg-pink-600',
+	};
+	return colorMap[bgColor] || 'bg-orange-500';
+};
+
 export default function RecentClassesSection({ classes }: RecentClassesSectionProps) {
-	// Helper function to darken a hex color for icon background (medium shade)
-	const darkenColor = (hex: string, percent: number = 15): string => {
-		hex = hex.replace('#', '');
-		const r = parseInt(hex.substring(0, 2), 16);
-		const g = parseInt(hex.substring(2, 4), 16);
-		const b = parseInt(hex.substring(4, 6), 16);
-
-		const darkenValue = (value: number) => Math.floor(value * (1 - percent / 100));
-		const newR = darkenValue(r);
-		const newG = darkenValue(g);
-		const newB = darkenValue(b);
-
-		const toHex = (value: number) => value.toString(16).padStart(2, '0');
-		return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-	};
-
-	// Helper function to create deeper color for progress bar filled portion
-	const deepenColor = (hex: string, percent: number = 25): string => {
-		hex = hex.replace('#', '');
-		const r = parseInt(hex.substring(0, 2), 16);
-		const g = parseInt(hex.substring(2, 4), 16);
-		const b = parseInt(hex.substring(4, 6), 16);
-
-		const darkenValue = (value: number) => Math.floor(value * (1 - percent / 100));
-		const newR = darkenValue(r);
-		const newG = darkenValue(g);
-		const newB = darkenValue(b);
-
-		const toHex = (value: number) => value.toString(16).padStart(2, '0');
-		return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-	};
-
-	// Helper function to lighten color for progress bar background
-	const lightenColor = (hex: string, percent: number = 10): string => {
-		hex = hex.replace('#', '');
-		const r = parseInt(hex.substring(0, 2), 16);
-		const g = parseInt(hex.substring(2, 4), 16);
-		const b = parseInt(hex.substring(4, 6), 16);
-
-		const lightenValue = (value: number) => Math.min(255, Math.floor(value + (255 - value) * (percent / 100)));
-		const newR = lightenValue(r);
-		const newG = lightenValue(g);
-		const newB = lightenValue(b);
-
-		const toHex = (value: number) => value.toString(16).padStart(2, '0');
-		return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-	};
-
 	if (classes.length === 0) {
 		return (
 			<div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -77,19 +47,13 @@ export default function RecentClassesSection({ classes }: RecentClassesSectionPr
 			<h2 className="text-xl font-bold text-gray-900 mb-6">Recent classes</h2>
 			<div className="space-y-3">
 				{classes.map((classItem) => {
-					const iconBgColor = darkenColor(classItem.color, 30);
-					const progressBarFilled = deepenColor(classItem.color, 50);
-					const progressBarBg = lightenColor(classItem.color, 20);
+					const progressBarColor = getProgressBarColor(classItem.color);
 
 					return (
 						<div
 							key={classItem.id}
-							className="rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
-							style={{ backgroundColor: classItem.color }}>
-							<div
-								className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-								style={{ backgroundColor: iconBgColor }}
-							>
+							className={`${classItem.color} rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer`}>
+							<div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center text-2xl">
 								{classItem.subjectIcon}
 							</div>
 							<div className="flex-1 min-w-0">
@@ -101,13 +65,10 @@ export default function RecentClassesSection({ classes }: RecentClassesSectionPr
 										{classItem.progress}%
 									</span>
 								</div>
-								<div className="w-full rounded-full h-2 mb-2" style={{ backgroundColor: progressBarBg }}>
+								<div className="w-full bg-white/50 rounded-full h-2 mb-2">
 									<div
-										className="h-2 rounded-full transition-all"
-										style={{
-											width: `${classItem.progress}%`,
-											backgroundColor: progressBarFilled
-										}}
+										className={`${progressBarColor} h-2 rounded-full transition-all`}
+										style={{ width: `${classItem.progress}%` }}
 									/>
 								</div>
 								<div className="flex items-center justify-between text-xs text-gray-600">

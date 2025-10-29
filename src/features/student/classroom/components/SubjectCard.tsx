@@ -5,13 +5,33 @@ interface SubjectCardProps {
   onClick: () => void;
 }
 
+// Helper function to convert light bg color to bold progress bar color
+const getProgressBarColor = (bgColor: string): string => {
+  const colorMap: Record<string, string> = {
+    'bg-green-100': 'bg-green-600',
+    'bg-red-100': 'bg-red-600',
+    'bg-blue-100': 'bg-blue-600',
+    'bg-purple-100': 'bg-purple-600',
+    'bg-teal-100': 'bg-teal-600',
+    'bg-lime-100': 'bg-lime-600',
+    'bg-indigo-100': 'bg-indigo-600',
+    'bg-orange-100': 'bg-orange-600',
+    'bg-rose-100': 'bg-rose-600',
+    'bg-cyan-100': 'bg-cyan-600',
+    'bg-pink-100': 'bg-pink-600',
+  };
+  return colorMap[bgColor] || 'bg-orange-500';
+};
+
 export default function SubjectCard({ subject, onClick }: SubjectCardProps) {
+  const progressBarColor = getProgressBarColor(subject.bgColor);
+
   return (
     <div
       onClick={onClick}
       className={`${subject.bgColor} rounded-xl p-4 cursor-pointer hover:shadow-md transition-all hover:scale-[1.02]`}
     >
-      {/* Icon Container */} 
+      {/* Icon Container */}
       <div className="mb-3">
         <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center">
           <span className="text-2xl">{subject.icon}</span>
@@ -37,7 +57,7 @@ export default function SubjectCard({ subject, onClick }: SubjectCardProps) {
       {/* Progress Bar */}
       <div className="w-full bg-white/50 rounded-full h-2">
         <div
-          className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+          className={`${progressBarColor} h-2 rounded-full transition-all duration-300`}
           style={{ width: `${subject.progressPercentage}%` }}
         />
       </div>

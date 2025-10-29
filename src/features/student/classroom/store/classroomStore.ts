@@ -320,21 +320,51 @@ const mockQuizzes: StudentQuiz[] = [
 const mockAssignments: StudentAssignment[] = [
   {
     id: 'assignment-1',
-    title: 'Biology Assignment 1',
+    title: 'Week 2 Assignment',
     subjectId: 'subject-1',
     subjectName: 'Biology',
-    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
     status: 'pending',
-    description: 'Complete the assignment on cell structure',
+    description: 'Complete questions on photosynthesis',
   },
   {
     id: 'assignment-2',
-    title: 'Mathematics Assignment 2',
+    title: 'Week 5- Introduction',
     subjectId: 'subject-8',
     subjectName: 'Mathematics',
-    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
+    status: 'pending',
+  },
+  {
+    id: 'assignment-3',
+    title: 'Assignment Deadline',
+    subjectId: 'subject-3',
+    subjectName: 'English',
+    dueDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
     status: 'submitted',
-    submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    submittedAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'assignment-4',
+    title: 'Everyday physics',
+    subjectId: 'subject-4',
+    subjectName: 'Physics',
+    dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'graded',
+    score: 50,
+    totalPoints: 100,
+    submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'assignment-5',
+    title: 'Everyday physics',
+    subjectId: 'subject-4',
+    subjectName: 'Physics',
+    dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'graded',
+    score: 85,
+    totalPoints: 100,
+    submittedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
 

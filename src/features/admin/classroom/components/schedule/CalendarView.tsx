@@ -163,26 +163,26 @@ export default function CalendarView(_props: CalendarViewProps) {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="space-y-2">
         {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-0 border-b border-gray-200">
+        <div className="grid grid-cols-7 gap-2">
           {dayNames.map((day) => (
-            <div key={day} className="p-3 bg-gray-50 text-center font-medium text-gray-600 text-sm">
+            <div key={day} className="p-3 text-center font-medium text-gray-600 text-sm">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-0">
+        <div className="grid grid-cols-7 gap-2">
           {calendarDays.map((day, index) => {
             if (!day) {
-              return <div key={index} className="h-24 border-b border-r border-gray-100" />;
+              return <div key={index} className="h-28 rounded-lg" style={{ backgroundColor: '#FFF5F0' }} />;
             }
 
             const dayDate = new Date(currentYear, currentMonth, day);
             const isCurrentDay = checkIsToday(dayDate);
-            
+
             // Filter events for this specific day
             const dayEvents = currentMonthEvents.filter((event: EventResponse) => {
               const eventDate = apiDateToDate(event.date);
@@ -190,30 +190,27 @@ export default function CalendarView(_props: CalendarViewProps) {
             });
 
             return (
-              <div 
-                key={index} 
-                className="p-2 h-24 border-b border-r border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+              <div
+                key={index}
+                className="p-3 h-28 rounded-lg hover:opacity-90 cursor-pointer transition-all"
+                style={{ backgroundColor: '#FFEFE9' }}
               >
-                <div className={`text-sm font-medium mb-1 ${
-                  isCurrentDay ? 'text-orange-600 font-bold' : 'text-gray-900'
+                <div className={`text-sm mb-2 ${
+                  isCurrentDay ? 'text-orange-600 font-bold' :
+                  dayEvents.length > 0 ? 'font-bold text-gray-900' : 'font-normal text-gray-600'
                 }`}>
                   {day}
                 </div>
                 <div className="space-y-1">
-                  {dayEvents.slice(0, 2).map((event: EventResponse) => (
-                    <div 
+                  {dayEvents.map((event: EventResponse) => (
+                    <div
                       key={event.id}
-                      className={`text-xs px-2 py-1 rounded truncate ${EVENT_COLORS[event.receivers as keyof typeof EVENT_COLORS]}`}
+                      className="text-xs bg-white rounded-full px-2 py-1 text-gray-700 leading-tight truncate"
                       title={event.description}
                     >
                       {event.description}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
-                    <div className="text-xs text-gray-500 px-2">
-                      +{dayEvents.length - 2} more
-                    </div>
-                  )}
                 </div>
               </div>
             );
