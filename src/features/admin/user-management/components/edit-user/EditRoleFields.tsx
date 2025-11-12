@@ -86,6 +86,7 @@ export default function EditRoleFields({ selectedRole, register, errors, control
               errors.gender ? 'border-red-300' : 'border-gray-300'
             }`}
           >
+            <option value="">Select gender</option>
             {genders.map((gender) => (
               <option key={gender} value={gender}>{gender}</option>
             ))}
@@ -124,6 +125,7 @@ export default function EditRoleFields({ selectedRole, register, errors, control
                 errors.gender ? 'border-red-300' : 'border-gray-300'
               }`}
             >
+              <option value="">Select gender</option>
               {genders.map((gender) => (
                 <option key={gender} value={gender}>{gender}</option>
               ))}
@@ -155,6 +157,7 @@ export default function EditRoleFields({ selectedRole, register, errors, control
                 (errors as any).employmentStatus ? 'border-red-300' : 'border-gray-300'
               }`}
             >
+              <option value="">Select employment status</option>
               {employmentStatuses.map((status) => (
                 <option key={status} value={status}>{status}</option>
               ))}
@@ -237,6 +240,7 @@ export default function EditRoleFields({ selectedRole, register, errors, control
               errors.gender ? 'border-red-300' : 'border-gray-300'
             }`}
           >
+            <option value="">Select gender</option>
             {genders.map((gender) => (
               <option key={gender} value={gender}>{gender}</option>
             ))}

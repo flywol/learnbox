@@ -9,6 +9,7 @@ import { DashboardRoutes } from "./routes/DashboardRoutes";
 import { AdminRoutes } from "./routes/admin/AdminRoutes";
 import { TeacherRoutes } from "./routes/teacher/TeacherRoutes";
 import { StudentRoutes } from "./routes/student/StudentRoutes";
+import { ParentRoutes } from "./routes/parent/ParentRoutes";
 
 // Error and loading components
 import { UnauthorizedPage, NotFoundPage, LoadingSpinner } from "./components/ErrorPages";
@@ -31,6 +32,7 @@ export default function App() {
               {AdminRoutes()}
               {TeacherRoutes()}
               {StudentRoutes()}
+              {ParentRoutes()}
 
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
               <Route path="*" element={<NotFoundPage />} />
@@ -41,4 +43,4 @@ export default function App() {
       </HydrationGate>
     </SecurityWrapper>
   );
-}
+} 
