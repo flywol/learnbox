@@ -1,43 +1,35 @@
 import { useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-
-// Mock timetable data matching student structure
-const mockTimetableData = {
-	"Monday-08:00am": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-	"Tuesday-08:00am": { subjectName: "English", duration: "1hr 30mins", color: "bg-green-100 text-green-700", icon: "📚" },
-	"Wednesday-08:00am": { subjectName: "Biology", duration: "50mins", color: "bg-orange-100 text-orange-700", icon: "🧬" },
-	"Friday-08:00am": { subjectName: "Chemistry", duration: "50mins", color: "bg-yellow-100 text-yellow-700", icon: "⚗️" },
-	"Tuesday-09:00am": { subjectName: "Biology", duration: "50mins", color: "bg-orange-100 text-orange-700", icon: "🧬" },
-	"Thursday-09:00am": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-	"Monday-10:00am": { subjectName: "English", duration: "1hr 30mins", color: "bg-green-100 text-green-700", icon: "📚" },
-	"Wednesday-10:00am": { subjectName: "Chemistry", duration: "50mins", color: "bg-yellow-100 text-yellow-700", icon: "⚗️" },
-	"Friday-10:00am": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-	"Tuesday-11:00am": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-	"Monday-12:00pm": { subjectName: "Chemistry", duration: "50mins", color: "bg-yellow-100 text-yellow-700", icon: "⚗️" },
-	"Wednesday-12:00pm": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-	"Thursday-12:00pm": { subjectName: "Biology", duration: "50mins", color: "bg-orange-100 text-orange-700", icon: "🧬" },
-	"Tuesday-01:00pm": { subjectName: "English", duration: "1hr 30mins", color: "bg-green-100 text-green-700", icon: "📚" },
-	"Thursday-01:00pm": { subjectName: "English", duration: "1hr 30mins", color: "bg-green-100 text-green-700", icon: "📚" },
-	"Monday-02:00pm": { subjectName: "Biology", duration: "50mins", color: "bg-orange-100 text-orange-700", icon: "🧬" },
-	"Wednesday-02:00pm": { subjectName: "Biology", duration: "50mins", color: "bg-orange-100 text-orange-700", icon: "⚗️" },
-	"Tuesday-03:00pm": { subjectName: "Chemistry", duration: "50mins", color: "bg-yellow-100 text-yellow-700", icon: "⚗️" },
-	"Thursday-03:00pm": { subjectName: "Further M...", duration: "1hr", color: "bg-blue-100 text-blue-700", icon: "📐" },
-};
-
-// Mock events data
-const mockEvents = [
-	{ id: "1", date: "2025-10-03", description: "Assignment deadline is today", color: "bg-orange-100 text-orange-700" },
-	{ id: "2", date: "2025-10-08", description: "Physics live class", color: "bg-blue-100 text-blue-700" },
-	{ id: "3", date: "2025-10-11", description: "Class trip", color: "bg-purple-100 text-purple-700" },
-	{ id: "4", date: "2025-10-10", description: "Biology quiz due", color: "bg-orange-100 text-orange-700" },
-	{ id: "5", date: "2025-10-21", description: "Physics live class", color: "bg-blue-100 text-blue-700" },
-	{ id: "6", date: "2025-10-27", description: "Children's day", color: "bg-purple-100 text-purple-700" },
-	{ id: "7", date: "2025-10-31", description: "Biology quiz due", color: "bg-orange-100 text-orange-700" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { useParentContext } from "../../context/ParentContext";
+import { parentApiClient } from "../../api/parentApiClient";
 
 export default function ScheduleContent() {
+	const { selectedChild } = useParentContext();
 	const [activeSubTab, setActiveSubTab] = useState<"timetable" | "calendar">("timetable");
 	const [currentDate, setCurrentDate] = useState(new Date());
+
+	// Fetch schedule (timetable) data
+	const { data: scheduleData, isLoading: isLoadingSchedule } = useQuery({
+		queryKey: ["child-schedule", selectedChild?._id],
+		queryFn: async () => {
+			if (!selectedChild) return null;
+			const response = await parentApiClient.getSchedule(selectedChild._id);
+			return response.data;
+		},
+		enabled: !!selectedChild,
+	});
+
+	// Fetch calendar data
+	const { data: calendarData, isLoading: isLoadingCalendar } = useQuery({
+		queryKey: ["child-calendar", selectedChild?._id],
+		queryFn: async () => {
+			if (!selectedChild) return null;
+			const response = await parentApiClient.getCalendar(selectedChild._id);
+			return response.data;
+		},
+		enabled: !!selectedChild,
+	});
 
 	const timeSlots = ["08:00am", "09:00am", "10:00am", "11:00am", "12:00pm", "01:00pm", "02:00pm", "03:00pm"];
 	const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -80,8 +72,32 @@ export default function ScheduleContent() {
 	};
 
 	const getEventsForDay = (day: number) => {
+		if (!calendarData?.events) return [];
 		const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-		return mockEvents.filter((event) => event.date === dateStr);
+		return calendarData.events.filter((event: any) => event.date?.startsWith(dateStr));
+	};
+
+	// Helper function to get color for subject
+	const getSubjectColor = (subjectName: string) => {
+		const colors = [
+			"bg-green-100 text-green-700",
+			"bg-blue-100 text-blue-700",
+			"bg-purple-100 text-purple-700",
+			"bg-teal-100 text-teal-700",
+			"bg-pink-100 text-pink-700",
+			"bg-orange-100 text-orange-700",
+			"bg-yellow-100 text-yellow-700",
+		];
+		const colorIndex = subjectName.charCodeAt(0) % colors.length;
+		return colors[colorIndex];
+	};
+
+	// Helper function to format duration from minutes
+	const formatDuration = (minutes: number) => {
+		if (minutes < 60) return `${minutes}mins`;
+		const hours = Math.floor(minutes / 60);
+		const mins = minutes % 60;
+		return mins > 0 ? `${hours}hr ${mins}mins` : `${hours}hr`;
 	};
 
 	return (
@@ -124,77 +140,85 @@ export default function ScheduleContent() {
 						</div>
 					</div>
 
-					{/* Timetable Grid */}
-					<div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-						{/* Header */}
-						<div className="grid grid-cols-6 gap-0 border-b border-gray-200">
-							<div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
-							{days.map((day) => (
-								<div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
-									{day}
-								</div>
-							))}
+					{isLoadingSchedule ? (
+						<div className="flex justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
 						</div>
-
-						{/* Time Slots */}
-						{timeSlots.map((time) => (
-							<div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-								<div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center">
-									<span className="flex items-center">
-										<span className="mr-1">⏰</span>
-										{time}
-									</span>
-								</div>
-								{days.map((day) => {
-									const key = `${day}-${time}`;
-									const subject = mockTimetableData[key as keyof typeof mockTimetableData];
-
-									return (
-										<div key={key} className="p-2 h-24 flex items-center justify-center">
-											{subject ? (
-												<div
-													className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-													title={`${subject.subjectName} - ${subject.duration}`}>
-													<div className="text-lg mb-1">{subject.icon}</div>
-													<div className="text-xs font-semibold mb-1 leading-tight">
-														{subject.subjectName}
-													</div>
-													<div className="text-xs opacity-75 leading-tight">
-														{subject.duration}
-													</div>
-												</div>
-											) : (
-												<div className="w-full h-full flex items-center justify-center text-gray-300">
-													—
-												</div>
-											)}
+					) : scheduleData?.schedule && scheduleData.schedule.length > 0 ? (
+						<>
+							{/* Timetable Grid */}
+							<div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+								{/* Header */}
+								<div className="grid grid-cols-6 gap-0 border-b border-gray-200">
+									<div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
+									{days.map((day) => (
+										<div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
+											{day}
 										</div>
-									);
-								})}
-							</div>
-						))}
-					</div>
+									))}
+								</div>
 
-					{/* Legend */}
-					<div className="flex items-center space-x-6 flex-wrap text-sm text-gray-600">
-						<span className="font-medium">Subjects:</span>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-blue-100" />
-							<span>Further Mathematics</span>
+								{/* Time Slots */}
+								{timeSlots.map((time) => (
+									<div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
+										<div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center">
+											<span className="flex items-center">
+												<span className="mr-1">⏰</span>
+												{time}
+											</span>
+										</div>
+										{days.map((day) => {
+											// Find the schedule entry for this day and time
+											const scheduleEntry = scheduleData.schedule.find(
+												(entry: any) => entry.day === day && entry.startTime === time
+											);
+
+											return (
+												<div key={`${day}-${time}`} className="p-2 h-24 flex items-center justify-center">
+													{scheduleEntry ? (
+														<div
+															className={`w-full h-full rounded-lg ${getSubjectColor(
+																scheduleEntry.subjectName
+															)} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
+															title={`${scheduleEntry.subjectName} - ${formatDuration(scheduleEntry.duration)}`}>
+															<div className="text-lg mb-1">{scheduleEntry.subjectName[0]}</div>
+															<div className="text-xs font-semibold mb-1 leading-tight">
+																{scheduleEntry.subjectName}
+															</div>
+															<div className="text-xs opacity-75 leading-tight">
+																{formatDuration(scheduleEntry.duration)}
+															</div>
+														</div>
+													) : (
+														<div className="w-full h-full flex items-center justify-center text-gray-300">
+															—
+														</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+								))}
+							</div>
+
+							{/* Legend */}
+							<div className="flex items-center space-x-6 flex-wrap text-sm text-gray-600">
+								<span className="font-medium">Subjects:</span>
+								{[...new Set(scheduleData.schedule.map((entry: any) => entry.subjectName))].map(
+									(subjectName: any) => (
+										<div key={subjectName} className="flex items-center space-x-2">
+											<div className={`w-3 h-3 rounded ${getSubjectColor(subjectName).split(" ")[0]}`} />
+											<span>{subjectName}</span>
+										</div>
+									)
+								)}
+							</div>
+						</>
+					) : (
+						<div className="text-center py-12 text-gray-500">
+							No schedule found for this child
 						</div>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-green-100" />
-							<span>English</span>
-						</div>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-orange-100" />
-							<span>Biology</span>
-						</div>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-yellow-100" />
-							<span>Chemistry</span>
-						</div>
-					</div>
+					)}
 				</div>
 			)}
 
@@ -212,108 +236,130 @@ export default function ScheduleContent() {
 						</div>
 					</div>
 
-					{/* Calendar Header */}
-					<div className="flex items-center justify-between">
-						<div className="flex items-center space-x-4">
-							<div className="flex items-center space-x-2">
-								<button
-									onClick={() => navigateMonth("prev")}
-									className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-									title="Previous month">
-									<ChevronLeft className="w-5 h-5 text-gray-600" />
-								</button>
+					{isLoadingCalendar ? (
+						<div className="flex justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+						</div>
+					) : (
+						<>
+							{/* Calendar Header */}
+							<div className="flex items-center justify-between">
+								<div className="flex items-center space-x-4">
+									<div className="flex items-center space-x-2">
+										<button
+											onClick={() => navigateMonth("prev")}
+											className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+											title="Previous month">
+											<ChevronLeft className="w-5 h-5 text-gray-600" />
+										</button>
 
-								<h3 className="text-xl font-semibold min-w-[200px] text-center">
-									{monthNames[currentMonth]} {currentYear}
-								</h3>
+										<h3 className="text-xl font-semibold min-w-[200px] text-center">
+											{monthNames[currentMonth]} {currentYear}
+										</h3>
 
-								<button
-									onClick={() => navigateMonth("next")}
-									className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-									title="Next month">
-									<ChevronRight className="w-5 h-5 text-gray-600" />
-								</button>
+										<button
+											onClick={() => navigateMonth("next")}
+											className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+											title="Next month">
+											<ChevronRight className="w-5 h-5 text-gray-600" />
+										</button>
+									</div>
+
+									<button
+										onClick={goToToday}
+										className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+										Today
+									</button>
+								</div>
 							</div>
 
-							<button
-								onClick={goToToday}
-								className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-								Today
-							</button>
-						</div>
-					</div>
-
-					{/* Calendar Grid */}
-					<div className="space-y-2">
-						{/* Day Headers */}
-						<div className="grid grid-cols-7 gap-2">
-							{dayNames.map((day) => (
-								<div key={day} className="p-3 text-center font-medium text-gray-600 text-sm">
-									{day}
-								</div>
-							))}
-						</div>
-
-						{/* Calendar Days */}
-						<div className="grid grid-cols-7 gap-2">
-							{calendarDays.map((day, index) => {
-								if (!day) {
-									return <div key={index} className="h-24 rounded-lg" style={{ backgroundColor: '#FFF5F0' }} />;
-								}
-
-								const dayEvents = getEventsForDay(day);
-								const isCurrentDay = isToday(day);
-
-								return (
-									<div
-										key={index}
-										className="p-3 h-24 rounded-lg hover:opacity-90 cursor-pointer transition-all"
-										style={{ backgroundColor: '#FFEFE9' }}>
-										<div
-											className={`text-sm mb-2 ${
-												isCurrentDay
-													? "text-orange-600 font-bold"
-													: dayEvents.length > 0
-													? "font-bold text-gray-900"
-													: "font-normal text-gray-600"
-											}`}>
+							{/* Calendar Grid */}
+							<div className="space-y-2">
+								{/* Day Headers */}
+								<div className="grid grid-cols-7 gap-2">
+									{dayNames.map((day) => (
+										<div key={day} className="p-3 text-center font-medium text-gray-600 text-sm">
 											{day}
 										</div>
-										<div className="space-y-1">
-											{dayEvents.slice(0, 2).map((event) => (
-												<div
-													key={event.id}
-													className={`text-xs px-2 py-1 rounded truncate ${event.color}`}
-													title={event.description}>
-													{event.description}
-												</div>
-											))}
-											{dayEvents.length > 2 && (
-												<div className="text-xs text-gray-500 px-2">+{dayEvents.length - 2} more</div>
-											)}
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					</div>
+									))}
+								</div>
 
-					{/* Events Legend */}
-					<div className="flex items-center space-x-6 flex-wrap">
-						<span className="text-sm font-medium text-gray-600">Event types:</span>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-orange-100" />
-							<span className="text-sm text-gray-600">Assignments</span>
-						</div>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-blue-100" />
-							<span className="text-sm text-gray-600">Live Classes</span>
-						</div>
-						<div className="flex items-center space-x-2">
-							<div className="w-3 h-3 rounded bg-purple-100" />
-							<span className="text-sm text-gray-600">School Events</span>
-						</div>
-					</div>
+								{/* Calendar Days */}
+								<div className="grid grid-cols-7 gap-2">
+									{calendarDays.map((day, index) => {
+										if (!day) {
+											return <div key={index} className="h-24 rounded-lg" style={{ backgroundColor: '#FFF5F0' }} />;
+										}
+
+										const dayEvents = getEventsForDay(day);
+										const isCurrentDay = isToday(day);
+
+										// Helper to get event color class
+										const getEventColor = (type: string) => {
+											switch (type) {
+												case 'assignment':
+													return 'bg-orange-100 text-orange-700';
+												case 'live_class':
+													return 'bg-blue-100 text-blue-700';
+												case 'school_event':
+													return 'bg-purple-100 text-purple-700';
+												default:
+													return 'bg-gray-100 text-gray-700';
+											}
+										};
+
+										return (
+											<div
+												key={index}
+												className="p-3 h-24 rounded-lg hover:opacity-90 cursor-pointer transition-all"
+												style={{ backgroundColor: '#FFEFE9' }}>
+												<div
+													className={`text-sm mb-2 ${
+														isCurrentDay
+															? "text-orange-600 font-bold"
+															: dayEvents.length > 0
+															? "font-bold text-gray-900"
+															: "font-normal text-gray-600"
+													}`}>
+													{day}
+												</div>
+												<div className="space-y-1">
+													{dayEvents.slice(0, 2).map((event: any) => (
+														<div
+															key={event._id}
+															className={`text-xs px-2 py-1 rounded truncate ${getEventColor(event.type)}`}
+															title={event.title}>
+															{event.title}
+														</div>
+													))}
+													{dayEvents.length > 2 && (
+														<div className="text-xs text-gray-500 px-2">+{dayEvents.length - 2} more</div>
+													)}
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							</div>
+
+							{/* Events Legend */}
+							<div className="flex items-center space-x-6 flex-wrap">
+								<span className="text-sm font-medium text-gray-600">Event types:</span>
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded bg-orange-100" />
+									<span className="text-sm text-gray-600">Assignments</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded bg-blue-100" />
+									<span className="text-sm text-gray-600">Live Classes</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded bg-purple-100" />
+									<span className="text-sm text-gray-600">School Events</span>
+								</div>
+							</div>
+						</>
+					)}
 				</div>
 			)}
 		</div>

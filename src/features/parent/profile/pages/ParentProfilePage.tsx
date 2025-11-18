@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
+import { useParentContext } from "../../context/ParentContext";
 
 export default function ParentProfilePage() {
+	const { profile, children } = useParentContext();
 	const [showLogoutModal, setShowLogoutModal] = useState(false);
 	const [showSwitchModal, setShowSwitchModal] = useState(false);
 	const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -11,12 +13,22 @@ export default function ParentProfilePage() {
 			{/* Header Banner */}
 			<div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 mb-6 text-white">
 				<div className="flex items-center gap-4">
-					<div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-						<span className="text-4xl">👤</span>
-					</div>
+					{profile?.profilePicture ? (
+						<img
+							src={profile.profilePicture}
+							alt={profile.fullName}
+							className="w-20 h-20 rounded-full object-cover bg-white"
+						/>
+					) : (
+						<div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+							<span className="text-4xl">👤</span>
+						</div>
+					)}
 					<div className="flex-1">
-						<h1 className="text-2xl font-bold">Paula Doe</h1>
-						<button className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+						<h1 className="text-2xl font-bold">{profile?.fullName || "Loading..."}</h1>
+						<button
+							onClick={() => setShowSwitchModal(true)}
+							className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
 							Switch account
 						</button>
 					</div>
@@ -37,26 +49,24 @@ export default function ParentProfilePage() {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div>
 						<label className="block text-xs text-gray-600 mb-1">Name</label>
-						<p className="text-sm font-medium text-gray-900">Paula Doe</p>
+						<p className="text-sm font-medium text-gray-900">{profile?.fullName || "N/A"}</p>
 					</div>
 					<div>
 						<label className="block text-xs text-gray-600 mb-1">Email</label>
 						<p className="text-sm font-medium text-gray-900">
-							paula@gmail.com
+							{profile?.email || "N/A"}
 						</p>
 					</div>
 					<div>
-						<label className="block text-xs text-gray-600 mb-1">Gender</label>
-						<p className="text-sm font-medium text-gray-900">Female</p>
+						<label className="block text-xs text-gray-600 mb-1">Phone</label>
+						<p className="text-sm font-medium text-gray-900">{profile?.phoneNumber || "N/A"}</p>
 					</div>
-					<div>
-						<label className="block text-xs text-gray-600 mb-1">Child 1</label>
-						<p className="text-sm font-medium text-gray-900">Jane Doe</p>
-					</div>
-					<div>
-						<label className="block text-xs text-gray-600 mb-1">Child 2</label>
-						<p className="text-sm font-medium text-gray-900">Jane Doe</p>
-					</div>
+					{children.map((child, index) => (
+						<div key={child._id}>
+							<label className="block text-xs text-gray-600 mb-1">Child {index + 1}</label>
+							<p className="text-sm font-medium text-gray-900">{child.fullName}</p>
+						</div>
+					))}
 				</div>
 			</div>
 

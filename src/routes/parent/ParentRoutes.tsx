@@ -47,6 +47,11 @@ const ChatPage = lazy(
 	() => import("../../features/parent/chat/pages/ChatPage")
 );
 
+// Notifications
+const NotificationsPage = lazy(
+	() => import("../../features/parent/notifications/pages/NotificationsPage")
+);
+
 export function ParentRoutes() {
 	return (
 		<Route
@@ -75,6 +80,9 @@ export function ParentRoutes() {
 
 			{/* Chat */}
 			<Route path="chat" element={<ChatPage />} />
+
+			{/* Notifications */}
+			<Route path="notifications" element={<NotificationsPage />} />
 
 			{/* Academic Record */}
 			<Route path="academic-record" element={<AcademicRecordPage />} />

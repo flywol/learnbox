@@ -14,6 +14,7 @@ import type {
 import { authApiClient } from "../api/authApiClient";
 import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
 import { studentAuthApiClient } from "../api/studentAuthApiClient";
+import { parentAuthApiClient } from "../api/parentAuthApiClient";
 
 interface AuthState {
 	// Core state
@@ -88,7 +89,11 @@ const getAuthClientForRole = (selectedRole: Role | null) => {
 		return studentAuthApiClient;
 	}
 
-	// Use base auth client for ADMIN and other roles (including PARENT)
+	if (selectedRole === "PARENT") {
+		return parentAuthApiClient;
+	}
+
+	// Use base auth client for ADMIN and other roles
 	return authApiClient;
 };
 

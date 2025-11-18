@@ -5,7 +5,7 @@ interface Props {
 }
 
 export default function OverviewStats({ stats }: Props) {
-	const { classAttendance, assignments, testScores } = stats;
+	const { attendance, assignments, tests } = stats;
 
 	// Calculate circular progress strokeDasharray values
 	const getCircularProgress = (percentage: number) => {
@@ -15,8 +15,8 @@ export default function OverviewStats({ stats }: Props) {
 		return { circumference, progress };
 	};
 
-	const attendanceCircle = getCircularProgress(classAttendance.percentage);
-	const testScoreCircle = getCircularProgress(testScores.averageScore);
+	const attendanceCircle = getCircularProgress(attendance?.percentage || 0);
+	const testScoreCircle = getCircularProgress(tests?.averageScore || 0);
 
 	return (
 		<div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -51,7 +51,7 @@ export default function OverviewStats({ stats }: Props) {
 						</svg>
 						<div className="absolute inset-0 flex items-center justify-center">
 							<span className="text-xl font-bold text-gray-900">
-								{classAttendance.percentage}
+								{attendance?.percentage || 0}
 								<span className="text-sm">%</span>
 							</span>
 						</div>
@@ -64,9 +64,9 @@ export default function OverviewStats({ stats }: Props) {
 
 					{/* Stats */}
 					<div className="text-xs text-gray-600 text-center space-y-1">
-						<p>Total classes: {classAttendance.totalClasses}</p>
-						<p>Attended: {classAttendance.attended}</p>
-						<p>Missed: {classAttendance.missed}</p>
+						<p>Total classes: {attendance?.totalClasses || 0}</p>
+						<p>Attended: {attendance?.attended || 0}</p>
+						<p>Missed: {attendance?.missed || 0}</p>
 					</div>
 				</div>
 
@@ -76,11 +76,11 @@ export default function OverviewStats({ stats }: Props) {
 					<div className="relative w-24 h-24 mb-3 flex items-center justify-center">
 						<div className="text-center">
 							<div className="text-4xl font-bold text-gray-900">
-								{assignments.completed}
+								{assignments?.completed || 0}
 							</div>
 							<div className="w-12 h-0.5 bg-gray-900 mx-auto my-1"></div>
 							<div className="text-4xl font-bold text-gray-900">
-								{assignments.total}
+								{assignments?.total || 0}
 							</div>
 						</div>
 					</div>
@@ -92,9 +92,9 @@ export default function OverviewStats({ stats }: Props) {
 
 					{/* Stats */}
 					<div className="text-xs text-gray-600 text-center space-y-1">
-						<p>Total assignments: {assignments.total}</p>
-						<p>Completed: {assignments.completed}</p>
-						<p>Pending: {assignments.pending}</p>
+						<p>Total assignments: {assignments?.total || 0}</p>
+						<p>Completed: {assignments?.completed || 0}</p>
+						<p>Pending: {assignments?.pending || 0}</p>
 					</div>
 				</div>
 
@@ -126,7 +126,7 @@ export default function OverviewStats({ stats }: Props) {
 						</svg>
 						<div className="absolute inset-0 flex items-center justify-center">
 							<span className="text-xl font-bold text-gray-900">
-								{testScores.averageScore}
+								{tests?.averageScore || 0}
 								<span className="text-sm">%</span>
 							</span>
 						</div>
@@ -139,9 +139,9 @@ export default function OverviewStats({ stats }: Props) {
 
 					{/* Stats */}
 					<div className="text-xs text-gray-600 text-center space-y-1">
-						<p>Total tests: {testScores.totalTests}</p>
-						<p>Completed: {testScores.completed}</p>
-						<p>Pending: {testScores.pending}</p>
+						<p>Total tests: {tests?.totalTests || 0}</p>
+						<p>Completed: {tests?.completedTests || 0}</p>
+						<p>Pending: {tests?.pendingTests || 0}</p>
 					</div>
 				</div>
 			</div>

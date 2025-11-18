@@ -41,10 +41,15 @@ class UserApiClient extends BaseApiClient {
         } else if (key === 'parentGuardianName' && userData.role === 'Student') {
           // Transform parentGuardianName -> parentName for students
           formData.append('parentName', value as string);
+        } else if (key === 'linkedChildren' && userData.role === 'Parent') {
+          // Transform linkedChildren -> linkChild for parents (API expects singular)
+          if (Array.isArray(value)) {
+            value.forEach((item) => formData.append('linkChild', item));
+          }
         } else if (Array.isArray(value)) {
           // Handle arrays (assignedClasses, assignedClassArms, assignedSubjects, etc.)
           value.forEach((item) => formData.append(key, item));
-        } else if (value !== undefined && value !== null && key !== 'profileImage' && key !== 'parentGuardianName') {
+        } else if (value !== undefined && value !== null && key !== 'profileImage' && key !== 'parentGuardianName' && key !== 'linkedChildren') {
           // Add other fields as strings
           formData.append(key, value as string);
         }

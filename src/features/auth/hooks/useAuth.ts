@@ -5,6 +5,7 @@ import { Role, User, UserData } from "../types/auth.types";
 import { authApiClient } from "../api/authApiClient";
 import { teacherAuthApiClient } from "../api/teacherAuthApiClient";
 import { studentAuthApiClient } from "../api/studentAuthApiClient";
+import { parentAuthApiClient } from "../api/parentAuthApiClient";
 
 interface UseAuthOptions {
 	redirectTo?: string;
@@ -86,8 +87,10 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 					authClient = teacherAuthApiClient;
 				} else if (selectedRole === "STUDENT") {
 					authClient = studentAuthApiClient;
+				} else if (selectedRole === "PARENT") {
+					authClient = parentAuthApiClient;
 				} else {
-					authClient = authApiClient; // ADMIN, PARENT, etc.
+					authClient = authApiClient; // ADMIN and other roles
 				}
 
 				const response = await authClient.login(

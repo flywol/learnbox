@@ -133,13 +133,22 @@ const CombinedSchoolLoginPage = () => {
 					
 					// Verify that authentication state is properly set
 					if (currentAuthState.isAuthenticated && currentAuthState.user) {
+						// Determine default destination based on role
+						const getDefaultDashboard = () => {
+							const userRole = currentAuthState.user?.role;
+							if (userRole === "PARENT") return "/parent/dashboard";
+							if (userRole === "TEACHER") return "/teacher/dashboard";
+							if (userRole === "STUDENT") return "/student/dashboard";
+							return "/dashboard"; // ADMIN default
+						};
+
 						// Navigate based on user state
 						if (result.isFirstTimeLogin) {
 							navigate("/reset-password", {
 								state: {
 									resetToken: result.resetToken,
 									email: result.user!.email,
-									from: intendedDestination || "/dashboard",
+									from: intendedDestination || getDefaultDashboard(),
 								},
 								replace: true,
 							});
@@ -148,7 +157,7 @@ const CombinedSchoolLoginPage = () => {
 							setIntendedDestination(null);
 							navigate(destination, { replace: true });
 						} else if (hasSeenOnboarding) {
-							navigate("/dashboard", { replace: true });
+							navigate(getDefaultDashboard(), { replace: true });
 						} else {
 							navigate("/onboarding", { replace: true });
 						}

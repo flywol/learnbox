@@ -19,6 +19,11 @@ function RoleBasedLayout() {
     return <Navigate to="/student/dashboard" replace />;
   }
 
+  // Parents should never use DashboardLayout - redirect immediately before any API calls
+  if (user?.role?.toLowerCase() === 'parent') {
+    return <Navigate to="/parent/dashboard" replace />;
+  }
+
   // Teachers get simple layout with no API calls
   if (user?.role?.toLowerCase() === 'teacher') {
     return <TeacherLayout />;

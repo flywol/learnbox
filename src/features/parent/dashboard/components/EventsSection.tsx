@@ -1,10 +1,20 @@
-import type { Event } from "../types/dashboard.types";
+import type { SchoolEvent } from "../../types/parent-api.types";
 
 interface Props {
-	events: Event[];
+	events: SchoolEvent[];
 }
 
 export default function EventsSection({ events }: Props) {
+	// Helper to extract day and month from date string
+	const formatEventDate = (dateString: string) => {
+		if (!dateString) return { day: 0, month: "N/A" };
+		const date = new Date(dateString);
+		if (isNaN(date.getTime())) return { day: 0, month: "N/A" };
+		const day = date.getDate();
+		const month = date.toLocaleDateString("en-US", { month: "short" });
+		return { day, month };
+	};
+
 	if (events.length === 0) {
 		return (
 			<div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -28,26 +38,29 @@ export default function EventsSection({ events }: Props) {
 		<div className="bg-white rounded-2xl p-6 shadow-sm">
 			<h2 className="text-xl font-bold text-gray-900 mb-6">Events</h2>
 			<div className="space-y-3 max-h-[500px] overflow-y-auto">
-				{events.map((event) => (
-					<div
-						key={event.id}
-						className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer">
-						<div className="flex-shrink-0 text-center">
-							<div className="w-14 h-14 rounded-lg bg-orange-50 flex flex-col items-center justify-center">
-								<span className="text-2xl font-bold text-gray-900">
-									{event.day}
-								</span>
-								<span className="text-xs text-gray-600">{event.month}</span>
+				{events.map((event) => {
+					const { day, month } = formatEventDate(event.date);
+					return (
+						<div
+							key={event._id}
+							className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer">
+							<div className="flex-shrink-0 text-center">
+								<div className="w-14 h-14 rounded-lg bg-orange-50 flex flex-col items-center justify-center">
+									<span className="text-2xl font-bold text-gray-900">
+										{day || '-'}
+									</span>
+									<span className="text-xs text-gray-600">{month || 'N/A'}</span>
+								</div>
+							</div>
+							<div className="flex-1 min-w-0">
+								<h3 className="font-semibold text-gray-900 mb-1">{event.description}</h3>
+								<p className="text-sm text-gray-600 line-clamp-2">
+									{event.repeat && `Repeats: ${event.repeat}`}
+								</p>
 							</div>
 						</div>
-						<div className="flex-1 min-w-0">
-							<h3 className="font-semibold text-gray-900 mb-1">{event.title}</h3>
-							<p className="text-sm text-gray-600 line-clamp-2">
-								{event.description}
-							</p>
-						</div>
-					</div>
-				))}
+					);
+				})}
 			</div>
 		</div>
 	);

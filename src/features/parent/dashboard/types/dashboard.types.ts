@@ -8,7 +8,7 @@ export interface Child {
 	classArm: string;
 }
 
-export interface ClassAttendance {
+export interface Attendance {
 	percentage: number;
 	totalClasses: number;
 	attended: number;
@@ -19,20 +19,19 @@ export interface Assignments {
 	total: number;
 	completed: number;
 	pending: number;
-	completionRate: number;
 }
 
-export interface TestScores {
+export interface Tests {
 	averageScore: number;
 	totalTests: number;
-	completed: number;
-	pending: number;
+	completedTests: number;
+	pendingTests: number;
 }
 
 export interface OverviewStats {
-	classAttendance: ClassAttendance;
+	attendance: Attendance;
 	assignments: Assignments;
-	testScores: TestScores;
+	tests: Tests;
 }
 
 export interface RecentClass {

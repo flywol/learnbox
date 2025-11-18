@@ -1,7 +1,7 @@
-import type { RecentClass } from "../types/dashboard.types";
+import type { RecentLesson } from "../../types/parent-api.types";
 
 interface Props {
-	classes: RecentClass[];
+	classes: RecentLesson[];
 }
 
 // Helper function to convert light bg color to bold progress bar color
@@ -30,16 +30,28 @@ export default function RecentClassesSection({ classes }: Props) {
 			</h2>
 
 			<div className="space-y-4">
-				{classes.map((classItem) => {
-					const progressBarColor = getProgressBarColor(classItem.color);
+				{classes.map((lesson) => {
+					// Generate a color based on subject name hash
+					const colors = [
+						"bg-green-100",
+						"bg-blue-100",
+						"bg-purple-100",
+						"bg-teal-100",
+						"bg-pink-100",
+						"bg-orange-100",
+					];
+					const colorIndex =
+						lesson.subject.name.charCodeAt(0) % colors.length;
+					const bgColor = colors[colorIndex];
+					const progressBarColor = getProgressBarColor(bgColor);
 
 					return (
 						<div
-							key={classItem.id}
-							className={`${classItem.color} rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer`}>
-							{/* Icon */}
-							<div className="w-14 h-14 bg-white/40 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
-								{classItem.subjectIcon}
+							key={lesson._id}
+							className={`${bgColor} rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer`}>
+							{/* Icon - using first letter of subject */}
+							<div className="w-14 h-14 bg-white/40 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">
+								{lesson.subject.name[0]}
 							</div>
 
 							{/* Content */}
@@ -47,10 +59,10 @@ export default function RecentClassesSection({ classes }: Props) {
 								{/* Subject Name */}
 								<div className="flex items-center justify-between mb-2">
 									<h3 className="font-semibold text-gray-900 truncate">
-										{classItem.subjectName}
+										{lesson.subject.name}
 									</h3>
 									<span className="text-sm font-medium text-gray-700 ml-2">
-										{classItem.progress}%
+										{lesson.completionPercentage}%
 									</span>
 								</div>
 
@@ -58,18 +70,16 @@ export default function RecentClassesSection({ classes }: Props) {
 								<div className="w-full bg-white/50 rounded-full h-2.5 mb-2">
 									<div
 										className={`${progressBarColor} h-2.5 rounded-full transition-all duration-300`}
-										style={{ width: `${classItem.progress}%` }}
+										style={{
+											width: `${lesson.completionPercentage}%`,
+										}}
 									/>
 								</div>
 
 								{/* Lesson Info */}
 								<div className="flex items-center justify-between text-xs text-gray-700">
-									<span>
-										Lesson {classItem.lessonNumber}/{classItem.totalLessons}
-									</span>
-									<span className="text-gray-600">
-										{classItem.lastAccessed}
-									</span>
+									<span>{lesson.title}</span>
+									<span className="text-gray-600">{lesson.timeAgo}</span>
 								</div>
 							</div>
 						</div>
