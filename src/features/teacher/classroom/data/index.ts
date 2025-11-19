@@ -41,10 +41,50 @@ export const mockData = {
   ] as Assignment[],
 
   quizzes: [
-    { id: '1', title: 'Week 2 Quiz', dueDate: 'Due in 2hrs 30mins', status: 'active' },
-    { id: '2', title: 'Week 2 Quiz', dueDate: 'Due in 2hrs 30mins', status: 'active' },
-    { id: '3', title: 'Everyday physics', dueDate: 'Expired', status: 'expired' },
-    { id: '4', title: 'Everyday physics', dueDate: 'Expired', status: 'expired' },
+    {
+      id: '1',
+      title: 'Week 2 Quiz',
+      dueDate: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dueTime: '14:30',
+      duration: 30,
+      allowLateSubmission: true,
+      status: 'published' as const,
+      questions: [],
+      subjectId: 'subject-1'
+    },
+    {
+      id: '2',
+      title: 'Week 2 Quiz',
+      dueDate: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dueTime: '16:00',
+      duration: 30,
+      allowLateSubmission: true,
+      status: 'published' as const,
+      questions: [],
+      subjectId: 'subject-1'
+    },
+    {
+      id: '3',
+      title: 'Everyday physics',
+      dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dueTime: '14:00',
+      duration: 45,
+      allowLateSubmission: false,
+      status: 'archived' as const,
+      questions: [],
+      subjectId: 'subject-1'
+    },
+    {
+      id: '4',
+      title: 'Everyday physics',
+      dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dueTime: '15:00',
+      duration: 45,
+      allowLateSubmission: false,
+      status: 'archived' as const,
+      questions: [],
+      subjectId: 'subject-1'
+    },
   ] as Quiz[],
 
   students: [

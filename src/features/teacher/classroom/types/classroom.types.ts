@@ -70,11 +70,39 @@ export interface Assignment {
   status: 'active' | 'overdue' | 'expired';
 }
 
+// Quiz Question Types
+export type QuestionType = 'text-only' | 'text-with-image';
+
+export interface QuizOption {
+  label: string; // A, B, C, D
+  value: string; // The option text/value
+  image?: string; // Optional image URL for the option
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  type: QuestionType;
+  image?: string; // Optional image for the question itself
+  options: QuizOption[];
+  correctAnswers: string[]; // Array of correct answer labels (supports multi-select)
+  points: number;
+}
+
 export interface Quiz {
   id: string;
   title: string;
-  dueDate: string;
-  status: 'active' | 'expired';
+  instruction?: string; // Rich text instruction
+  duration: number; // Duration in minutes
+  dueDate: string; // ISO date string
+  dueTime: string; // Time in HH:mm format
+  allowLateSubmission: boolean;
+  status: 'draft' | 'published' | 'archived';
+  questions: QuizQuestion[];
+  subjectId: string;
+  lessonId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Student {
@@ -111,6 +139,30 @@ export interface AssessmentSummary {
   exam: number;
   total: number;
   grades: string;
+}
+
+// Quiz Submission Types
+export interface QuizAnswer {
+  questionId: string;
+  selectedAnswers: string[]; // Array of selected answer labels
+  isCorrect?: boolean; // Set after grading
+}
+
+export interface QuizSubmission {
+  id: string;
+  quizId: string;
+  studentId: string;
+  studentName: string;
+  studentAvatar: string;
+  answers: QuizAnswer[];
+  submissionStatus: 'Submitted' | 'Late' | 'Not submitted';
+  submissionTime?: string; // ISO string
+  gradeStatus: 'Graded' | 'Not graded';
+  score?: number; // Points earned
+  totalPoints?: number; // Total possible points
+  percentage?: number; // Calculated percentage
+  gradedAt?: string; // ISO string
+  gradedBy?: string; // Teacher ID
 }
 
 export interface StudentSubmission {

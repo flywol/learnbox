@@ -1,14 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, ClipboardList, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, RefreshCw, AlertCircle } from 'lucide-react';
 import LiveClassTab from '../components/subject-detail/LiveClassTab';
+import QuizTab from '../components/subject-detail/QuizTab';
 import AssignmentTab from '../components/assignments/AssignmentTab';
 import AttendanceTab from '../components/attendance/AttendanceTab';
 import { subjectsClassesApiClient } from '../api/subjectsClassesApiClient';
 import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import { assignmentsApiClient } from '../../assignments/api/assignmentsApiClient';
-import type { SubjectDetailTab, Assignment } from '../types/classroom.types';
+import type { SubjectDetailTab, Assignment, Quiz } from '../types/classroom.types';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
 
 // Empty state components
@@ -26,17 +27,6 @@ const EmptyLessons = ({ onAddLesson }: { onAddLesson: () => void }) => (
   </div>
 );
 
-const EmptyGeneric = ({ icon: Icon, title, description }: { 
-  icon: React.ComponentType<any>; 
-  title: string; 
-  description: string;
-}) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-    <Icon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-    <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
-    <p className="text-gray-500">{description}</p>
-  </div>
-);
 
 const ErrorState = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
@@ -130,7 +120,7 @@ export default function SubjectDetailPage() {
         status: 'active' as const,
       },
       {
-        id: 'mock-assignment-2', 
+        id: 'mock-assignment-2',
         title: 'Cell Structure Diagram',
         dueDate: 'Due in 1 day',
         status: 'overdue' as const,
@@ -175,6 +165,9 @@ export default function SubjectDetailPage() {
 
     return [...mockAssignments, ...apiAssignments];
   }, [assignmentsData]);
+
+  // Mock quiz data - keeping until quiz endpoint is provided
+  const quizzes: Quiz[] = useMemo(() => [], []);
 
   const tabs: { key: SubjectDetailTab; label: string }[] = [
     { key: 'lessons', label: 'Lessons' },
@@ -360,11 +353,7 @@ export default function SubjectDetailPage() {
       )}
       
       {activeTab === 'quiz' && (
-        <EmptyGeneric
-          icon={ClipboardList}
-          title="No quizzes created"
-          description="Create interactive quizzes to test your students' understanding."
-        />
+        <QuizTab quizzes={quizzes} />
       )}
 
       {activeTab === 'assignment' && (

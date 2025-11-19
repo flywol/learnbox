@@ -72,9 +72,9 @@ export default function ScheduleContent() {
 	};
 
 	const getEventsForDay = (day: number) => {
-		if (!calendarData?.events) return [];
+		if (!(calendarData as any)?.events) return [];
 		const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-		return calendarData.events.filter((event: any) => event.date?.startsWith(dateStr));
+		return (calendarData as any).events.filter((event: any) => event.date?.startsWith(dateStr));
 	};
 
 	// Helper function to get color for subject

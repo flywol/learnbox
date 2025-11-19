@@ -39,8 +39,8 @@ export default function GradeBreakdownPage() {
 		);
 	}
 
-	const breakdown = breakdownData.breakdown;
-	const assessments = breakdown.assessments || [];
+	const breakdown = (breakdownData as any).breakdown || breakdownData;
+	const assessments = (breakdown as any).assessments || [];
 
 	return (
 		<div>
@@ -57,14 +57,14 @@ export default function GradeBreakdownPage() {
 			{/* Subject Header */}
 			<div className="bg-blue-100 rounded-lg p-4 flex items-center gap-4 mb-6">
 				<div className="w-14 h-14 bg-blue-200 rounded-full flex items-center justify-center text-3xl font-bold">
-					{breakdown.subjectName[0]}
+					{((breakdown as any).subjectName || 'S')[0]}
 				</div>
 				<div className="flex-1">
-					<h2 className="text-lg font-bold text-gray-900">{breakdown.subjectName}</h2>
-					<p className="text-sm text-gray-600">{breakdown.session} - {breakdown.term}</p>
+					<h2 className="text-lg font-bold text-gray-900">{(breakdown as any).subjectName || 'Subject'}</h2>
+					<p className="text-sm text-gray-600">{(breakdown as any).session || ''} - {(breakdown as any).term || ''}</p>
 				</div>
 				<div className="text-right">
-					<p className="text-3xl font-bold text-gray-900">{breakdown.totalScore}%</p>
+					<p className="text-3xl font-bold text-gray-900">{(breakdown as any).totalScore || 0}%</p>
 				</div>
 			</div>
 
@@ -134,7 +134,7 @@ export default function GradeBreakdownPage() {
 				<div className="grid grid-cols-2 gap-6">
 					<div>
 						<p className="text-sm text-gray-600 mb-1">Total Score</p>
-						<p className="text-2xl font-bold text-gray-900">{breakdown.totalScore}%</p>
+						<p className="text-2xl font-bold text-gray-900">{(breakdown as any).totalScore || 0}%</p>
 					</div>
 					<div>
 						<p className="text-sm text-gray-600 mb-1">Assessments</p>
@@ -149,7 +149,7 @@ export default function GradeBreakdownPage() {
 					Teacher's remark
 				</h3>
 				<p className="text-sm text-gray-900">
-					{breakdown.remark || "No remarks available"}
+					{(breakdown as any).remark || "No remarks available"}
 				</p>
 			</div>
 		</div>

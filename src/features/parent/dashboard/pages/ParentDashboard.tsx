@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { parentApiClient } from "../../api/parentApiClient";
 import { parentQueryConfig, parentQueryKeys } from "../../config/queryConfig";
 import ErrorState, { getErrorMessage } from "../../components/ErrorState";
-import { DashboardSkeleton, CardSkeleton, ListSkeleton } from "../../components/LoadingState";
+import { DashboardSkeleton, ListSkeleton } from "../../components/LoadingState";
 import WelcomeBanner from "../components/WelcomeBanner";
 import OverviewStats from "../components/OverviewStats";
 import RecentClassesSection from "../components/RecentClassesSection";
@@ -65,8 +65,10 @@ export default function ParentDashboard() {
 	// TODO: Upcoming deadline - might need separate endpoint or derive from calendar/assignments
 	const upcomingDeadline = {
 		title: "Mathematics assignment",
+		subject: "Mathematics",
 		date: "Jan 15, 2024",
 		time: "11:59 PM",
+		dueIn: "2 days",
 	};
 
 	if (!selectedChild) {

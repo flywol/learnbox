@@ -46,6 +46,12 @@ const AssignmentDetailPage = lazy(
 const SubmittedAssignmentPage = lazy(
 	() => import("../../features/student/classroom/pages/SubmittedAssignmentPage")
 );
+const StudentQuizTakingPage = lazy(
+	() => import("../../features/student/classroom/pages/StudentQuizTakingPage")
+);
+const StudentQuizReviewPage = lazy(
+	() => import("../../features/student/classroom/pages/StudentQuizReviewPage")
+);
 
 // Assessment
 const AssessmentPage = lazy(
@@ -86,6 +92,8 @@ export function StudentRoutes() {
 			<Route path="classroom" element={<ClassroomPage />} />
 			<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
 			<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+			<Route path="classroom/subject/:subjectId/quiz/:quizId/take" element={<StudentQuizTakingPage />} />
+			<Route path="classroom/subject/:subjectId/quiz/:quizId/review" element={<StudentQuizReviewPage />} />
 			<Route path="classroom/assignment/:assignmentId" element={<AssignmentDetailPage />} />
 			<Route path="classroom/assignment/:assignmentId/submitted" element={<SubmittedAssignmentPage />} />
 

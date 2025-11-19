@@ -67,7 +67,7 @@ export default function LessonContentPage() {
 	};
 
 	// Split content into two columns
-	const contents = lesson.content || [];
+	const contents = (lesson as any).content || [];
 	const leftColumn = contents.filter((_: any, index: number) => index % 2 === 0);
 	const rightColumn = contents.filter((_: any, index: number) => index % 2 === 1);
 

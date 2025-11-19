@@ -66,14 +66,14 @@ export default function SubjectDetailPage() {
 			{/* Description Card */}
 			<div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
 				<p className="text-sm text-gray-700 leading-relaxed mb-4">
-					{subject.description || "No description available"}
+					{(subject as any).description || "No description available"}
 				</p>
 
 				{/* Progress Bar */}
 				<div className="w-full bg-gray-200 rounded-full h-2 mb-4">
 					<div
 						className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-						style={{ width: `${subject.progressPercentage}%` }}
+						style={{ width: `${subject.overallProgress || 0}%` }}
 					/>
 				</div>
 
@@ -81,7 +81,7 @@ export default function SubjectDetailPage() {
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2 text-sm text-gray-700">
 						<User className="w-4 h-4" />
-						<span>Teacher: {subject.teacher || "Not assigned"}</span>
+						<span>Teacher: {subject.teacher?.fullName || "Not assigned"}</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">

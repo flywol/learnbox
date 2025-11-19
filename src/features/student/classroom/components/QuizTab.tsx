@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { StudentQuiz, QuizSummary } from '../types/classroom.types';
 
 interface QuizTabProps {
@@ -9,6 +9,8 @@ interface QuizTabProps {
 type QuizFilter = 'all' | 'pending' | 'submitted' | 'graded';
 
 export default function QuizTab({ quizzes }: QuizTabProps) {
+  const navigate = useNavigate();
+  const { subjectId } = useParams();
   const [activeFilter, setActiveFilter] = useState<QuizFilter>('all');
 
   // Calculate quiz summary
@@ -161,13 +163,27 @@ export default function QuizTab({ quizzes }: QuizTabProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredQuizzes.length === 0 ? (
           <div className="col-span-2 text-center py-12">
-            <p className="text-gray-500">No quizzes found</p>
+            <div className="mb-4">
+              <img
+                src="/images/onboarding/student-2.svg"
+                alt="No quizzes"
+                className="w-32 h-32 mx-auto opacity-50"
+              />
+            </div>
+            <p className="text-gray-500">No assignment yet</p>
           </div>
         ) : (
           filteredQuizzes.map((quiz) => (
             <div
               key={quiz.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer"
+              onClick={() => {
+                if (quiz.status === 'pending') {
+                  navigate(`/student/classroom/subject/${subjectId}/quiz/${quiz.id}/take`);
+                } else {
+                  navigate(`/student/classroom/subject/${subjectId}/quiz/${quiz.id}/review`);
+                }
+              }}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
@@ -184,16 +200,10 @@ export default function QuizTab({ quizzes }: QuizTabProps) {
                   </span>
                 )}
 
-                {quiz.status === 'submitted' && (
-                  <CheckCircle className="w-6 h-6 text-green-500" />
-                )}
-
-                {quiz.status === 'graded' && quiz.score !== undefined && (
-                  <div className="w-12 h-12 rounded-full border-4 border-orange-500 flex items-center justify-center">
-                    <span className="text-sm font-bold text-gray-900">
-                      {Math.round((quiz.score / (quiz.totalPoints || 1)) * 100)}%
-                    </span>
-                  </div>
+                {(quiz.status === 'submitted' || quiz.status === 'graded') && (
+                  <span className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm font-medium">
+                    View
+                  </span>
                 )}
               </div>
 

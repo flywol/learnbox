@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParentContext } from "../../context/ParentContext";
 import { parentApiClient } from "../../api/parentApiClient";
@@ -23,7 +23,7 @@ export default function AcademicRecordContent() {
 	});
 
 	// Set default session and term when data loads
-	const sessions = academicData?.sessions || [];
+	const sessions = (academicData as any)?.sessions || [];
 	const currentSession = selectedSession || sessions[0]?._id;
 	const currentTerm = selectedTerm || "first";
 
@@ -59,7 +59,7 @@ export default function AcademicRecordContent() {
 		return colors[colorIndex];
 	};
 
-	const subjects = gradesData?.grades || [];
+	const subjects = (gradesData as any)?.subjects || [];
 	const isLoading = isLoadingAcademic || isLoadingGrades;
 
 	return (
@@ -135,14 +135,14 @@ export default function AcademicRecordContent() {
 							<h3 className="text-sm font-semibold text-gray-900 mb-3">Average Grade</h3>
 							<p className="text-gray-600 text-sm mb-2">Overall performance across all subjects</p>
 							<p className="text-4xl font-bold text-gray-900">
-								{gradesData?.averageScore ? `${gradesData.averageScore.toFixed(1)}%` : "N/A"}
+								{(gradesData as any)?.summary?.averageScore ? `${(gradesData as any).summary.averageScore.toFixed(1)}%` : "N/A"}
 							</p>
 						</div>
 						<div className="bg-white rounded-lg p-6 border border-gray-200">
 							<h3 className="text-sm font-semibold text-gray-900 mb-3">Remark</h3>
 							<p className="text-gray-600 text-sm mb-2">Performance Summary</p>
 							<p className="text-sm text-gray-900">
-								{gradesData?.remark || "Keep up the good work!"}
+								{(gradesData as any)?.summary?.remark || "Keep up the good work!"}
 							</p>
 						</div>
 					</div>

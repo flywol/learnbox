@@ -35,10 +35,51 @@ export interface StudentQuiz {
   title: string;
   subjectId: string;
   dueDate: string; // ISO string
+  dueTime: string; // HH:mm format
+  duration: number; // in minutes
+  instruction?: string;
   status: 'pending' | 'submitted' | 'graded';
   score?: number; // Out of total points
   totalPoints?: number;
   submittedAt?: string; // ISO string
+  questions?: StudentQuizQuestion[];
+}
+
+export type QuestionType = 'text-only' | 'text-with-image' | 'image-with-text';
+
+export interface QuizOption {
+  label: string; // A, B, C, D
+  value: string;
+  image?: string;
+}
+
+export interface StudentQuizQuestion {
+  id: string;
+  question: string;
+  type: QuestionType;
+  image?: string; // For image-with-text type
+  options: QuizOption[];
+  correctAnswers: string[]; // For grading after submission
+  points: number;
+}
+
+export interface StudentQuizAnswer {
+  questionId: string;
+  selectedAnswers: string[]; // Array to support multi-select if needed
+}
+
+export interface QuizAttempt {
+  quizId: string;
+  startedAt: string; // ISO string
+  answers: Map<string, string[]>; // questionId -> selected answer labels
+  timeRemaining: number; // in seconds
+}
+
+export interface TimerStatus {
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isExpired: boolean;
 }
 
 export interface QuizSummary {

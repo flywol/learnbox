@@ -1,20 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Edit2, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import RichTextEditor from '@/common/components/RichTextEditor';
 import TimePicker from '@/common/components/TimePicker';
 import AddQuestionModal from '../components/AddQuestionModal';
-import { QuizQuestion } from '../../classroom/types/classroom.types';
+import { QuizQuestion, Quiz } from '../../classroom/types/classroom.types';
 
-export default function AddQuizPage() {
-  const { subjectId, lessonId } = useParams<{ subjectId: string; lessonId?: string }>();
+// Mock function to get existing quiz
+const getMockQuiz = (quizId: string): Quiz => ({
+  id: quizId,
+  title: 'Introduction to biology',
+  instruction: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, elit nibh et nisl, pellentesque scelerisque faucibus facilisis at.',
+  duration: 20,
+  dueDate: '2023-09-15',
+  dueTime: '14:00',
+  allowLateSubmission: true,
+  status: 'published',
+  subjectId: 'subject-1',
+  questions: [
+    {
+      id: 'q1',
+      question: 'Select all reptiles',
+      type: 'text-only',
+      options: [
+        { label: 'A', value: 'Ostrich' },
+        { label: 'B', value: 'Crocodile' },
+        { label: 'C', value: 'Hawk' },
+        { label: 'D', value: 'Snake' },
+      ],
+      correctAnswers: ['B', 'D'],
+      points: 1,
+    },
+    {
+      id: 'q2',
+      question: 'Which of the following is cold-blooded?',
+      type: 'text-only',
+      options: [
+        { label: 'A', value: 'Reptiles' },
+        { label: 'B', value: 'Mammals' },
+        { label: 'C', value: 'Birds' },
+      ],
+      correctAnswers: ['A'],
+      points: 1,
+    },
+    {
+      id: 'q3',
+      question: 'What class of animal does the following belong to?',
+      type: 'text-only',
+      options: [
+        { label: 'A', value: 'Mammals' },
+        { label: 'B', value: 'Birds' },
+        { label: 'C', value: 'Reptiles' },
+        { label: 'D', value: 'Amphibians' },
+      ],
+      correctAnswers: ['D'],
+      points: 2,
+    },
+  ],
+});
+
+export default function EditQuizPage() {
+  const { subjectId, quizId } = useParams<{ subjectId: string; quizId: string }>();
   const navigate = useNavigate();
 
   // Form state
-  const [title, setTitle] = useState('Introduction to biology');
+  const [title, setTitle] = useState('');
   const [instruction, setInstruction] = useState('');
-  const [duration, setDuration] = useState('00:20'); // HH:MM format
+  const [duration, setDuration] = useState('00:20');
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('14:00');
   const [allowLateSubmission, setAllowLateSubmission] = useState(true);
@@ -27,6 +80,26 @@ export default function AddQuizPage() {
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Load existing quiz data
+  useEffect(() => {
+    if (quizId) {
+      // TODO: Fetch quiz from API
+      const quiz = getMockQuiz(quizId);
+      setTitle(quiz.title);
+      setInstruction(quiz.instruction || '');
+
+      // Convert duration to HH:MM format
+      const hours = Math.floor(quiz.duration / 60);
+      const minutes = quiz.duration % 60;
+      setDuration(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+
+      setDueDate(quiz.dueDate);
+      setDueTime(quiz.dueTime);
+      setAllowLateSubmission(quiz.allowLateSubmission);
+      setQuestions(quiz.questions);
+    }
+  }, [quizId]);
 
   const handleAddQuestion = (question: Omit<QuizQuestion, 'id'>) => {
     if (editingIndex !== undefined && editingQuestion) {
@@ -73,11 +146,12 @@ export default function AddQuizPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveAndContinueLater = () => {
+  const handleSaveChanges = () => {
     if (!validateForm()) return;
 
-    // TODO: Save as draft to backend
-    console.log('Saving draft:', {
+    // TODO: Update quiz via API
+    console.log('Updating quiz:', {
+      id: quizId,
       title,
       instruction,
       duration,
@@ -87,8 +161,8 @@ export default function AddQuizPage() {
       questions,
     });
 
-    alert('Quiz saved as draft!');
-    navigate(-1);
+    alert('Quiz updated successfully!');
+    navigate(`/teacher/subject/${subjectId}/quiz/${quizId}`);
   };
 
   const handlePreview = () => {
@@ -99,6 +173,7 @@ export default function AddQuizPage() {
 
     // Navigate to preview page with quiz data
     const quizData = {
+      id: quizId,
       title,
       instruction,
       duration: parseInt(duration.split(':')[0]) * 60 + parseInt(duration.split(':')[1]),
@@ -107,27 +182,22 @@ export default function AddQuizPage() {
       allowLateSubmission,
       questions,
       subjectId,
-      lessonId,
     };
 
-    navigate('preview', { state: { quizData } });
+    navigate(`/teacher/subject/${subjectId}/quiz/${quizId}/preview`, { state: { quizData } });
   };
-
-  const backPath = lessonId
-    ? `/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`
-    : `/teacher/subject/${subjectId}/lesson/add/content`;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate(backPath)}
+          onClick={() => navigate(`/teacher/subject/${subjectId}/quiz/${quizId}`)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Add Quiz</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Quiz</h1>
       </div>
 
       {/* Form */}
@@ -289,17 +359,17 @@ export default function AddQuizPage() {
       <div className="flex gap-4">
         <button
           type="button"
-          onClick={handleSaveAndContinueLater}
+          onClick={handlePreview}
           className="flex-1 px-6 py-3 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-50 transition-colors font-medium"
         >
-          Save & Continue Later
+          Preview Changes
         </button>
         <button
           type="button"
-          onClick={handlePreview}
+          onClick={handleSaveChanges}
           className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
         >
-          Preview
+          Save Changes
         </button>
       </div>
 

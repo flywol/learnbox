@@ -36,6 +36,11 @@ const AddVideoPage = lazy(() => import("../../features/teacher/lessons/pages/Add
 const AddFilesPage = lazy(() => import("../../features/teacher/lessons/pages/AddFilesPage"));
 const AddAssignmentPage = lazy(() => import("../../features/teacher/lessons/pages/AddAssignmentPage"));
 const AddQuizPage = lazy(() => import("../../features/teacher/lessons/pages/AddQuizPage"));
+const QuizPreviewPage = lazy(() => import("../../features/teacher/lessons/pages/QuizPreviewPage"));
+const TeacherQuizViewPage = lazy(() => import("../../features/teacher/lessons/pages/TeacherQuizViewPage"));
+const EditQuizPage = lazy(() => import("../../features/teacher/lessons/pages/EditQuizPage"));
+const QuizSubmissionsPage = lazy(() => import("../../features/teacher/lessons/pages/QuizSubmissionsPage"));
+const IndividualSubmissionPage = lazy(() => import("../../features/teacher/lessons/pages/IndividualSubmissionPage"));
 const CreateLiveClassPage = lazy(() => import("../../features/teacher/classroom/pages/CreateLiveClassPage"));
 
 export function TeacherRoutes() {
@@ -91,7 +96,16 @@ export function TeacherRoutes() {
       <Route path="subject/:subjectId/lesson/:lessonId/content/files/add" element={<AddFilesPage />} />
       <Route path="subject/:subjectId/lesson/:lessonId/content/assignment/add" element={<AddAssignmentPage />} />
       <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add" element={<AddQuizPage />} />
-      
+
+      {/* Quiz Management Routes */}
+      <Route path="subject/:subjectId/lesson/add/quiz/preview" element={<QuizPreviewPage />} />
+      <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add/preview" element={<QuizPreviewPage />} />
+      <Route path="subject/:subjectId/quiz/:quizId" element={<TeacherQuizViewPage />} />
+      <Route path="subject/:subjectId/quiz/:quizId/preview" element={<QuizPreviewPage />} />
+      <Route path="subject/:subjectId/quiz/:quizId/edit" element={<EditQuizPage />} />
+      <Route path="subject/:subjectId/quiz/:quizId/submissions" element={<QuizSubmissionsPage />} />
+      <Route path="subject/:subjectId/quiz/:quizId/submissions/:studentId" element={<IndividualSubmissionPage />} />
+
       {/* Fallback */}
       <Route path="*" element={<LayoutNotFoundPage />} />
     </Route>

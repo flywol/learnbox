@@ -33,7 +33,7 @@ export const mockParentDashboardData: ParentDashboardData = {
 		},
 	],
 	overview: {
-		classAttendance: {
+		attendance: {
 			percentage: 54,
 			totalClasses: 20,
 			attended: 11,
@@ -43,13 +43,12 @@ export const mockParentDashboardData: ParentDashboardData = {
 			total: 5,
 			completed: 2,
 			pending: 3,
-			completionRate: 40, // 2/5 = 0.4 = 40%
 		},
-		testScores: {
+		tests: {
 			averageScore: 54,
 			totalTests: 2,
-			completed: 2,
-			pending: 0,
+			completedTests: 2,
+			pendingTests: 0,
 		},
 	},
 	recentClasses: [
