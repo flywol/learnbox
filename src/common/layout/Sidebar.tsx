@@ -26,7 +26,13 @@ const menuItems = [
 	{ label: "Profile", icon: User, path: "/admin/profile" },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+	isCollapsed: boolean;
+	onToggle: () => void;
+	isTablet?: boolean;
+}
+
+export default function Sidebar({ isCollapsed, isTablet }: SidebarProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
 	const { logout } = useAuthStore();
@@ -43,7 +49,7 @@ export default function Sidebar() {
 		if (itemPath === "/admin/dashboard" && location.pathname === "/admin") {
 			return true;
 		}
-		
+
 		return (
 			location.pathname === itemPath ||
 			location.pathname.startsWith(itemPath + "/")
@@ -51,16 +57,20 @@ export default function Sidebar() {
 	};
 
 	return (
-		<aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+		<aside className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isTablet && !isCollapsed ? 'fixed top-16 left-0 bottom-0 z-20 shadow-xl' : ''}`}>
 			{/* Logo */}
-			<div className="p-6">
-				<h1 className="text-2xl font-bold">
-					Learn<span className="text-orange-500">Box</span>
+			<div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
+				<h1 className={`font-bold ${isCollapsed ? 'text-lg text-center' : 'text-2xl'}`}>
+					{isCollapsed ? (
+						<span className="text-orange-500">L</span>
+					) : (
+						<>Learn<span className="text-orange-500">Box</span></>
+					)}
 				</h1>
 			</div>
 
 			{/* Menu */}
-			<nav className="flex-1 p-4">
+			<nav className="flex-1 p-4 overflow-y-auto">
 				<ul className="space-y-2">
 					{menuItems.map((item) => {
 						const active = isMenuActive(item.path);
@@ -68,13 +78,16 @@ export default function Sidebar() {
 							<li key={item.path}>
 								<NavLink
 									to={item.path}
-									className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+									className={`flex items-center gap-3 rounded-lg transition-colors ${
+										isCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3'
+									} ${
 										active
 											? "bg-orange-50 text-orange-500"
 											: "text-gray-700 hover:bg-gray-50"
-									}`}>
-									<item.icon className="w-5 h-5" />
-									<span>{item.label}</span>
+									}`}
+									title={isCollapsed ? item.label : undefined}>
+									<item.icon className="w-5 h-5 flex-shrink-0" />
+									{!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
 								</NavLink>
 							</li>
 						);
@@ -87,17 +100,20 @@ export default function Sidebar() {
 				<button
 					onClick={handleLogout}
 					disabled={isLoggingOut}
-					className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
+					className={`flex items-center gap-3 rounded-lg transition-colors w-full ${
+						isCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3'
+					} ${
 						isLoggingOut
 							? "text-gray-400 cursor-not-allowed"
 							: "text-gray-700 hover:bg-gray-50"
-					}`}>
+					}`}
+					title={isCollapsed ? (isLoggingOut ? "Logging out..." : "Logout") : undefined}>
 					{isLoggingOut ? (
 						<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
 					) : (
-						<LogOut className="w-5 h-5" />
+						<LogOut className="w-5 h-5 flex-shrink-0" />
 					)}
-					<span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+					{!isCollapsed && <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>}
 				</button>
 			</div>
 		</aside>

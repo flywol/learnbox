@@ -1,10 +1,15 @@
-import { Settings } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import NotificationDropdown from "@/features/admin/notifications/components/NotificationDropdown";
 import { useNavigate } from "react-router-dom";
 import SchoolBranding from "./SchoolBranding";
 
-export default function Header() {
+interface HeaderProps {
+	onMenuToggle?: () => void;
+	showMenuButton: boolean;
+}
+
+export default function Header({ onMenuToggle, showMenuButton }: HeaderProps) {
 	const { user } = useAuthStore();
 	const navigate = useNavigate();
 
@@ -15,8 +20,18 @@ export default function Header() {
 	return (
 		<header className="bg-white border-b border-gray-200 px-8 py-4">
 			<div className="flex items-center justify-between">
-				{/* Left side - School Branding */}
-				<SchoolBranding />
+				{/* Left side - Hamburger + School Branding */}
+				<div className="flex items-center gap-3">
+					{showMenuButton && onMenuToggle && (
+						<button
+							onClick={onMenuToggle}
+							className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+							aria-label="Toggle menu">
+							<Menu className="w-5 h-5 text-gray-600" />
+						</button>
+					)}
+					<SchoolBranding />
+				</div>
 
 				{/* Right side - User Controls */}
 				<div className="flex items-center gap-4">

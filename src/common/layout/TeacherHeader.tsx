@@ -1,4 +1,4 @@
-import { Settings, Bell } from "lucide-react";
+import { Settings, Bell, Menu } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
 // Mock school data for teacher - NO API CALLS
@@ -7,14 +7,27 @@ const mockSchoolInfo = {
 	schoolInitial: "LM"
 };
 
-export default function TeacherHeader() {
+interface TeacherHeaderProps {
+	onMenuToggle?: () => void;
+	showMenuButton: boolean;
+}
+
+export default function TeacherHeader({ onMenuToggle, showMenuButton }: TeacherHeaderProps) {
 	const { user } = useAuthStore();
 
 	return (
 		<header className="bg-white border-b border-gray-200 px-8 py-4">
 			<div className="flex items-center justify-between">
-				{/* Left side - Mock School Branding for Teacher */}
+				{/* Left side - Hamburger + Mock School Branding for Teacher */}
 				<div className="flex items-center gap-3">
+					{showMenuButton && onMenuToggle && (
+						<button
+							onClick={onMenuToggle}
+							className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+							aria-label="Toggle menu">
+							<Menu className="w-5 h-5 text-gray-600" />
+						</button>
+					)}
 					<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-orange-100">
 						<span className="text-orange-600 font-semibold text-lg">
 							{mockSchoolInfo.schoolInitial}
