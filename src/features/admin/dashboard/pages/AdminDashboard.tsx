@@ -114,55 +114,74 @@ const EmptyState = ({
 	</div>
 );
 
+import { getFirstName } from "@/common/utils/userUtils";
+import { ASSETS } from "@/common/constants/assets";
+
+interface ActionConfig {
+	iconSrc: string;
+	title: string;
+	description: string;
+	onClick: () => void;
+}
+
 export default function AdminDashboard() {
 	const navigate = useNavigate();
-	const { user } = useAuthStore();
+	const user = useAuthStore((state) => state.user);
 	const { isCompleted: isSchoolSetupCompleted } = useSchoolSetupStore();
-	const [showSetupPrompt, setShowSetupPrompt] = useState(false);
 	const { stats, loading } = useDashboardStats();
+	const [showSetupPrompt, setShowSetupPrompt] = useState(false);
 
 	useEffect(() => {
-		// Show setup prompt if school setup is not completed
-		if (!isSchoolSetupCompleted && user?.role === "ADMIN") {
-			setShowSetupPrompt(true);
+		if (!isSchoolSetupCompleted) {
+			const timer = setTimeout(() => setShowSetupPrompt(true), 1000);
+			return () => clearTimeout(timer);
 		}
-	}, [isSchoolSetupCompleted, user]);
+	}, [isSchoolSetupCompleted]);
+
+	// Admin action cards configuration
+	const adminActions: ActionConfig[] = [
+		{
+			iconSrc: ASSETS.IMAGES.ADD_NEW,
+			title: "Add new user",
+			description: "Add students, teachers, or parents to your school",
+			onClick: () => navigate("/admin/users/create"),
+		},
+		{
+			iconSrc: ASSETS.IMAGES.ADD_NEW_2,
+			title: "Add new subject",
+			description: "Add subjects and assign them to classes",
+			onClick: () => navigate("/admin/classroom"),
+		},
+		{
+			iconSrc: ASSETS.IMAGES.ADD_NEW,
+			title: "School payments",
+			description: "Manage fees, transactions, and payment records",
+			onClick: () => navigate("/admin/payments"),
+		},
+		{
+			iconSrc: ASSETS.IMAGES.ADD_NEW_2,
+			title: "Session config",
+			description: "Set up academic sessions and terms",
+			onClick: () => navigate("/admin/profile/session-config"),
+		},
+	];
+
+	console.log('AdminDashboard rendering:', { user, isSchoolSetupCompleted, stats, loading });
 
 	return (
 		<div className="space-y-6">
 			{/* Top Welcome Card */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 				<h1 className="text-xl font-semibold text-gray-900 mb-6">
-					Welcome {user?.fullName?.split(" ")[0]}, what do you want to do today?
+					Welcome {getFirstName(user?.fullName)}, what do you want to do today?
 				</h1>
 
 				{/* Action Cards */}
 				{isSchoolSetupCompleted ? (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-						<ActionCard
-							iconSrc="/assets/add-new.svg"
-							title="Add new user"
-							description="Add students, teachers, or parents to your school"
-							onClick={() => navigate("/admin/users/create")}
-						/>
-						<ActionCard
-							iconSrc="/assets/add-new2.svg"
-							title="Add new subject"
-							description="Add subjects and assign them to classes"
-							onClick={() => {/* TODO: Implement add subject */}}
-						/>
-						<ActionCard
-							iconSrc="/assets/add-new.svg"
-							title="School payments"
-							description="Manage fees, transactions, and payment records"
-							onClick={() => navigate("/admin/payments")}
-						/>
-						<ActionCard
-							iconSrc="/assets/add-new2.svg"
-							title="Session config"
-							description="Set up academic sessions and terms"
-							onClick={() => navigate("/admin/profile/session-config")}
-						/>
+						{adminActions.map((action, index) => (
+							<ActionCard key={index} {...action} />
+						))}
 					</div>
 				) : (
 					/* Registration Prompt */
@@ -317,7 +336,7 @@ export default function AdminDashboard() {
 							<EmptyState
 								title="No recent activities yet"
 								description=""
-								illustration="/assets/activity-empty.svg"
+								illustration={ASSETS.IMAGES.ACTIVITY_EMPTY}
 							/>
 						</div>
 					</div>

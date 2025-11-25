@@ -112,8 +112,8 @@ class AuthApiClient extends BaseApiClient {
 		// Use StorageManager for complete cleanup
 		storageManager.clearAllAppData(true); // Keep remember me preference
 
-		// Redirect to login
-		window.location.href = "/";
+		// Redirect to login via event
+		window.dispatchEvent(new Event("auth:unauthorized"));
 	}
 
 	// Refresh access token

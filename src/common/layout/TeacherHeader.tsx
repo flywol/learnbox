@@ -13,7 +13,7 @@ interface TeacherHeaderProps {
 }
 
 export default function TeacherHeader({ onMenuToggle, showMenuButton }: TeacherHeaderProps) {
-	const { user } = useAuthStore();
+	const user = useAuthStore((state) => state.user);
 
 	return (
 		<header className="bg-white border-b border-gray-200 px-8 py-4">

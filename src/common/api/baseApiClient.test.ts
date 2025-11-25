@@ -114,16 +114,18 @@ describe('BaseApiClient', () => {
       }
     });
 
-    it('should redirect to login on failed token refresh', async () => {
+    it('should dispatch auth:unauthorized event on failed token refresh', async () => {
       apiClient.setTokens('expired-token', 'invalid-refresh-token', false);
 
       mockAxios.onGet('/protected').replyOnce(401);
       mockAxios.onPost('/auth/refresh-token').reply(401, { message: 'Invalid refresh token' });
 
+      const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
+
       try {
         await apiClient['get']('/protected');
       } catch (error) {
-        expect(window.location.href).toBe('/');
+        expect(dispatchEventSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'auth:unauthorized' }));
         expect(apiClient.isAuthenticated()).toBe(false);
       }
     });

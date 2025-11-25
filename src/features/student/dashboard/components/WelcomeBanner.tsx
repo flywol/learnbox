@@ -1,15 +1,18 @@
+import { getFirstName } from "@/common/utils/userUtils";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import type { UpcomingDeadline } from "../types/dashboard.types";
 
 interface WelcomeBannerProps {
-	upcomingDeadline: UpcomingDeadline | null;
+  upcomingDeadline?: {
+    subject: string;
+    dueIn: string;
+  };
 }
 
 export default function WelcomeBanner({ upcomingDeadline }: WelcomeBannerProps) {
-	const { user } = useAuthStore();
+	const user = useAuthStore((state) => state.user);
 
 	// Get first name from full name
-	const firstName = user?.fullName?.split(" ")[0] || "Student";
+	const firstName = getFirstName(user?.fullName, "Student");
 
 	return (
 		<div className="bg-white rounded-2xl p-8 flex items-center justify-between shadow-sm">

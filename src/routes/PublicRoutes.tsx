@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import { AuthGuard } from "../features/auth/components/guards/AuthGuard";
 import { FlowGuard } from "../features/auth/components/guards/FlowGuard";
@@ -16,7 +16,7 @@ const OnboardingPage = lazy(() => import("../features/auth/pages/onboarding/Onbo
 
 export function PublicRoutes() {
   return (
-    <>
+    <Routes>
       <Route path="/device-restricted" element={<DeviceRestrictedPage />} />
       
       <Route
@@ -103,6 +103,6 @@ export function PublicRoutes() {
           </AuthGuard>
         }
       />
-    </>
+    </Routes>
   );
 }

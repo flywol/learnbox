@@ -3,6 +3,8 @@ import { ReactNode, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 
+import { useShallow } from "zustand/react/shallow";
+
 interface AuthGuardProps {
 	children: ReactNode;
 	requiresAuth?: boolean;
@@ -21,7 +23,15 @@ export const AuthGuard = ({
 		setIntendedDestination,
 		hasHydrated,
 		user,
-	} = useAuthStore();
+	} = useAuthStore(
+		useShallow((state) => ({
+			isAuthenticated: state.isAuthenticated,
+			loginContext: state.loginContext,
+			setIntendedDestination: state.setIntendedDestination,
+			hasHydrated: state.hasHydrated,
+			user: state.user,
+		}))
+	);
 
 	useEffect(() => {
 		// Save intended destination for protected routes

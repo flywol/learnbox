@@ -14,48 +14,30 @@ export const SecurityWrapper: React.FC<SecurityWrapperProps> = ({
 
 	useEffect(() => {
 		const checkDevice = () => {
-			// Check if it's a mobile device
-			const isMobile =
-				/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-					navigator.userAgent
-				);
-
-			// Check if it's a tablet (iPad or Android tablet)
-			const isTablet =
-				/iPad|Android(?=.*Mobile)/i.test(navigator.userAgent) ||
-				(navigator.userAgent.includes("Android") &&
-					!navigator.userAgent.includes("Mobile"));
-
-			// Check screen size as additional validation
-			const isSmallScreen = window.innerWidth < 1024; // Less than desktop size
-
-			// Check if running in a mobile browser or webview
-			const isWebView =
-				/wv|WebView|(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(
-					navigator.userAgent
-				);
-
-			// Allow only if it's NOT mobile, NOT tablet, and NOT in a webview
-			const deviceAllowed =
-				!isMobile && !isTablet && !isWebView && !isSmallScreen;
-
-
-			setIsDeviceAllowed(deviceAllowed);
+            // Use matchMedia for reliable screen size detection
+            // 1024px is the standard breakpoint for desktop/large tablets
+            const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+            
+            // Also check for coarse pointer (touch) to detect tablets/mobiles even with large screens
+            // But we primarily care about screen real estate for the admin dashboard
+            
+			setIsDeviceAllowed(isDesktop);
 			setIsLoading(false);
 		};
 
 		// Initial check
 		checkDevice();
 
-		// Listen for window resize to catch screen size changes
-		const handleResize = () => {
-			checkDevice();
-		};
+		// Listen for resize events using matchMedia listener for better performance than window.onresize
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
+        const handleChange = (e: MediaQueryListEvent) => {
+            setIsDeviceAllowed(e.matches);
+        };
 
-		window.addEventListener("resize", handleResize);
+        mediaQuery.addEventListener("change", handleChange);
 
 		return () => {
-			window.removeEventListener("resize", handleResize);
+            mediaQuery.removeEventListener("change", handleChange);
 		};
 	}, []);
 

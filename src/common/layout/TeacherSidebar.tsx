@@ -48,7 +48,7 @@ interface TeacherSidebarProps {
 export default function TeacherSidebar({ isCollapsed, isTablet }: TeacherSidebarProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
-	const { logout } = useAuthStore();
+	const logout = useAuthStore((state) => state.logout);
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;

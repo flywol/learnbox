@@ -2,7 +2,7 @@ import { useAdminProfile } from "@/features/admin/profile/hooks/useProfile";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
 export default function SchoolBranding() {
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { data: adminProfile } = useAdminProfile(isAuthenticated);
   const schoolInfo = adminProfile?.school;
 

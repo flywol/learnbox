@@ -1,15 +1,13 @@
 // src/features/auth/pages/password/ForgotPassword.tsx
 import { useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
-	forgotPasswordSchema,
 	ForgotPasswordFormData,
 } from "../../schemas/authSchema";
 import { usePasswordReset } from "../../hooks/usePasswordReset";
 import OtpVerification from "../../components/OtpVerification";
 import { AuthPageWrapper } from "../../components/ui/AuthPageWrapper";
+import ForgotPasswordForm from "../../components/forms/ForgotPasswordForm";
 
 const ForgotPasswordPage = () => {
 	const navigate = useNavigate();
@@ -31,27 +29,13 @@ const ForgotPasswordPage = () => {
 
 	// Initialize password reset flow - the hook handles this automatically
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors, isValid },
-		setError,
-	} = useForm<ForgotPasswordFormData>({
-		resolver: zodResolver(forgotPasswordSchema),
-		defaultValues: {
-			email: defaultEmail,
-		},
-	});
+
 
 	const onEmailSubmit = useCallback(
 		async (data: ForgotPasswordFormData) => {
-			const success = await requestPasswordReset(data.email);
-			
-			if (!success && error) {
-				setError("email", { message: error });
-			}
+			await requestPasswordReset(data.email);
 		},
-		[requestPasswordReset, error, setError]
+		[requestPasswordReset]
 	);
 
 	// OTP verification callback
@@ -187,34 +171,12 @@ const ForgotPasswordPage = () => {
 					</p>
 				</div>
 
-				<form
-					onSubmit={handleSubmit(onEmailSubmit)}
-					className="space-y-4">
-					<div className="space-y-2">
-						<input
-							id="email"
-							type="email"
-							{...register("email")}
-							className="w-full p-3 border rounded-md"
-							placeholder="Email address"
-							disabled={isLoading}
-						/>
-						{errors.email && (
-							<p className="text-red-500 text-sm mt-1">
-								{errors.email.message}
-							</p>
-						)}
-					</div>
-
-					<button
-						type="submit"
-						disabled={!isValid || isLoading}
-						className="w-full bg-orange-500 text-white p-3 rounded-md font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50">
-						{isLoading
-							? "Sending..."
-							: "Send Verification Code"}
-					</button>
-				</form>
+				<ForgotPasswordForm
+					onSubmit={onEmailSubmit}
+					isLoading={isLoading}
+					defaultEmail={defaultEmail}
+					serverError={error}
+				/>
 
 				<div className="text-center text-sm">
 					<p className="text-gray-600">

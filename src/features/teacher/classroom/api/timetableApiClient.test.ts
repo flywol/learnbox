@@ -286,7 +286,7 @@ describe('TimetableApiClient', () => {
 
       expect(result).toEqual(mockResponse.data);
       expect(result.classes).toHaveLength(2);
-      expect(result.classes[0].subjectName).toBe('Mathematics');
+      expect(result.classes[0].subject).toBe('Mathematics');
     });
 
     it('should throw error and log on failure', async () => {

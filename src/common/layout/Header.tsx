@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuToggle, showMenuButton }: HeaderProps) {
-	const { user } = useAuthStore();
+	const user = useAuthStore((state) => state.user);
 	const navigate = useNavigate();
 
 	const handleNotificationPageClick = () => {

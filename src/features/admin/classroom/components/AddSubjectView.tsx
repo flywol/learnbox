@@ -163,23 +163,25 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
               </div>
               
               {/* Add/Remove buttons */}
-              {index === subjectInputs.length - 1 ? (
-                <button
-                  onClick={handleAddInput}
-                  disabled={isSubmitting}
-                  className="mt-6 w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              ) : (
+              <div className="flex items-center gap-2 mt-6">
                 <button
                   onClick={() => handleRemoveInput(input.id)}
-                  disabled={isSubmitting}
-                  className="mt-6 w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || subjectInputs.length === 1}
+                  className="w-8 h-8 bg-red-400 text-white rounded flex items-center justify-center hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-              )}
+
+                {index === subjectInputs.length - 1 && (
+                  <button
+                    onClick={handleAddInput}
+                    disabled={isSubmitting}
+                    className="w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -190,7 +192,7 @@ export default function AddSubjectView({ classId, classArmId, onBack, onAddSubje
           disabled={isSubmitDisabled}
           className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
             isSubmitDisabled
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-orange-100 text-white cursor-not-allowed'
               : 'bg-orange-500 text-white hover:bg-orange-600'
           }`}
         >

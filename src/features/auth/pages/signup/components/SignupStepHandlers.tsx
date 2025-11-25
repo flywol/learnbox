@@ -7,6 +7,8 @@ import {
   PersonalInfoFormData,
 } from "@/features/auth/schemas/authSchema";
 
+import { getFirstName } from "@/common/utils/userUtils";
+
 export function useSignupStepHandlers() {
   const navigate = useNavigate();
   const {
@@ -52,7 +54,7 @@ export function useSignupStepHandlers() {
         await authApiClient.register({
           email: info.email,
           password: info.password,
-          fullName: info.fullName.split(" ")[0] || info.fullName,
+          fullName: getFirstName(info.fullName) || info.fullName,
           phoneNumber: `+234${info.phoneNumber}`,
           learnboxUrl: signupData.learnboxUrl || "",
           schoolName: signupData.schoolName || "",

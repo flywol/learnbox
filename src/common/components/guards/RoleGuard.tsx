@@ -3,6 +3,8 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
+import { useShallow } from 'zustand/react/shallow';
+
 interface RoleGuardProps {
   allowedRoles: string[];
   children: React.ReactNode;
@@ -14,7 +16,12 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   children, 
   fallbackPath = '/unauthorized' 
 }) => {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore(
+    useShallow((state) => ({
+      user: state.user,
+      isAuthenticated: state.isAuthenticated,
+    }))
+  );
   const location = useLocation();
 
   // If not authenticated, redirect to login

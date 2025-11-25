@@ -10,6 +10,8 @@ import { useDashboardData } from './useDashboardData';
 import { useTodayClasses } from '@/features/teacher/classroom/hooks/useTimetable';
 import { transformClassForGrid } from '@/features/teacher/classroom/utils/timetableUtils';
 import type { ClassSchedule } from '../components/RecentClassesSection';
+import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
+import { useQuery } from '@tanstack/react-query';
 
 export function useTeacherDashboard() {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ export function useTeacherDashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isLiveClassModalOpen, setIsLiveClassModalOpen] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   // Fetch dashboard data from API
   const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useDashboardData();
@@ -26,6 +29,12 @@ export function useTeacherDashboard() {
 
   // Fetch today's classes from API
   const { data: todayClassesData, isLoading: classesLoading } = useTodayClasses();
+
+  // Fetch teacher subjects
+  const { data: subjectsData } = useQuery({
+    queryKey: ['teacher-subjects'],
+    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
+  });
 
   // Action handlers
   const handleAddTask = () => {
@@ -182,5 +191,15 @@ export function useTeacherDashboard() {
     handleEditTask,
     handleOpenLiveClassModal,
     handleCloseLiveClassModal,
+    
+    // Welcome modal
+    showWelcomeModal,
+    setShowWelcomeModal,
+
+    // Subjects
+    teacherSubjects: subjectsData?.assignedSubjects.map(s => ({
+      id: s._id,
+      name: s.name
+    })) || [],
   };
 }

@@ -35,7 +35,7 @@ interface SidebarProps {
 export default function Sidebar({ isCollapsed, isTablet }: SidebarProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
-	const { logout } = useAuthStore();
+	const logout = useAuthStore((state) => state.logout);
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;

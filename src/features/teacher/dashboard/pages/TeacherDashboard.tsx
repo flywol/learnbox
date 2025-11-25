@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+
 import {
   StatCard,
   ActionCard,
@@ -12,60 +12,46 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+
 import { useAuthStore } from '@/features/auth/store/authStore';
 import TasksSection from '../components/TasksSection';
 import RecentClassesSection from '../components/RecentClassesSection';
 import TeacherWelcomeModal from '../../components/TeacherWelcomeModal';
 import TaskDetailModal from '../../tasks/components/TaskDetailModal';
 import CreateLiveClassModal from '../../classroom/components/modals/CreateLiveClassModal';
-import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
+
 import { useTeacherDashboard } from '../hooks/useTeacherDashboard';
 
+import { getFirstName } from "@/common/utils/userUtils";
+
+// ... imports
+
 export default function TeacherDashboard() {
-  const { user } = useAuthStore();
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  
+  const user = useAuthStore((state) => state.user);
   const {
-    actionCards,
     stats,
+    loading,
     tasks,
     completedTasks,
     totalTasks,
     schedule,
     selectedDay,
+    handleDayChange,
     events,
     eventsLoading,
     eventsError,
-    loading,
-    selectedTask,
+    showWelcomeModal,
+    setShowWelcomeModal,
     isTaskModalOpen,
-    isLiveClassModalOpen,
-    handleAddTask,
-    handleDayChange,
     handleCloseTaskModal,
+    selectedTask,
     handleEditTask,
+    handleAddTask,
+    actionCards,
+    isLiveClassModalOpen,
     handleCloseLiveClassModal,
+    teacherSubjects
   } = useTeacherDashboard();
-
-  // Fetch teacher's subjects for live class modal
-  const { data: subjectsData } = useQuery({
-    queryKey: ['teacher-subjects-classes'],
-    queryFn: () => subjectsClassesApiClient.getTeacherSubjectsAndClasses(),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const teacherSubjects = subjectsData?.assignedSubjects.map(s => ({
-    id: s._id,
-    name: s.name
-  })) || [];
-
-  useEffect(() => {
-    // Show welcome modal for teacher users who haven't seen it
-    if (user?.role === "TEACHER" && !localStorage.getItem('teacher-welcome-seen')) {
-      setShowWelcomeModal(true);
-    }
-  }, [user]);
 
   return (
     <>
@@ -76,7 +62,7 @@ export default function TeacherDashboard() {
           {/* Welcome Header */}
           <div className="bg-gray-100 rounded-lg p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome {user?.fullName?.split(" ")[0] || "Joe"}, what do you want to do today?
+              Welcome {getFirstName(user?.fullName, "Joe")}, what do you want to do today?
             </h1>
             
             {/* Action Cards */}

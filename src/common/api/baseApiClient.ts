@@ -74,12 +74,12 @@ export class BaseApiClient {
 							return this.api(originalRequest);
 						} catch {
 								this.clearAllTokens();
-							window.location.href = "/";
+							window.dispatchEvent(new Event("auth:unauthorized"));
 							return Promise.reject(this.normalizeError(error));
 						}
 					} else {
 								this.clearAllTokens();
-						window.location.href = "/";
+						window.dispatchEvent(new Event("auth:unauthorized"));
 					}
 				}
 				return Promise.reject(this.normalizeError(error));

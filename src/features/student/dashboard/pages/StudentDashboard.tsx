@@ -18,7 +18,7 @@ export default function StudentDashboard() {
 			{/* Left Column - Welcome, Overview and Tasks */}
 			<div className="lg:col-span-2 space-y-6">
 				{/* Welcome Banner */}
-				<WelcomeBanner upcomingDeadline={dashboardData.upcomingDeadline} />
+				<WelcomeBanner upcomingDeadline={dashboardData.upcomingDeadline || undefined} />
 
 				{/* Overview Stats */}
 				<OverviewStats stats={dashboardData.overview} />

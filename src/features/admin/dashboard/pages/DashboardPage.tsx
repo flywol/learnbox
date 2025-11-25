@@ -12,14 +12,14 @@ import {
 	BookOpen,
 	Heart,
 	Award,
-	Building2,
 } from "lucide-react";
 import SchoolSetupPromptModal from "../../school-setup/components/SchoolSetupPromptModal";
 import { useSchoolSetupStore } from "../../school-setup/store/schoolSetupStore";
 import { useAdminDashboardStats } from "../hooks/useAdminDashboardStats";
 import AdminWelcomeModal from "../../components/AdminWelcomeModal";
 import { StatCard, WelcomeHeader, DashboardLayout, EventsSection } from "@/common/components/dashboard";
-import type { ActionConfig, DashboardEvent } from "@/common/components/dashboard";
+import { ASSETS } from "@/common/constants/assets";
+import type { ActionConfig } from "@/common/components/dashboard";
 import { useQuery } from '@tanstack/react-query';
 import { eventsApiClient } from '@/features/admin/events/api/eventsApiClient';
 
@@ -49,97 +49,95 @@ const EmptyState = ({
 	</div>
 );
 
+import { getFirstName } from "@/common/utils/userUtils";
+
+// ... imports
+
 export default function DashboardPage() {
 	const navigate = useNavigate();
-	const { user } = useAuthStore();
+	const user = useAuthStore((state) => state.user);
 	const { isCompleted: isSchoolSetupCompleted } = useSchoolSetupStore();
+	const { stats, loading } = useAdminDashboardStats();
 	const [showSetupPrompt, setShowSetupPrompt] = useState(false);
 	const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-	const { stats, loading } = useAdminDashboardStats();
 
-	// Fetch events for admin dashboard
-	const { data: eventsData, isLoading: eventsLoading, error: eventsError } = useQuery({
+	// Events query
+	const { 
+		data: eventsResponse, 
+		isLoading: eventsLoading, 
+		error: eventsError 
+	} = useQuery({
 		queryKey: ['admin-events'],
 		queryFn: () => eventsApiClient.getEvents(),
-		staleTime: 5 * 60 * 1000,
 	});
 
-	// Transform events to shared format
-	const events: DashboardEvent[] = eventsData?.map(event => ({
-		id: event.id,
-		description: event.description,
-		date: event.date,
-		receivers: event.receivers,
-	})) || [];
+	const events = eventsResponse || [];
+
+	useEffect(() => {
+		// Show welcome modal if it's the first login
+		// This logic might need adjustment based on actual "first login" flag
+		// For now, we'll just leave it initialized to false
+	}, []);
+
+	useEffect(() => {
+		if (!isSchoolSetupCompleted) {
+			// Delay showing the prompt slightly to allow for initial load
+			const timer = setTimeout(() => setShowSetupPrompt(true), 1000);
+			return () => clearTimeout(timer);
+		}
+	}, [isSchoolSetupCompleted]);
+
+	const setupPrompt = !isSchoolSetupCompleted ? (
+		<div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+			<div className="flex items-start justify-between">
+				<div>
+					<h3 className="text-sm font-medium text-blue-900">Complete your school setup</h3>
+					<p className="mt-1 text-sm text-blue-700">
+						You need to complete your school setup to access all features.
+					</p>
+				</div>
+				<button
+					onClick={() => navigate("/admin/school-setup")}
+					className="ml-4 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+				>
+					Complete Setup
+				</button>
+			</div>
+		</div>
+	) : undefined;
 
 	// Admin action cards configuration
 	const adminActions: ActionConfig[] = [
 		{
-			iconSrc: "/assets/add-new.svg",
+			iconSrc: ASSETS.IMAGES.ADD_NEW,
 			title: "Add new user",
 			description: "Add students, teachers, or parents to your school",
 			onClick: () => navigate("/admin/users/create"),
 		},
 		{
-			iconSrc: "/assets/add-new2.svg", 
+			iconSrc: ASSETS.IMAGES.ADD_NEW_2,
 			title: "Add new subject",
 			description: "Add subjects and assign them to classes",
-			onClick: () => {/* TODO: Implement add subject */},
+			onClick: () => navigate("/admin/classroom"),
 		},
 		{
-			iconSrc: "/assets/add-new.svg",
+			iconSrc: ASSETS.IMAGES.ADD_NEW,
 			title: "School payments", 
 			description: "Manage fees, transactions, and payment records",
 			onClick: () => navigate("/admin/payments"),
 		},
 		{
-			iconSrc: "/assets/add-new2.svg",
+			iconSrc: ASSETS.IMAGES.ADD_NEW_2,
 			title: "Session config",
 			description: "Set up academic sessions and terms", 
 			onClick: () => navigate("/admin/profile/session-config"),
 		},
 	];
-
-	// Setup prompt for admin if school setup not completed
-	const setupPrompt = (
-		<div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
-					<div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
-						<Building2 className="w-6 h-6 text-white" />
-					</div>
-					<div>
-						<h3 className="font-semibold text-gray-900">Complete your school registration</h3>
-						<p className="text-sm text-gray-600">Set up your school profile, classes, and academic sessions</p>
-					</div>
-				</div>
-				<button
-					onClick={() => setShowSetupPrompt(true)}
-					className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
-					Continue Setup
-				</button>
-			</div>
-		</div>
-	);
-
-	useEffect(() => {
-		// Show setup prompt if school setup is not completed
-		if (!isSchoolSetupCompleted && user?.role === "ADMIN") {
-			setShowSetupPrompt(true);
-		}
-		// Show welcome modal for admin users who haven't seen it
-		else if (user?.role === "ADMIN" && !localStorage.getItem('admin-welcome-seen')) {
-			setShowWelcomeModal(true);
-		}
-	}, [isSchoolSetupCompleted, user]);
-
-
-	// Default admin dashboard
 	return (
 		<DashboardLayout
 			welcomeHeader={
 				<WelcomeHeader
-					userName={user?.fullName?.split(" ")[0] || "Admin"}
+					userName={getFirstName(user?.fullName, "Admin")}
 					actions={adminActions}
 					isSetupRequired={!isSchoolSetupCompleted}
 					setupPrompt={setupPrompt}
@@ -192,7 +190,7 @@ export default function DashboardPage() {
 							<h2 className="text-lg font-semibold text-gray-900">Recent activities</h2>
 						</div>
 						<div className="p-4 flex-1 flex items-center justify-center">
-							<EmptyState title="No recent activities yet" description="" illustration="/assets/activity-empty.svg" />
+							<EmptyState title="No recent activities yet" description="" illustration={ASSETS.IMAGES.ACTIVITY_EMPTY} />
 						</div>
 					</div>
 
