@@ -1,4 +1,4 @@
-import { Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy } from "react";
 import { ProtectedRoute } from "../features/auth/components/guards/FirstTimeLoginGuard";
 import DashboardLayout from "../common/layout/DashboardLayout";
@@ -24,9 +24,9 @@ function RoleBasedLayout() {
     return <Navigate to="/parent/dashboard" replace />;
   }
 
-  // Teachers get simple layout with no API calls
+  // Teachers should use /teacher/dashboard - redirect immediately
   if (user?.role?.toLowerCase() === 'teacher') {
-    return <TeacherLayout />;
+    return <Navigate to="/teacher/dashboard" replace />;
   }
 
   // Admins get full dashboard layout (with ProfileProvider)
@@ -35,17 +35,19 @@ function RoleBasedLayout() {
 
 export function DashboardRoutes() {
   return (
-    <Route
-      element={
-        <ProtectedRoute>
-          <RoleBasedLayout />
-        </ProtectedRoute>
-      }
-    >
-      <Route path="/dashboard" element={<RoleDashboard />} />
-      <Route path="/dashboard/complete-school-setup" element={<CompleteSetupPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/dashboard/*" element={<LayoutNotFoundPage />} />
-    </Route>
+    <Routes>
+      <Route
+        element={
+          <ProtectedRoute>
+            <RoleBasedLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<RoleDashboard />} />
+        <Route path="/dashboard/complete-school-setup" element={<CompleteSetupPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/dashboard/*" element={<LayoutNotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }

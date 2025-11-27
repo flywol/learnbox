@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link } from "react-router-dom";
 import {
 	Home,
 	BookOpen,
@@ -73,13 +73,15 @@ export default function TeacherSidebar({ isCollapsed, isTablet }: TeacherSidebar
 		<aside className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isTablet && !isCollapsed ? 'fixed top-16 left-0 bottom-0 z-20 shadow-xl' : ''}`}>
 			{/* Logo */}
 			<div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
-				<h1 className={`font-bold ${isCollapsed ? 'text-lg text-center' : 'text-2xl'}`}>
-					{isCollapsed ? (
-						<span className="text-orange-500">L</span>
-					) : (
-						<>Learn<span className="text-orange-500">Box</span></>
-					)}
-				</h1>
+				<Link to="/teacher/dashboard">
+					<h1 className={`font-bold cursor-pointer hover:opacity-80 transition-opacity ${isCollapsed ? 'text-lg text-center' : 'text-2xl'}`}>
+						{isCollapsed ? (
+							<span className="text-orange-500">L</span>
+						) : (
+							<>Learn<span className="text-orange-500">Box</span></>
+						)}
+					</h1>
+				</Link>
 			</div>
 
 			{/* Menu */}

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Bold, Italic, Underline, List, ListOrdered, Link, Image, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Bold, Italic, Underline, List, ListOrdered, Link, Image, Calendar, Clock, FileText, Upload, X, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '../../../../hooks/use-toast';
 import { lessonsApiClient } from '../api/lessonsApiClient';
@@ -180,355 +180,374 @@ export default function AddAssignmentPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(`/teacher/subject/${subjectId}/lesson/add/content`)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Add assignment</h1>
+        <div>
+           <h1 className="text-2xl font-bold text-gray-900">Add Assignment</h1>
+           <p className="text-sm text-gray-500">Create a new assignment for this lesson</p>
+        </div>
       </div>
 
       {/* Form */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Side - Form */}
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-6">
-          <form className="space-y-6">
-            {/* Lesson Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Lesson Details</h3>
-              
-              {/* Lesson Title */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lesson Title *
-                </label>
-                <input
-                  {...register('lessonTitle')}
-                  type="text"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.lessonTitle ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.lessonTitle && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lessonTitle.message}</p>
-                )}
-              </div>
+        <div className="lg:col-span-2 space-y-8">
+           <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+             <form className="space-y-8">
+               {/* Lesson Section */}
+               <div className="border-b border-gray-100 pb-8">
+                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 text-sm">1</span>
+                    Lesson Details
+                 </h3>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Lesson Title */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Lesson Title *
+                      </label>
+                      <input
+                        {...register('lessonTitle')}
+                        type="text"
+                        className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                          errors.lessonTitle ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                      />
+                      {errors.lessonTitle && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.lessonTitle.message}</p>
+                      )}
+                    </div>
 
-              {/* Lesson Number & Start Date */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Number *
-                  </label>
-                  <input
-                    {...register('lessonNumber')}
-                    type="text"
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.lessonNumber ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.lessonNumber && (
-                    <p className="mt-1 text-sm text-red-600">{errors.lessonNumber.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date *
-                  </label>
-                  <input
-                    {...register('startDate')}
-                    type="date"
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.startDate ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.startDate && (
-                    <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
-                  )}
-                </div>
-              </div>
+                    {/* Lesson Number & Start Date */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Lesson Number *
+                      </label>
+                      <input
+                        {...register('lessonNumber')}
+                        type="text"
+                        className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                          errors.lessonNumber ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                      />
+                      {errors.lessonNumber && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.lessonNumber.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Start Date *
+                      </label>
+                      <div className="relative">
+                         <input
+                           {...register('startDate')}
+                           type="date"
+                           className={`w-full px-4 py-3 pl-11 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                             errors.startDate ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                           }`}
+                         />
+                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                      </div>
+                      {errors.startDate && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.startDate.message}</p>
+                      )}
+                    </div>
 
-              {/* Class & Class Arm */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Class *
-                  </label>
-                  <select
-                    {...register('class')}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.class ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Select a class</option>
-                    {(() => {
-                      // Try classes array first
-                      if (subjectsClassesData?.classes?.length) {
-                        return subjectsClassesData.classes.map((cls: any) => (
-                          <option key={cls.id} value={cls.id}>
-                            {cls.name}
-                          </option>
-                        ));
-                      }
+                    {/* Class & Class Arm */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Class *
+                      </label>
+                      <div className="relative">
+                         <select
+                           {...register('class')}
+                           className={`w-full px-4 py-3 bg-gray-50 border rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                             errors.class ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                           }`}
+                         >
+                           <option value="">Select a class</option>
+                           {(() => {
+                             if (subjectsClassesData?.classes?.length) {
+                               return subjectsClassesData.classes.map((cls: any) => (
+                                 <option key={cls.id} value={cls.id}>
+                                   {cls.name}
+                                 </option>
+                               ));
+                             }
+                             const uniqueClasses = new Map();
+                             subjectsClassesData?.assignedSubjects?.forEach(subject => {
+                               if (subject.classRef && typeof subject.classRef === 'object') {
+                                 const classRef = subject.classRef;
+                                 uniqueClasses.set(classRef._id, {
+                                   id: classRef._id,
+                                   name: classRef.class || classRef.levelName
+                                 });
+                               }
+                             });
+                             const classOptions = Array.from(uniqueClasses.values());
+                             if (classOptions.length === 0) {
+                               return <option disabled>No classes available</option>;
+                             }
+                             return classOptions.map((cls: any) => (
+                               <option key={cls.id} value={cls.id}>
+                                 {cls.name}
+                               </option>
+                             ));
+                           })()}
+                         </select>
+                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                         </div>
+                      </div>
+                      {errors.class && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.class.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Class Arm (Optional)
+                      </label>
+                      <input
+                        {...register('classArm')}
+                        type="text"
+                        placeholder="e.g., A, B, Alpha"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                 </div>
+               </div>
+
+               {/* Assignment Section */}
+               <div>
+                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 text-sm">2</span>
+                    Assignment Details
+                 </h3>
+                 
+                 <div className="space-y-6">
+                    {/* Assignment Title */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Title *
+                      </label>
+                      <input
+                        {...register('title')}
+                        type="text"
+                        className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                          errors.title ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                      />
+                      {errors.title && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.title.message}</p>
+                      )}
+                    </div>
+
+                    {/* Description with Rich Text Editor */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Description *
+                      </label>
                       
-                      // Fallback: extract unique classes from assigned subjects
-                      const uniqueClasses = new Map();
-                      subjectsClassesData?.assignedSubjects?.forEach(subject => {
-                        if (subject.classRef && typeof subject.classRef === 'object') {
-                          const classRef = subject.classRef;
-                          uniqueClasses.set(classRef._id, {
-                            id: classRef._id,
-                            name: classRef.class || classRef.levelName
-                          });
-                        }
-                      });
-                      
-                      const classOptions = Array.from(uniqueClasses.values());
-                      
-                      if (classOptions.length === 0) {
-                        return <option disabled>No classes available</option>;
-                      }
-                      
-                      return classOptions.map((cls: any) => (
-                        <option key={cls.id} value={cls.id}>
-                          {cls.name}
-                        </option>
-                      ));
-                    })()}
-                  </select>
-                  {errors.class && (
-                    <p className="mt-1 text-sm text-red-600">{errors.class.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Class Arm (Optional)
-                  </label>
-                  <input
-                    {...register('classArm')}
-                    type="text"
-                    placeholder="e.g., A, B, Alpha"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
+                      <div className={`border rounded-xl overflow-hidden transition-all ${
+                         errors.description ? 'border-red-300' : 'border-gray-200 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20'
+                      }`}>
+                         {/* Toolbar */}
+                         <div className="bg-gray-50 border-b border-gray-200 p-2 flex items-center gap-1 flex-wrap">
+                           <select className="text-sm border-none bg-transparent mr-2 font-medium text-gray-600 focus:ring-0 cursor-pointer">
+                             <option>Normal Text</option>
+                             <option>Heading 1</option>
+                             <option>Heading 2</option>
+                           </select>
+                           <div className="w-px h-4 bg-gray-300 mx-2" />
+                           <div className="flex items-center gap-1">
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <Bold className="w-4 h-4" />
+                             </button>
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <Italic className="w-4 h-4" />
+                             </button>
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <Underline className="w-4 h-4" />
+                             </button>
+                           </div>
+                           <div className="w-px h-4 bg-gray-300 mx-2" />
+                           <div className="flex items-center gap-1">
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <List className="w-4 h-4" />
+                             </button>
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <ListOrdered className="w-4 h-4" />
+                             </button>
+                           </div>
+                           <div className="w-px h-4 bg-gray-300 mx-2" />
+                           <div className="flex items-center gap-1">
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <Link className="w-4 h-4" />
+                             </button>
+                             <button type="button" className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+                               <Image className="w-4 h-4" />
+                             </button>
+                           </div>
+                         </div>
 
-            {/* Assignment Section */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Assignment Details</h3>
-            </div>
+                         <textarea
+                           {...register('description')}
+                           rows={8}
+                           className="w-full px-4 py-3 border-none focus:ring-0 resize-none bg-white"
+                           placeholder="Type your assignment description here..."
+                         />
+                      </div>
+                      {errors.description && (
+                        <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.description.message}</p>
+                      )}
+                    </div>
 
-            {/* Assignment Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title *
-              </label>
-              <input
-                {...register('title')}
-                type="text"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.title ? 'border-red-300' : 'border-gray-300'
-                }`}
-              />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-              )}
-            </div>
+                    {/* Due Date & Time */}
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Schedule due date *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('dueDate')}
+                            type="date"
+                            className={`w-full px-4 py-3 pl-11 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                              errors.dueDate ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                            }`}
+                          />
+                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                        </div>
+                        {errors.dueDate && (
+                          <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.dueDate.message}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Schedule due time *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('dueTime')}
+                            type="time"
+                            className={`w-full px-4 py-3 pl-11 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                              errors.dueTime ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                            }`}
+                          />
+                          <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                        </div>
+                        {errors.dueTime && (
+                          <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.dueTime.message}</p>
+                        )}
+                      </div>
+                    </div>
+                 </div>
+               </div>
 
-            {/* Description with Rich Text Editor */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              
-              {/* Toolbar */}
-              <div className="border border-gray-300 rounded-t-md p-2 bg-gray-50 flex items-center gap-1">
-                <select className="text-sm border-none bg-transparent mr-2">
-                  <option>Font</option>
-                </select>
-                <select className="text-sm border-none bg-transparent mr-2">
-                  <option>Size</option>
-                </select>
-                <div className="flex items-center gap-1 ml-2 border-l pl-2">
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <Bold className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <Italic className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <Underline className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-1 ml-2 border-l pl-2">
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <ListOrdered className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-1 ml-2 border-l pl-2">
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <Link className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded">
-                    <Image className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <textarea
-                {...register('description')}
-                rows={6}
-                className={`w-full px-3 py-2 border border-t-0 rounded-b-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none ${
-                  errors.description ? 'border-red-300' : 'border-gray-300'
-                }`}
-              />
-              {errors.description && (
-                <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-              )}
-            </div>
-
-            {/* Due Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Schedule due date *
-              </label>
-              <div className="relative">
-                <input
-                  {...register('dueDate')}
-                  type="date"
-                  className={`w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.dueDate ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                <Calendar className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              {errors.dueDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>
-              )}
-            </div>
-
-            {/* Due Time */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Schedule due time *
-              </label>
-              <div className="relative">
-                <input
-                  {...register('dueTime')}
-                  type="time"
-                  className={`w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.dueTime ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                <Clock className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              {errors.dueTime && (
-                <p className="mt-1 text-sm text-red-600">{errors.dueTime.message}</p>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleSubmit(handleSaveAndContinue)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmitting ? 'Saving...' : 'Save & Continue'}
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit(handlePublish)}
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmitting ? 'Publishing...' : 'Publish'}
-              </button>
-            </div>
-          </form>
+               {/* Action Buttons */}
+               <div className="flex gap-4 pt-4 border-t border-gray-100">
+                 <button
+                   type="button"
+                   onClick={handleSubmit(handleSaveAndContinue)}
+                   disabled={isSubmitting}
+                   className="flex-1 px-6 py-3 border border-orange-200 text-orange-600 rounded-xl hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
+                 >
+                   {isSubmitting ? 'Saving...' : 'Save as Draft'}
+                 </button>
+                 <button
+                   type="button"
+                   onClick={handleSubmit(handlePublish)}
+                   disabled={isSubmitting}
+                   className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-semibold"
+                 >
+                   {isSubmitting ? 'Publishing...' : 'Publish Assignment'}
+                 </button>
+               </div>
+             </form>
+           </div>
         </div>
 
         {/* Right Side - Settings & File Upload */}
         <div className="space-y-6">
           {/* Accept Late Submission Toggle */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">
-                Accept submission after due date:
+              <span className="text-sm font-semibold text-gray-900">
+                Accept late submissions
               </span>
               <button
                 type="button"
                 onClick={() => setAcceptLateSubmission(!acceptLateSubmission)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  acceptLateSubmission ? 'bg-orange-500' : 'bg-gray-200'
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                  acceptLateSubmission ? 'bg-orange-600' : 'bg-gray-200'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
                     acceptLateSubmission ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
               </button>
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+               If enabled, students can submit after the due date but it will be marked as late.
+            </p>
           </div>
 
           {/* File Upload */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Assignment File</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+               <FileText className="w-4 h-4 text-orange-600" />
+               Assignment Resources
+            </h3>
+            
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer group ${
                 isDragging 
-                  ? 'border-orange-400 bg-orange-50' 
-                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                  ? 'border-orange-500 bg-orange-50' 
+                  : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
               }`}
             >
               <div className="flex flex-col items-center space-y-4">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <img 
-                    src="/assets/upload.svg" 
-                    alt="Upload file" 
-                    className="w-16 h-16"
-                  />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                   isDragging ? 'bg-orange-200' : 'bg-orange-100 group-hover:bg-orange-200'
+                }`}>
+                  <Upload className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-gray-600">
-                    Drag and drop or{' '}
-                    <span className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer">
-                      select file
-                    </span>{' '}
-                    to upload
+                  <p className="text-gray-900 font-medium mb-1">
+                    Click to upload or drag and drop
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Supports: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG
+                  <p className="text-xs text-gray-500">
+                    PDF, DOCX, JPG or PNG (max. 10MB)
                   </p>
                 </div>
                 
                 {assignmentFile && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg w-full">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                          <span className="text-green-600 text-sm">📄</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-green-800">{assignmentFile.name}</p>
-                          <p className="text-xs text-green-600">
-                            {(assignmentFile.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl w-full text-left relative group/file">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{assignmentFile.name}</p>
+                        <p className="text-xs text-green-600 font-medium">
+                          {(assignmentFile.size / 1024 / 1024).toFixed(2)} MB • Ready to upload
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -536,9 +555,9 @@ export default function AddAssignmentPage() {
                           e.stopPropagation();
                           setAssignmentFile(null);
                         }}
-                        className="text-green-600 hover:text-green-800 transition-colors"
+                        className="p-1 hover:bg-green-200 rounded-full text-green-700 transition-colors"
                       >
-                        ✕
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

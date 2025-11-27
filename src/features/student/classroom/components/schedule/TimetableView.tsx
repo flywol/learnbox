@@ -41,53 +41,58 @@ export default function TimetableView() {
   return (
     <div className="space-y-4">
       {/* Timetable Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
-          <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
+        <div className="grid grid-cols-6 gap-px bg-gray-100">
+          <div className="p-4 bg-white font-semibold text-gray-900 text-sm">Time</div>
           {days.map((day) => (
-            <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
+            <div key={day} className="p-4 bg-white font-semibold text-gray-900 text-sm text-center">
               {day}
             </div>
           ))}
         </div>
 
         {/* Time Slots */}
+        <div className="bg-gray-100 gap-px grid">
         {timeSlots.map((time) => (
-          <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-            <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center gap-2">
+          <div key={time} className="grid grid-cols-6 gap-px bg-gray-100">
+            <div className="p-4 bg-white font-medium text-gray-500 text-xs flex items-center gap-2">
               <span>{time}</span>
-              <ChevronsRight className="w-4 h-4 text-orange-500" />
+              <ChevronsRight className="w-3 h-3 text-gray-300" />
             </div>
             {days.map((day) => {
               const key = `${day}-${time}`;
               const subject = mockTimetableData[key as keyof typeof mockTimetableData];
 
               return (
-                <div key={key} className="p-3 h-24 flex items-center justify-center">
+                <div key={key} className="p-2 bg-white h-28 flex items-center justify-center relative group">
                   {subject ? (
                     <div
-                      className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-2.5 transition-all hover:shadow-md cursor-pointer min-w-0"
+                      className="w-full h-full bg-orange-50/50 border border-orange-100 rounded-xl p-3 flex flex-col gap-2 transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer group-hover:bg-orange-50"
                       title={`${subject.subjectName} - ${subject.duration}`}
                     >
-                      <div className="text-2xl flex-shrink-0">
-                        {subject.icon}
+                      <div className="flex items-start justify-between">
+                         <div className="text-xl">{subject.icon}</div>
+                         <div className="text-[10px] font-semibold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full">
+                            {subject.duration}
+                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+                      
+                      <div className="mt-auto">
+                        <div className="text-xs font-bold text-gray-900 leading-tight line-clamp-2">
                           {subject.subjectName}
-                        </div>
-                        <div className="text-xs text-gray-500 leading-tight mt-0.5">
-                          {subject.duration}
                         </div>
                       </div>
                     </div>
-                  ) : null}
+                  ) : (
+                      <div className="w-full h-full rounded-xl border border-dashed border-gray-100 hover:border-gray-200 transition-colors" />
+                  )}
                 </div>
               );
             })}
           </div>
         ))}
+        </div>
       </div>
     </div>
   );

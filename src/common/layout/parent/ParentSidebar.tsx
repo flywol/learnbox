@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link } from "react-router-dom";
 import {
 	Home,
 	Users,
@@ -7,7 +7,6 @@ import {
 	MessageSquare,
 	User,
 	LogOut,
-	RefreshCw,
 } from "lucide-react";
 
 // Menu config for parents
@@ -86,9 +85,11 @@ export default function ParentSidebar({ isOpen, onClose }: ParentSidebarProps) {
 			`}>
 				{/* Logo */}
 				<div className="p-6 flex justify-between items-center">
-					<h1 className="text-2xl font-bold">
-						Learn<span className="text-orange-500">Box</span>
-					</h1>
+					<Link to="/parent/dashboard">
+						<h1 className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity">
+							Learn<span className="text-orange-500">Box</span>
+						</h1>
+					</Link>
 					{/* Close button for mobile */}
 					<button 
 						onClick={onClose}
@@ -123,10 +124,6 @@ export default function ParentSidebar({ isOpen, onClose }: ParentSidebarProps) {
 
 			{/* Footer actions */}
 			<div className="p-4 border-t border-gray-200 space-y-2">
-				<button className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full text-gray-700 hover:bg-gray-50">
-					<RefreshCw className="w-5 h-5" />
-					<span>Switch account</span>
-				</button>
 				<button
 					onClick={handleLogout}
 					disabled={isLoggingOut}

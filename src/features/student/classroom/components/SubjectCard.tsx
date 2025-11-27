@@ -29,37 +29,51 @@ export default function SubjectCard({ subject, onClick }: SubjectCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`${subject.bgColor} rounded-xl p-4 cursor-pointer hover:shadow-md transition-all hover:scale-[1.02]`}
+      className={`group relative overflow-hidden bg-white border border-gray-100 rounded-2xl p-5 cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
     >
-      {/* Icon Container */}
-      <div className="mb-3">
-        <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center">
-          <span className="text-2xl">{subject.icon}</span>
+      {/* Background Decoration */}
+      <div className={`absolute top-0 right-0 w-32 h-32 ${subject.bgColor} opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110`} />
+      
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className={`w-14 h-14 ${subject.bgColor} rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+            <span className="text-3xl filter drop-shadow-sm">{subject.icon}</span>
+          </div>
+          <div className="bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+             <span className="text-xs font-semibold text-gray-600">{subject.totalLessons} Lessons</span>
+          </div>
         </div>
-      </div>
 
-      {/* Subject Name */}
-      <h3 className="font-semibold text-gray-900 text-base mb-1">{subject.name}</h3>
+        {/* Content */}
+        <div className="mb-6">
+          <h3 className="font-bold text-gray-900 text-lg mb-1 group-hover:text-orange-600 transition-colors line-clamp-1">
+            {subject.name}
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+            <p className="font-medium">{subject.teacher}</p>
+          </div>
+        </div>
 
-      {/* Teacher Name */}
-      <p className="text-sm text-gray-700 mb-3">Teacher: {subject.teacher}</p>
+        {/* Progress Section */}
+        <div>
+          <div className="flex items-end justify-between text-sm mb-2">
+            <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Progress</span>
+            <span className="font-bold text-gray-900">
+              {subject.progressPercentage}%
+            </span>
+          </div>
 
-      {/* Progress Info Row */}
-      <div className="flex items-center justify-between text-sm mb-2">
-        <span className="text-gray-700">
-          Lesson {subject.currentLesson}/{subject.totalLessons}
-        </span>
-        <span className="font-semibold text-gray-900">
-          {subject.progressPercentage}%
-        </span>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="w-full bg-white/50 rounded-full h-2">
-        <div
-          className={`${progressBarColor} h-2 rounded-full transition-all duration-300`}
-          style={{ width: `${subject.progressPercentage}%` }}
-        />
+          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+            <div
+              className={`${progressBarColor} h-full rounded-full transition-all duration-500 ease-out group-hover:brightness-110 relative`}
+              style={{ width: `${subject.progressPercentage}%` }}
+            >
+                <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

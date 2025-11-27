@@ -41,118 +41,138 @@ export default function AddLessonPage() {
   const lessonNumbers = Array.from({ length: 20 }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(`/teacher/subject/${subjectId}`)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Add New Lesson</h1>
+        <div>
+           <h1 className="text-2xl font-bold text-gray-900">Add New Lesson</h1>
+           <p className="text-sm text-gray-500">Create a new lesson for your students</p>
+        </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+           <h2 className="text-lg font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100">
+              Lesson Details
+           </h2>
+           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Lesson Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Lesson title *
               </label>
               <input
                 {...register('title')}
                 type="text"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.title ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                  errors.title ? 'border-red-300 bg-red-50' : 'border-gray-200'
                 }`}
-                placeholder="Enter lesson title"
+                placeholder="e.g. Introduction to Photosynthesis"
               />
               {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.title.message}</p>
               )}
             </div>
 
             {/* Lesson Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Lesson number *
               </label>
-              <select
-                {...register('lessonNumber')}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.lessonNumber ? 'border-red-300' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select lesson number</option>
-                {lessonNumbers.map(num => (
-                  <option key={num} value={num.toString()}>
-                    Lesson {num}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                 <select
+                   {...register('lessonNumber')}
+                   className={`w-full px-4 py-3 bg-gray-50 border rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                     errors.lessonNumber ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                   }`}
+                 >
+                   <option value="">Select number</option>
+                   {lessonNumbers.map(num => (
+                     <option key={num} value={num.toString()}>
+                       Lesson {num}
+                     </option>
+                   ))}
+                 </select>
+                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                 </div>
+              </div>
               {errors.lessonNumber && (
-                <p className="mt-1 text-sm text-red-600">{errors.lessonNumber.message}</p>
+                <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.lessonNumber.message}</p>
               )}
             </div>
 
             {/* Schedule Start Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Schedule start date *
               </label>
               <div className="relative">
                 <input
                   {...register('scheduleStartDate')}
                   type="date"
-                  className={`w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.scheduleStartDate ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 pl-11 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                    errors.scheduleStartDate ? 'border-red-300 bg-red-50' : 'border-gray-200'
                   }`}
                 />
-                <Calendar className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
               {errors.scheduleStartDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.scheduleStartDate.message}</p>
+                <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.scheduleStartDate.message}</p>
               )}
             </div>
 
             {/* Schedule Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Schedule time *
               </label>
               <div className="relative">
                 <input
                   {...register('scheduleTime')}
                   type="time"
-                  className={`w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.scheduleTime ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 pl-11 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                    errors.scheduleTime ? 'border-red-300 bg-red-50' : 'border-gray-200'
                   }`}
                 />
-                <Clock className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
               {errors.scheduleTime && (
-                <p className="mt-1 text-sm text-red-600">{errors.scheduleTime.message}</p>
+                <p className="mt-1.5 text-sm text-red-600 font-medium">{errors.scheduleTime.message}</p>
               )}
             </div>
           </div>
 
           {/* Note */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
-              Please note: Lessons will be locked pending scheduled start date.
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-3">
+             <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-600 text-xs font-bold">i</span>
+             </div>
+            <p className="text-sm text-blue-700">
+              Please note: Lessons will be locked for students until the scheduled start date and time.
             </p>
           </div>
 
           {/* Continue Button */}
-          <div className="mt-6">
+          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
             <button
               type="submit"
-              className="w-full md:w-auto px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              className="px-8 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all shadow-sm hover:shadow-md font-semibold flex items-center gap-2"
             >
               Continue to Add Content
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </button>
           </div>
         </div>

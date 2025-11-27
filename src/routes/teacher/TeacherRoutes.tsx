@@ -1,5 +1,5 @@
 // src/routes/teacher/TeacherRoutes.tsx
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import TeacherLayout from "../../common/layout/TeacherLayout";
 import { ProtectedRoute } from "../../features/auth/components/guards/FirstTimeLoginGuard";
@@ -45,69 +45,70 @@ const CreateLiveClassPage = lazy(() => import("../../features/teacher/classroom/
 
 export function TeacherRoutes() {
   return (
-    <Route
-      path="/teacher"
-      element={
-        <ProtectedRoute>
-          <RoleGuard allowedRoles={['TEACHER']}>
-            <TeacherLayout />
-          </RoleGuard>
-        </ProtectedRoute>
-      }
-    >
-      {/* Dashboard */}
-      <Route index element={<TeacherDashboard />} />
-      <Route path="dashboard" element={<TeacherDashboard />} />
-      
-      {/* Classroom Management */}
-      <Route path="classes" element={<MyClassesPage />} />
+    <Routes>
+      <Route
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['TEACHER']}>
+              <TeacherLayout />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      >
+        {/* Dashboard */}
+        <Route index element={<TeacherDashboard />} />
+        <Route path="dashboard" element={<TeacherDashboard />} />
+        
+        {/* Classroom Management */}
+        <Route path="classes" element={<MyClassesPage />} />
 
-      {/* Profile */}
-      <Route path="profile" element={<TeacherProfilePage />} />
-      
-      {/* Notifications */}
-      <Route path="notifications" element={<TeacherNotificationsPage />} />
-      
-      {/* Tasks */}
-      <Route path="tasks/create" element={<CreateTaskPage />} />
-      <Route path="tasks/edit" element={<EditTaskPage />} />
-      
-      {/* Subject Detail */}
-      <Route path="subject/:subjectId" element={<SubjectDetailPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
-      
-      {/* Standalone Assignment Creation */}
-      <Route path="subject/:subjectId/assignment/create" element={<AddAssignmentPage />} />
-      
-      {/* Live Class Creation */}
-      <Route path="subject/:subjectId/live-class/create" element={<CreateLiveClassPage />} />
-      
-      {/* Lesson Management */}
-      <Route path="subject/:subjectId/lesson/add" element={<AddLessonPage />} />
-      <Route path="subject/:subjectId/lesson/add/content" element={<LessonContentSelectionPage />} />
-      <Route path="subject/:subjectId/lesson/add/video" element={<AddVideoPage />} />
-      <Route path="subject/:subjectId/lesson/add/files" element={<AddFilesPage />} />
-      <Route path="subject/:subjectId/lesson/add/assignment" element={<AddAssignmentPage />} />
-      <Route path="subject/:subjectId/lesson/add/quiz" element={<AddQuizPage />} />
-      
-      {/* Add Content to Existing Lesson */}
-      <Route path="subject/:subjectId/lesson/:lessonId/content/add" element={<AddLessonContentPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId/content/video/add" element={<AddVideoPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId/content/files/add" element={<AddFilesPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId/content/assignment/add" element={<AddAssignmentPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add" element={<AddQuizPage />} />
+        {/* Profile */}
+        <Route path="profile" element={<TeacherProfilePage />} />
+        
+        {/* Notifications */}
+        <Route path="notifications" element={<TeacherNotificationsPage />} />
+        
+        {/* Tasks */}
+        <Route path="tasks/create" element={<CreateTaskPage />} />
+        <Route path="tasks/edit" element={<EditTaskPage />} />
+        
+        {/* Subject Detail */}
+        <Route path="subject/:subjectId" element={<SubjectDetailPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+        
+        {/* Standalone Assignment Creation */}
+        <Route path="subject/:subjectId/assignment/create" element={<AddAssignmentPage />} />
+        
+        {/* Live Class Creation */}
+        <Route path="subject/:subjectId/live-class/create" element={<CreateLiveClassPage />} />
+        
+        {/* Lesson Management */}
+        <Route path="subject/:subjectId/lesson/add" element={<AddLessonPage />} />
+        <Route path="subject/:subjectId/lesson/add/content" element={<LessonContentSelectionPage />} />
+        <Route path="subject/:subjectId/lesson/add/video" element={<AddVideoPage />} />
+        <Route path="subject/:subjectId/lesson/add/files" element={<AddFilesPage />} />
+        <Route path="subject/:subjectId/lesson/add/assignment" element={<AddAssignmentPage />} />
+        <Route path="subject/:subjectId/lesson/add/quiz" element={<AddQuizPage />} />
+        
+        {/* Add Content to Existing Lesson */}
+        <Route path="subject/:subjectId/lesson/:lessonId/content/add" element={<AddLessonContentPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId/content/video/add" element={<AddVideoPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId/content/files/add" element={<AddFilesPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId/content/assignment/add" element={<AddAssignmentPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add" element={<AddQuizPage />} />
 
-      {/* Quiz Management Routes */}
-      <Route path="subject/:subjectId/lesson/add/quiz/preview" element={<QuizPreviewPage />} />
-      <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add/preview" element={<QuizPreviewPage />} />
-      <Route path="subject/:subjectId/quiz/:quizId" element={<TeacherQuizViewPage />} />
-      <Route path="subject/:subjectId/quiz/:quizId/preview" element={<QuizPreviewPage />} />
-      <Route path="subject/:subjectId/quiz/:quizId/edit" element={<EditQuizPage />} />
-      <Route path="subject/:subjectId/quiz/:quizId/submissions" element={<QuizSubmissionsPage />} />
-      <Route path="subject/:subjectId/quiz/:quizId/submissions/:studentId" element={<IndividualSubmissionPage />} />
+        {/* Quiz Management Routes */}
+        <Route path="subject/:subjectId/lesson/add/quiz/preview" element={<QuizPreviewPage />} />
+        <Route path="subject/:subjectId/lesson/:lessonId/content/quiz/add/preview" element={<QuizPreviewPage />} />
+        <Route path="subject/:subjectId/quiz/:quizId" element={<TeacherQuizViewPage />} />
+        <Route path="subject/:subjectId/quiz/:quizId/preview" element={<QuizPreviewPage />} />
+        <Route path="subject/:subjectId/quiz/:quizId/edit" element={<EditQuizPage />} />
+        <Route path="subject/:subjectId/quiz/:quizId/submissions" element={<QuizSubmissionsPage />} />
+        <Route path="subject/:subjectId/quiz/:quizId/submissions/:studentId" element={<IndividualSubmissionPage />} />
 
-      {/* Fallback */}
-      <Route path="*" element={<LayoutNotFoundPage />} />
-    </Route>
+        {/* Fallback */}
+        <Route path="*" element={<LayoutNotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }

@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import ParentLayout from "../../common/layout/parent/ParentLayout";
 import { LayoutNotFoundPage } from "../../components/ErrorPages";
@@ -54,45 +54,46 @@ const NotificationsPage = lazy(
 
 export function ParentRoutes() {
 	return (
-		<Route
-			path="/parent"
-			element={
-				// NO AUTH for now - just layout
-				<ParentLayout />
-			}>
-			{/* Dashboard */}
-			<Route index element={<ParentDashboard />} />
-			<Route path="dashboard" element={<ParentDashboard />} />
-
-			{/* Child */}
-			<Route path="child" element={<ChildPage />} />
-			<Route path="child/subject/:subjectId" element={<SubjectDetailPage />} />
+		<Routes>
 			<Route
-				path="child/subject/:subjectId/lesson/:lessonId"
-				element={<LessonContentPage />}
-			/>
+				element={
+					// NO AUTH for now - just layout
+					<ParentLayout />
+				}>
+				{/* Dashboard */}
+				<Route index element={<ParentDashboard />} />
+				<Route path="dashboard" element={<ParentDashboard />} />
 
-			{/* Schedule */}
-			<Route path="schedule" element={<SchedulePage />} />
+				{/* Child */}
+				<Route path="child" element={<ChildPage />} />
+				<Route path="child/subject/:subjectId" element={<SubjectDetailPage />} />
+				<Route
+					path="child/subject/:subjectId/lesson/:lessonId"
+					element={<LessonContentPage />}
+				/>
 
-			{/* Payments */}
-			<Route path="payments" element={<PaymentsPage />} />
+				{/* Schedule */}
+				<Route path="schedule" element={<SchedulePage />} />
 
-			{/* Chat */}
-			<Route path="chat" element={<ChatPage />} />
+				{/* Payments */}
+				<Route path="payments" element={<PaymentsPage />} />
 
-			{/* Notifications */}
-			<Route path="notifications" element={<NotificationsPage />} />
+				{/* Chat */}
+				<Route path="chat" element={<ChatPage />} />
 
-			{/* Academic Record */}
-			<Route path="academic-record" element={<AcademicRecordPage />} />
-			<Route path="academic-record/subject/:subjectId" element={<GradeBreakdownPage />} />
+				{/* Notifications */}
+				<Route path="notifications" element={<NotificationsPage />} />
 
-			{/* Profile */}
-			<Route path="profile" element={<ParentProfilePage />} />
+				{/* Academic Record */}
+				<Route path="academic-record" element={<AcademicRecordPage />} />
+				<Route path="academic-record/subject/:subjectId" element={<GradeBreakdownPage />} />
 
-			{/* Fallback */}
-			<Route path="*" element={<LayoutNotFoundPage />} />
-		</Route>
+				{/* Profile */}
+				<Route path="profile" element={<ParentProfilePage />} />
+
+				{/* Fallback */}
+				<Route path="*" element={<LayoutNotFoundPage />} />
+			</Route>
+		</Routes>
 	);
 }

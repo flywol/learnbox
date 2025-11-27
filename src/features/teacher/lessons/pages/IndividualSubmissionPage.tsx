@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import QuestionCard from '../components/QuestionCard';
 import { Quiz, QuizSubmission } from '../../classroom/types/classroom.types';
 
@@ -127,117 +127,156 @@ export default function IndividualSubmissionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50/50 pb-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(`/teacher/subject/${subjectId}/quiz/${quizId}/submissions`)}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Preview | {submission.studentName}
-            </h1>
+            <div>
+               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                  <span>Submissions</span>
+                  <span>/</span>
+                  <span className="font-medium text-gray-900">{submission.studentName}</span>
+               </div>
+               <h1 className="text-2xl font-bold text-gray-900">
+                 Review Submission
+               </h1>
+            </div>
           </div>
 
           {/* Score Display */}
-          <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">
-              {submission.percentage?.toFixed(2)}%
-            </div>
-            <div className="text-sm text-gray-600">Score</div>
+          <div className="bg-white px-6 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+             <div className="text-right">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Score</p>
+                <p className="text-2xl font-bold text-gray-900">
+                   {submission.percentage?.toFixed(0)}<span className="text-sm text-gray-400 font-medium">%</span>
+                </p>
+             </div>
+             <div className="w-12 h-12 rounded-full border-4 border-orange-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border-4 border-orange-500 flex items-center justify-center bg-white">
+                   <span className="text-xs font-bold text-orange-600">{submission.score}/{submission.totalPoints}</span>
+                </div>
+             </div>
           </div>
         </div>
 
-        {/* Submission Container */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          {/* Quiz Title */}
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{quiz.title}</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           {/* Main Content - Questions */}
+           <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+                <div className="flex items-start justify-between mb-6">
+                   <div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">{quiz.title}</h2>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                         <div className="flex items-center gap-1.5">
+                            <Clock className="w-4 h-4" />
+                            <span>{quiz.duration} mins</span>
+                         </div>
+                         <div className="flex items-center gap-1.5">
+                            <Calendar className="w-4 h-4" />
+                            <span>Due {formatDueDate(quiz.dueDate, quiz.dueTime)}</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
 
-          {/* Instruction */}
-          {quiz.instruction && (
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Instruction</h3>
-              <div
-                className="text-gray-700 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: quiz.instruction }}
-              />
-            </div>
-          )}
-
-          {/* Due Date and Correct Submission Button */}
-          <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
-            <div>
-              <span className="text-sm text-gray-600">Due date: </span>
-              <span className="text-sm font-medium text-gray-900">
-                {formatDueDate(quiz.dueDate, quiz.dueTime)}
-              </span>
-            </div>
-            <button
-              onClick={handleCorrectSubmission}
-              className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-            >
-              Correct Submission
-            </button>
-          </div>
-
-          {/* Questions with Student Answers */}
-          <div className="space-y-8">
-            {quiz.questions.map((question, index) => {
-              const studentAnswers = getAnswersForQuestion(question.id);
-              const answerData = submission.answers.find((a) => a.questionId === question.id);
-
-              return (
-                <div key={question.id}>
-                  <QuestionCard
-                    question={question}
-                    questionNumber={index + 1}
-                    selectedAnswers={studentAnswers}
-                    showCorrectAnswers={true}
-                    mode="grading"
-                  />
-                  {/* Show if answer is correct/incorrect */}
-                  <div className="mt-2 ml-4">
-                    {answerData?.isCorrect ? (
-                      <p className="text-sm text-green-600 font-medium">
-                        ✓ Correct ({question.points} {question.points === 1 ? 'point' : 'points'})
-                      </p>
-                    ) : (
-                      <p className="text-sm text-red-600 font-medium">
-                        ✗ Incorrect (0 points)
-                      </p>
-                    )}
+                {quiz.instruction && (
+                  <div className="bg-gray-50 rounded-xl p-6 mb-8">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Instructions</h3>
+                    <div
+                      className="text-gray-700 leading-relaxed text-sm"
+                      dangerouslySetInnerHTML={{ __html: quiz.instruction }}
+                    />
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                )}
 
-          {/* Score Summary */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Score Summary</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Total Points</p>
-                  <p className="text-2xl font-bold text-gray-900">{submission.totalPoints}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Points Earned</p>
-                  <p className="text-2xl font-bold text-green-600">{submission.score}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Percentage</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {submission.percentage?.toFixed(2)}%
-                  </p>
+                {/* Questions with Student Answers */}
+                <div className="space-y-10">
+                  {quiz.questions.map((question, index) => {
+                    const studentAnswers = getAnswersForQuestion(question.id);
+                    const answerData = submission.answers.find((a) => a.questionId === question.id);
+
+                    return (
+                      <div key={question.id} className="relative">
+                        <div className="absolute -left-3 top-6 w-1 h-full bg-gray-100 rounded-full" />
+                        <div className="relative pl-6">
+                           <QuestionCard
+                             question={question}
+                             questionNumber={index + 1}
+                             selectedAnswers={studentAnswers}
+                             showCorrectAnswers={true}
+                             mode="grading"
+                           />
+                           
+                           {/* Grading Feedback */}
+                           <div className={`mt-4 p-4 rounded-xl border flex items-start gap-3 ${
+                              answerData?.isCorrect 
+                                 ? 'bg-green-50 border-green-100' 
+                                 : 'bg-red-50 border-red-100'
+                           }`}>
+                              {answerData?.isCorrect ? (
+                                 <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              ) : (
+                                 <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                              )}
+                              <div>
+                                 <p className={`font-semibold ${
+                                    answerData?.isCorrect ? 'text-green-900' : 'text-red-900'
+                                 }`}>
+                                    {answerData?.isCorrect ? 'Correct Answer' : 'Incorrect Answer'}
+                                 </p>
+                                 <p className={`text-sm mt-1 ${
+                                    answerData?.isCorrect ? 'text-green-700' : 'text-red-700'
+                                 }`}>
+                                    {answerData?.isCorrect 
+                                       ? `Student earned ${question.points} ${question.points === 1 ? 'point' : 'points'}`
+                                       : 'Student earned 0 points'
+                                    }
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          </div>
+           </div>
+
+           {/* Sidebar - Grading Controls */}
+           <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 sticky top-6">
+                 <h3 className="text-lg font-bold text-gray-900 mb-6">Grading Actions</h3>
+                 
+                 <div className="space-y-6">
+                    <div>
+                       <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Teacher's Remarks
+                       </label>
+                       <textarea 
+                          rows={4}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all resize-none text-sm"
+                          placeholder="Add feedback for the student..."
+                       />
+                    </div>
+
+                    <div className="pt-6 border-t border-gray-100">
+                       <button
+                         onClick={handleCorrectSubmission}
+                         className="w-full px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all shadow-sm hover:shadow-md font-semibold"
+                       >
+                         Save Grading
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </div>
       </div>
     </div>

@@ -38,27 +38,26 @@ export default function LockedLessonModal({ isOpen, onClose, lesson }: LockedLes
             Lesson Locked Pending Start Date
           </h2>
 
-          <div className="space-y-3 mb-6">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Lesson Title:</p>
-              <p className="font-medium text-gray-900">{lesson.title}</p>
-            </div>
+          <div className="space-y-2 mb-8">
+            <p className="text-gray-600">
+              Lesson Title: <span className="font-bold text-gray-900">{lesson.title}</span>
+            </p>
 
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Scheduled start date & time:</p>
-              <p className="font-medium text-gray-900">{formatDateTime(lesson.startDate)}</p>
-            </div>
+            <p className="text-gray-600">
+              Scheduled start date & time: <span className="font-bold text-gray-900">{formatDateTime(lesson.startDate)}</span>
+            </p>
           </div>
 
-          <p className="text-sm text-gray-600 mb-6">
-            This lesson is scheduled to become available on {formatDateTime(lesson.startDate)}.
-            Until then, it is locked and cannot be accessed. Please check back when the lesson is
-            scheduled to start.
+          <p className="text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
+            This lesson is scheduled to become available on <span className="font-medium text-gray-900">{formatDateTime(lesson.startDate)}</span>.
+            Until then, it is locked and cannot be accessed.
+            <br />
+            Please check back when the lesson is scheduled to start.
           </p>
 
           <button
             onClick={onClose}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+            className="bg-[#FF5722] hover:bg-[#F4511E] text-white px-8 py-3 rounded-lg font-medium transition-all shadow-sm hover:shadow-md"
           >
             Back to lesson
           </button>

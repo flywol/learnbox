@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import StudentLayout from "../../common/layout/student/StudentLayout";
 import { ProtectedRoute } from "../../features/auth/components/guards/FirstTimeLoginGuard";
@@ -63,46 +63,47 @@ const GradeBreakdownPage = lazy(
 
 export function StudentRoutes() {
 	return (
-		<Route
-			path="/student"
-			element={
-				<ProtectedRoute>
-					<RoleGuard allowedRoles={["STUDENT"]}>
-						<StudentLayout />
-					</RoleGuard>
-				</ProtectedRoute>
-			}>
-			{/* Dashboard */}
-			<Route index element={<StudentDashboard />} />
-			<Route path="dashboard" element={<StudentDashboard />} />
+		<Routes>
+			<Route
+				element={
+					<ProtectedRoute>
+						<RoleGuard allowedRoles={["STUDENT"]}>
+							<StudentLayout />
+						</RoleGuard>
+					</ProtectedRoute>
+				}>
+				{/* Dashboard */}
+				<Route index element={<StudentDashboard />} />
+				<Route path="dashboard" element={<StudentDashboard />} />
 
-			{/* Profile */}
-			<Route path="profile" element={<StudentProfilePage />} />
+				{/* Profile */}
+				<Route path="profile" element={<StudentProfilePage />} />
 
-			{/* Notifications */}
-			<Route path="notifications" element={<NotificationsPage />} />
+				{/* Notifications */}
+				<Route path="notifications" element={<NotificationsPage />} />
 
-			{/* Chat */}
-			<Route path="chat" element={<ChatPage />} />
+				{/* Chat */}
+				<Route path="chat" element={<ChatPage />} />
 
-			{/* Live Class */}
-			<Route path="live-class" element={<LiveClassPage />} />
+				{/* Live Class */}
+				<Route path="live-class" element={<LiveClassPage />} />
 
-			{/* Classroom */}
-			<Route path="classroom" element={<ClassroomPage />} />
-			<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
-			<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
-			<Route path="classroom/subject/:subjectId/quiz/:quizId/take" element={<StudentQuizTakingPage />} />
-			<Route path="classroom/subject/:subjectId/quiz/:quizId/review" element={<StudentQuizReviewPage />} />
-			<Route path="classroom/assignment/:assignmentId" element={<AssignmentDetailPage />} />
-			<Route path="classroom/assignment/:assignmentId/submitted" element={<SubmittedAssignmentPage />} />
+				{/* Classroom */}
+				<Route path="classroom" element={<ClassroomPage />} />
+				<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
+				<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+				<Route path="classroom/subject/:subjectId/quiz/:quizId/take" element={<StudentQuizTakingPage />} />
+				<Route path="classroom/subject/:subjectId/quiz/:quizId/review" element={<StudentQuizReviewPage />} />
+				<Route path="classroom/assignment/:assignmentId" element={<AssignmentDetailPage />} />
+				<Route path="classroom/assignment/:assignmentId/submitted" element={<SubmittedAssignmentPage />} />
 
-			{/* Assessment */}
-			<Route path="assessment" element={<AssessmentPage />} />
-			<Route path="assessment/:subjectId" element={<GradeBreakdownPage />} />
+				{/* Assessment */}
+				<Route path="assessment" element={<AssessmentPage />} />
+				<Route path="assessment/:subjectId" element={<GradeBreakdownPage />} />
 
-			{/* Fallback */}
-			<Route path="*" element={<LayoutNotFoundPage />} />
-		</Route>
+				{/* Fallback */}
+				<Route path="*" element={<LayoutNotFoundPage />} />
+			</Route>
+		</Routes>
 	);
 }

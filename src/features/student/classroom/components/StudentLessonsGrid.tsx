@@ -37,7 +37,7 @@ export default function StudentLessonsGrid({
             onClick={() => onLessonClick(lesson)}
             className={`relative ${
               lesson.isLocked
-                ? 'cursor-not-allowed opacity-60'
+                ? 'cursor-pointer opacity-75 bg-gray-50'
                 : 'cursor-pointer hover:shadow-md'
             } transition-shadow`}
           >
@@ -46,12 +46,20 @@ export default function StudentLessonsGrid({
                 <Lock className="w-4 h-4 text-gray-400" />
               </div>
             )}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-              <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 mx-auto mb-2">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-center group-hover:border-orange-200 transition-colors">
+              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl font-bold text-orange-600 mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
                 {lesson.number}
               </div>
-              <p className="text-xs text-gray-600 mb-1">Lesson {lesson.number}</p>
-              <p className="text-sm font-medium text-gray-900 truncate">{lesson.title}</p>
+              <h4 className="text-sm font-bold text-gray-900 truncate mb-1">{lesson.title}</h4>
+              <p className="text-xs text-gray-500 mb-3">Lesson {lesson.number}</p>
+              
+              <div className={`text-xs font-medium py-1.5 px-3 rounded-lg inline-block ${
+                lesson.isLocked 
+                  ? 'bg-gray-100 text-gray-500' 
+                  : 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors'
+              }`}>
+                {lesson.isLocked ? 'Locked' : 'Start Lesson'}
+              </div>
             </div>
           </div>
         ))}

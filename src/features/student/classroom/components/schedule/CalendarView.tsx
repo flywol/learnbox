@@ -60,11 +60,7 @@ export default function CalendarView() {
     return mockEvents.filter(event => event.date === dateStr);
   };
 
-  // Check if date has events (for red highlighting)
-  const hasEvents = (day: number) => {
-    const dayEvents = getEventsForDay(day);
-    return dayEvents.length > 0;
-  };
+
 
   return (
     <div className="space-y-6">
@@ -103,12 +99,12 @@ export default function CalendarView() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-2">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
         {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 mb-2">
           {dayNames.map((day) => (
-            <div key={day} className="p-3 text-center font-medium text-gray-600 text-sm">
-              {day}
+            <div key={day} className="p-2 text-center font-semibold text-gray-400 text-xs uppercase tracking-wider">
+              {day.slice(0, 3)}
             </div>
           ))}
         </div>
@@ -117,28 +113,41 @@ export default function CalendarView() {
         <div className="grid grid-cols-7 gap-2">
           {calendarDays.map((day, index) => {
             if (!day) {
-              return <div key={index} className="h-28 rounded-lg" style={{ backgroundColor: '#FFF5F0' }} />;
+              return <div key={index} className="h-32 bg-gray-50/50 rounded-xl" />;
             }
 
             const dayEvents = getEventsForDay(day);
-            const hasEvent = hasEvents(day);
+            const isToday = day === new Date().getDate() && currentMonth === new Date().getMonth() && currentYear === new Date().getFullYear();
 
             return (
               <div
                 key={index}
-                className="p-3 h-28 rounded-lg hover:opacity-90 cursor-pointer transition-all"
-                style={{ backgroundColor: '#FFEFE9' }}
+                className={`p-2 h-32 rounded-xl border transition-all cursor-pointer flex flex-col group ${
+                    isToday ? 'bg-orange-50/30 border-orange-200' : 'bg-white border-gray-100 hover:border-orange-200 hover:shadow-md'
+                }`}
               >
-                <div className={`text-sm mb-2 ${
-                  hasEvent ? 'font-bold text-gray-900' : 'font-normal text-gray-600'
-                }`}>
-                  {day}
+                <div className="flex justify-between items-start mb-2">
+                    <span className={`text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full ${
+                        isToday ? 'bg-orange-500 text-white' : 'text-gray-700 group-hover:bg-gray-100'
+                    }`}>
+                        {day}
+                    </span>
+                    {dayEvents.length > 0 && (
+                        <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                            {dayEvents.length}
+                        </span>
+                    )}
                 </div>
-                <div className="space-y-1">
+                
+                <div className="space-y-1 overflow-y-auto custom-scrollbar">
                   {dayEvents.map((event) => (
                     <div
                       key={event.id}
-                      className="text-xs bg-white rounded-full px-2 py-1 text-gray-700 leading-tight truncate"
+                      className={`text-[10px] px-2 py-1 rounded-md truncate border ${
+                          event.type === 'assignment' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                          event.type === 'class' ? 'bg-green-50 text-green-700 border-green-100' :
+                          'bg-purple-50 text-purple-700 border-purple-100'
+                      }`}
                       title={event.description}
                     >
                       {event.description}

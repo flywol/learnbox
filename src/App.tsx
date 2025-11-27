@@ -39,14 +39,18 @@ export default function App() {
       <ToastProvider>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/*" element={<PublicRoutes />} />
-            <Route path="/*" element={<DashboardRoutes />} />
+            {/* Secure role-based routes - must come before catch-all routes */}
+            <Route path="/admin/*" element={<AdminRoutes />} />
+            <Route path="/teacher/*" element={<TeacherRoutes />} />
+            <Route path="/student/*" element={<StudentRoutes />} />
+            <Route path="/parent/*" element={<ParentRoutes />} />
 
-            {/* Secure role-based routes */}
-            <Route path="/*" element={<AdminRoutes />} />
-            <Route path="/*" element={<TeacherRoutes />} />
-            <Route path="/*" element={<StudentRoutes />} />
-            <Route path="/*" element={<ParentRoutes />} />
+            {/* Dashboard routes for legacy /dashboard paths */}
+            <Route path="/dashboard/*" element={<DashboardRoutes />} />
+            <Route path="/notifications" element={<DashboardRoutes />} />
+
+            {/* Public routes */}
+            <Route path="/*" element={<PublicRoutes />} />
 
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="*" element={<NotFoundPage />} />

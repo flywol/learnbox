@@ -1,5 +1,5 @@
 // src/routes/admin/AdminRoutes.tsx
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import DashboardLayout from "../../common/layout/DashboardLayout";
 import { ProtectedRoute } from "../../features/auth/components/guards/FirstTimeLoginGuard";
@@ -39,50 +39,51 @@ const NotificationsPage = lazy(() => import("../../features/admin/notifications/
 
 export function AdminRoutes() {
   return (
-    <Route
-      path="/admin"
-      element={
-        <ProtectedRoute>
-          <RoleGuard allowedRoles={['ADMIN']}>
-            <DashboardLayout />
-          </RoleGuard>
-        </ProtectedRoute>
-      }
-    >
-      {/* Dashboard */}
-      <Route index element={<AdminDashboard />} />
-      <Route path="dashboard" element={<AdminDashboard />} />
-      
-      {/* User Management */}
-      <Route path="users" element={<UserListPage />} />
-      <Route path="users/create" element={<CreateUserPage />} />
-      <Route path="users/:id" element={<UserDetailPage />} />
-      <Route path="users/:id/edit" element={<EditUserPage />} />
-      
-      {/* Classroom Management */}
-      <Route path="classroom" element={<ClassroomOverviewPage />} />
-      <Route path="classroom/add-event" element={<AddEventPage />} />
-      <Route path="classroom/add-timetable" element={<AddTimetablePage />} />
-      <Route path="classroom/:classId/:armId" element={<ClassDetailPage />} />
-      <Route path="classroom/:classId/:armId/subject/:subjectId" element={<SubjectDetailPage />} />
-      <Route path="classroom/:classId/:armId/subject/:subjectId/assignment/:assignmentId" element={<AssignmentDetailPage />} />
-      <Route path="classroom/:classId/:armId/subject/:subjectId/quiz/:quizId" element={<QuizDetailPage />} />
-      
-      {/* Payments */}
-      <Route path="payments" element={<SchoolPaymentsPage />} />
-      <Route path="payments/:classId" element={<ClassPaymentDetailPage />} />
-      
-      {/* Profile */}
-      <Route path="profile" element={<AdminProfilePage />} />
-      <Route path="profile/personal" element={<EditPersonalInfoPage />} />
-      <Route path="profile/school" element={<EditSchoolInfoPage />} />
-      <Route path="profile/session" element={<SessionConfigPage />} />
-      
-      {/* Notifications */}
-      <Route path="notifications" element={<NotificationsPage />} />
-      
-      {/* Fallback */}
-      <Route path="*" element={<LayoutNotFoundPage />} />
-    </Route>
+    <Routes>
+      <Route
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['ADMIN']}>
+              <DashboardLayout />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      >
+        {/* Dashboard */}
+        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        
+        {/* User Management */}
+        <Route path="users" element={<UserListPage />} />
+        <Route path="users/create" element={<CreateUserPage />} />
+        <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="users/:id/edit" element={<EditUserPage />} />
+        
+        {/* Classroom Management */}
+        <Route path="classroom" element={<ClassroomOverviewPage />} />
+        <Route path="classroom/add-event" element={<AddEventPage />} />
+        <Route path="classroom/add-timetable" element={<AddTimetablePage />} />
+        <Route path="classroom/:classId/:armId" element={<ClassDetailPage />} />
+        <Route path="classroom/:classId/:armId/subject/:subjectId" element={<SubjectDetailPage />} />
+        <Route path="classroom/:classId/:armId/subject/:subjectId/assignment/:assignmentId" element={<AssignmentDetailPage />} />
+        <Route path="classroom/:classId/:armId/subject/:subjectId/quiz/:quizId" element={<QuizDetailPage />} />
+        
+        {/* Payments */}
+        <Route path="payments" element={<SchoolPaymentsPage />} />
+        <Route path="payments/:classId" element={<ClassPaymentDetailPage />} />
+        
+        {/* Profile */}
+        <Route path="profile" element={<AdminProfilePage />} />
+        <Route path="profile/personal" element={<EditPersonalInfoPage />} />
+        <Route path="profile/school" element={<EditSchoolInfoPage />} />
+        <Route path="profile/session" element={<SessionConfigPage />} />
+        
+        {/* Notifications */}
+        <Route path="notifications" element={<NotificationsPage />} />
+        
+        {/* Fallback */}
+        <Route path="*" element={<LayoutNotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }

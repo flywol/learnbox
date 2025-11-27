@@ -24,19 +24,26 @@ export default function ClassroomPage() {
 	return (
 		<div className="space-y-6">
 			{/* Tabs */}
-			<div className="flex gap-3">
-				{tabs.map((tab) => (
-					<button
-						key={tab.id}
-						onClick={() => setActiveTab(tab.id)}
-						className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
-							activeTab === tab.id
-								? "bg-orange-500 text-white shadow-sm"
-								: "bg-white text-gray-700 border border-gray-200 hover:border-orange-300"
-						}`}>
-						{tab.label}
-					</button>
-				))}
+			{/* Header & Tabs */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div>
+					<h1 className="text-2xl font-bold text-gray-900">My Classroom</h1>
+					<p className="text-gray-500">Manage your subjects and assignments</p>
+				</div>
+				<div className="bg-gray-100/80 p-1 rounded-xl inline-flex self-start sm:self-auto">
+					{tabs.map((tab) => (
+						<button
+							key={tab.id}
+							onClick={() => setActiveTab(tab.id)}
+							className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+								activeTab === tab.id
+									? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+									: "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+							}`}>
+							{tab.label}
+						</button>
+					))}
+				</div>
 			</div>
 
 			{/* Subject Tab */}
