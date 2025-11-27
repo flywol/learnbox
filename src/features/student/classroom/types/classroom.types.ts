@@ -134,4 +134,4 @@ export interface ForumReply {
 }
 
 export type ClassroomTab = 'subject' | 'schedule' | 'assignment';
-export type SubjectTab = 'lesson' | 'quiz';
+export type SubjectTab = 'lesson' | 'live-class' | 'quiz' | 'assignment';

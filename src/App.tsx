@@ -45,9 +45,8 @@ export default function App() {
             <Route path="/student/*" element={<StudentRoutes />} />
             <Route path="/parent/*" element={<ParentRoutes />} />
 
-            {/* Dashboard routes for legacy /dashboard paths */}
+            {/* Dashboard routes for ADMIN only (legacy /dashboard paths) */}
             <Route path="/dashboard/*" element={<DashboardRoutes />} />
-            <Route path="/notifications" element={<DashboardRoutes />} />
 
             {/* Public routes */}
             <Route path="/*" element={<PublicRoutes />} />

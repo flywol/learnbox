@@ -7,7 +7,6 @@ import { LayoutNotFoundPage } from "../components/ErrorPages";
 
 const RoleDashboard = lazy(() => import("../features/admin/dashboard/pages/RoleDashboard"));
 const CompleteSetupPage = lazy(() => import("../features/admin/school-setup/pages/CompleteSetupPage"));
-const NotificationsPage = lazy(() => import("../features/admin/notifications/pages/NotificationsPage"));
 
 // Layout wrapper that chooses the right layout based on role
 function RoleBasedLayout() {
@@ -42,10 +41,9 @@ export function DashboardRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<RoleDashboard />} />
-        <Route path="/dashboard/complete-school-setup" element={<CompleteSetupPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/dashboard/*" element={<LayoutNotFoundPage />} />
+        <Route index element={<RoleDashboard />} />
+        <Route path="complete-school-setup" element={<CompleteSetupPage />} />
+        <Route path="*" element={<LayoutNotFoundPage />} />
       </Route>
     </Routes>
   );

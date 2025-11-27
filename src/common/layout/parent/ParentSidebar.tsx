@@ -8,6 +8,7 @@ import {
 	User,
 	LogOut,
 } from "lucide-react";
+import { useAuthStore } from "@/features/auth/store/authStore";
 
 // Menu config for parents
 const parentMenuItems = [
@@ -46,13 +47,12 @@ interface ParentSidebarProps {
 export default function ParentSidebar({ isOpen, onClose }: ParentSidebarProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
+	const logout = useAuthStore((state) => state.logout);
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;
 		setIsLoggingOut(true);
-		// TODO: Add logout logic when auth is ready
-		console.log("Logout clicked");
-		setTimeout(() => setIsLoggingOut(false), 1000);
+		await logout();
 	};
 
 	// Active check — exact or starts with path + "/"

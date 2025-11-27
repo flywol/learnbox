@@ -4,6 +4,7 @@ import { ArrowLeft, MessageCircle, Phone } from 'lucide-react';
 import { useClassroomStore } from '../store/classroomStore';
 import StudentLessonsGrid from '../components/StudentLessonsGrid';
 import QuizTab from '../components/QuizTab';
+import AssignmentTab from '../components/AssignmentTab';
 import LockedLessonModal from '../components/LockedLessonModal';
 import { SubjectTab, StudentLesson } from '../types/classroom.types';
 
@@ -37,7 +38,9 @@ export default function SubjectDetailPage() {
 
   const tabs: { id: SubjectTab; label: string }[] = [
     { id: 'lesson', label: 'Lesson' },
+    { id: 'live-class', label: 'Live class' },
     { id: 'quiz', label: 'Quiz' },
+    { id: 'assignment', label: 'Assignment' },
   ];
 
   const subjectDescription =
@@ -119,8 +122,24 @@ export default function SubjectDetailPage() {
         </div>
       )}
 
+      {/* Live Class Tab */}
+      {activeTab === 'live-class' && (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <p className="text-gray-500 mb-4">No live classes scheduled for this subject yet.</p>
+          <button
+            onClick={() => navigate('/student/live-class')}
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            View All Live Classes
+          </button>
+        </div>
+      )}
+
       {/* Quiz Tab */}
       {activeTab === 'quiz' && <QuizTab quizzes={quizzes} />}
+
+      {/* Assignment Tab */}
+      {activeTab === 'assignment' && <AssignmentTab />}
 
       {/* Locked Lesson Modal */}
       {lockedLesson && (
