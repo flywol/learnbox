@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy } from "react";
 import { ProtectedRoute } from "../features/auth/components/guards/FirstTimeLoginGuard";
 import DashboardLayout from "../common/layout/DashboardLayout";
-import TeacherLayout from "../common/layout/TeacherLayout";
 import { useCurrentUser } from "../features/auth/store/authStore";
 import { LayoutNotFoundPage } from "../components/ErrorPages";
 
