@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/authStore";
 import { authApiClient } from "../../../api/authApiClient";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "../../../hooks/useAuth";
 import {
   SchoolInfoFormData,
   PersonalInfoFormData,
@@ -11,6 +13,8 @@ import { getFirstName } from "@/common/utils/userUtils";
 
 export function useSignupStepHandlers() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { login } = useAuth();
   const {
     signupData,
     updateSignupData,
@@ -18,6 +22,7 @@ export function useSignupStepHandlers() {
     setSchoolDomain,
     setSignupStep,
     setLoadingState,
+    hasSeenOnboarding,
   } = useAuthStore();
 
   const handleSchoolInfoNext = useCallback(
@@ -65,8 +70,17 @@ export function useSignupStepHandlers() {
         setLoadingState("success");
       } catch (error: any) {
         console.error("Registration failed:", error);
+        const errorMessage = error.message || "Failed to create account";
+        
+        // Show error toast
+        toast({
+          title: "Registration failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        
         updateSignupData({
-          error: error.message || "Failed to create account",
+          error: errorMessage,
         });
         setSignupStep("error");
         setLoadingState("error");
@@ -77,30 +91,73 @@ export function useSignupStepHandlers() {
 
   const handleOtpVerify = useCallback(
     async (otp: string) => {
-      if (!signupData?.email) {
-        throw new Error("Email is required for OTP verification");
+      if (!signupData?.email || !signupData?.password) {
+        throw new Error("Email and password are required for OTP verification");
       }
 
-      await authApiClient.verifyOtp({
-        email: signupData.email,
-        otp
-      });
+      try {
+        // Verify OTP first
+        await authApiClient.verifyOtp({
+          email: signupData.email,
+          otp
+        });
 
-      updateSignupData({ otpVerified: true });
+        updateSignupData({ otpVerified: true });
 
-      if (signupData?.learnboxUrl) {
-        setSchoolDomain(signupData.learnboxUrl);
-      }
-
-      clearSignupData();
-      navigate("/login", { 
-        state: { 
-          message: "Account verified successfully! Please login to continue.",
-          email: signupData.email 
+        if (signupData?.learnboxUrl) {
+          setSchoolDomain(signupData.learnboxUrl);
         }
-      });
+
+        // Show success toast
+        toast({
+          title: "Account verified successfully!",
+          description: "Logging you in...",
+          variant: "default",
+        });
+
+        // Clear signup data before login
+        const email = signupData.email;
+        const password = signupData.password;
+        clearSignupData();
+
+        // Auto-login the user with their credentials
+        const loginResult = await login(email, password, false);
+
+        if (loginResult.success && loginResult.user) {
+          // Determine dashboard based on role
+          const getDashboardPath = () => {
+            const userRole = loginResult.user?.role;
+            if (userRole === "PARENT") return "/parent/dashboard";
+            if (userRole === "TEACHER") return "/teacher/dashboard";
+            if (userRole === "STUDENT") return "/student/dashboard";
+            return "/dashboard"; // ADMIN default
+          };
+
+          // Navigate to onboarding or dashboard
+          if (hasSeenOnboarding) {
+            navigate(getDashboardPath(), { replace: true });
+          } else {
+            navigate("/onboarding", { replace: true });
+          }
+        } else {
+          // If auto-login failed, redirect to login page with pre-filled email
+          toast({
+            title: "Please login to continue",
+            description: loginResult.error || "Please login with your credentials",
+            variant: "default",
+          });
+          navigate("/login", { 
+            state: { 
+              email: email 
+            }
+          });
+        }
+      } catch (error: any) {
+        // If OTP verification failed, let it bubble up to be handled by the component
+        throw error;
+      }
     },
-    [signupData, updateSignupData, setSchoolDomain, clearSignupData, navigate]
+    [signupData, updateSignupData, setSchoolDomain, clearSignupData, navigate, toast, login, hasSeenOnboarding]
   );
 
   const handleOtpResend = useCallback(async () => {
