@@ -11,6 +11,7 @@ import {
 	SchoolSetupFormData,
 	schoolSetupSchema,
 } from "../../schemas/authSchema";
+import { normalizeSchoolUrl } from "../../utils/authHelpers";
 import AuthIllustration from "./components/AuthIllustration";
 import SchoolDomainStep from "./components/SchoolDomainStep";
 import LoginForm from "./components/LoginForm";
@@ -75,11 +76,14 @@ const CombinedSchoolLoginPage = () => {
 		setLoginError(null);
 
 		try {
+			// Normalize the school URL (add https:// if not present)
+			const normalizedUrl = normalizeSchoolUrl(data.schoolUrl);
+
 			// All roles need to verify the school domain
-			const isValid = await verifySchoolDomain(data.schoolUrl);
+			const isValid = await verifySchoolDomain(normalizedUrl);
 
 			if (isValid) {
-				setSchoolDomain(data.schoolUrl);
+				setSchoolDomain(normalizedUrl);
 				// Wait a brief moment then slide to login
 				setTimeout(() => {
 					setCurrentStep("login");

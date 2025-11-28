@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, RefreshCw, AlertCircle, Edit } from 'lucide-react';
+import { ArrowLeft, BookOpen, RefreshCw, AlertCircle } from 'lucide-react';
 import LiveClassTab from '../components/subject-detail/LiveClassTab';
 import QuizTab from '../components/subject-detail/QuizTab';
 import AssignmentTab from '../components/assignments/AssignmentTab';

@@ -151,7 +151,8 @@ export const useAuthStore = create<AuthState>()(
 			},
 
 			setSchoolDomain: (domain) => {
-				const clean = domain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+				// Just remove trailing slash, keep the protocol (backend needs it)
+				const clean = domain.replace(/\/$/, "");
 				set({ schoolDomain: clean });
 			},
 

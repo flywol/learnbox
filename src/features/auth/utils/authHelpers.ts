@@ -182,6 +182,24 @@ export const validateNigerianPhone = (phone: string): boolean => {
 };
 
 /**
+ * Normalize school URL by ensuring it has https:// protocol
+ * - If URL already has http:// or https://, use as is
+ * - If URL has no protocol, add https://
+ */
+export const normalizeSchoolUrl = (url: string): string => {
+	// Trim whitespace
+	const trimmedUrl = url.trim();
+
+	// Check if URL already has a protocol
+	if (/^https?:\/\//i.test(trimmedUrl)) {
+		return trimmedUrl;
+	}
+
+	// Add https:// if no protocol present
+	return `https://${trimmedUrl}`;
+};
+
+/**
  * Get time-based greeting
  */
 export const getGreeting = (name?: string): string => {

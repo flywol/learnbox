@@ -34,7 +34,7 @@ export default function SchoolDomainStep({
             type="text"
             {...form.register("schoolUrl")}
             className="w-full p-3 border rounded-md"
-            placeholder="Input school domain"
+            placeholder="e.g., school.learnbox.com or https://school.learnbox.com"
             disabled={isValidating}
           />
           {form.formState.errors.schoolUrl && (

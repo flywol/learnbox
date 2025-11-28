@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "../store/authStore";
+import { normalizeSchoolUrl } from "../utils/authHelpers";
 import SignupFlow from "./signup/AdminSignupFlow";
 import { AuthPageWrapper } from "../components/ui/AuthPageWrapper";
 
@@ -53,11 +54,14 @@ const SchoolSetupPage = () => {
 		setValidationError(null);
 
 		try {
+			// Normalize the school URL (add https:// if not present)
+			const normalizedUrl = normalizeSchoolUrl(data.schoolUrl);
+			
 			// All roles (including ADMIN) need to verify the school domain first
-			const isValid = await verifySchoolDomain(data.schoolUrl);
+			const isValid = await verifySchoolDomain(normalizedUrl);
 
 			if (isValid) {
-				setSchoolDomain(data.schoolUrl);
+				setSchoolDomain(normalizedUrl);
 				// Navigate to login page after successful verification for ALL roles
 				navigate("/login");
 			} else {
@@ -160,7 +164,9 @@ const SchoolSetupPage = () => {
 								// Set the domain they entered and go to signup
 								const currentUrl = getValues("schoolUrl");
 								if (currentUrl) {
-									setSchoolDomain(currentUrl);
+									// Normalize the URL before setting it
+									const normalizedUrl = normalizeSchoolUrl(currentUrl);
+									setSchoolDomain(normalizedUrl);
 								}
 								setShowSignupFlow(true);
 							}}
