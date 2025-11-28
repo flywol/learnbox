@@ -40,6 +40,9 @@ const SubjectDetailPage = lazy(
 const LessonContentPage = lazy(
 	() => import("../../features/student/classroom/pages/LessonContentPage")
 );
+const ContentItemPage = lazy(
+	() => import("../../features/student/classroom/pages/ContentItemPage")
+);
 const AssignmentDetailPage = lazy(
 	() => import("../../features/student/classroom/pages/AssignmentDetailPage")
 );
@@ -92,6 +95,7 @@ export function StudentRoutes() {
 				<Route path="classroom" element={<ClassroomPage />} />
 				<Route path="classroom/subject/:subjectId" element={<SubjectDetailPage />} />
 				<Route path="classroom/subject/:subjectId/lesson/:lessonId" element={<LessonContentPage />} />
+				<Route path="classroom/subject/:subjectId/lesson/:lessonId/content/:contentId" element={<ContentItemPage />} />
 				<Route path="classroom/subject/:subjectId/quiz/:quizId/take" element={<StudentQuizTakingPage />} />
 				<Route path="classroom/subject/:subjectId/quiz/:quizId/review" element={<StudentQuizReviewPage />} />
 				<Route path="classroom/assignment/:assignmentId" element={<AssignmentDetailPage />} />

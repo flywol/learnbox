@@ -165,42 +165,99 @@ const mockBiologyLessons: StudentLesson[] = [
         type: 'video',
         title: 'Beginning of everything',
         description: 'Learn about how biology began',
-        isCompleted: false,
+        isCompleted: true,
+        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        thumbnail: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+        notes: 'This introductory video covers the origin of life on Earth and the fundamental principles that govern all living organisms.',
       },
       {
         id: 'content-2',
         type: 'document',
-        title: 'Introduction',
-        description: 'Learn about how biology began',
-        isCompleted: false,
+        title: 'When did all life begin?',
+        description: 'Read about the origin of life on Earth',
+        isCompleted: true,
+        content: `<h2>The Origin of Life</h2>
+<p>Life on Earth is thought to have begun approximately 3.5 to 4 billion years ago. The earliest evidence of life comes from fossilized microorganisms found in hydrothermal vent precipitates.</p>
+
+<h3>Key Milestones:</h3>
+<ul>
+  <li><strong>4.6 billion years ago:</strong> Earth forms</li>
+  <li><strong>4.0 billion years ago:</strong> First organic molecules</li>
+  <li><strong>3.5 billion years ago:</strong> First prokaryotic cells</li>
+  <li><strong>2.0 billion years ago:</strong> First eukaryotic cells</li>
+</ul>
+
+<p>The exact mechanisms of how life began remain one of science's greatest mysteries, with several competing theories including the primordial soup hypothesis and hydrothermal vent theory.</p>`,
       },
       {
         id: 'content-3',
         type: 'video',
         title: 'Life and its characteristics',
-        description: 'Learn about how biology began',
+        description: 'Understand what defines living organisms',
         isCompleted: false,
+        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        notes: 'This video explores the seven characteristics of life: movement, respiration, sensitivity, growth, reproduction, excretion, and nutrition.',
       },
       {
         id: 'content-4',
         type: 'quiz',
         title: 'Introduction Quiz',
-        description: 'Lesson 1 quiz',
-        isCompleted: true,
+        description: 'Week 1 quiz - Test your knowledge',
+        isCompleted: false,
       },
       {
         id: 'content-5',
         type: 'assignment',
-        title: 'Introduction',
-        description: 'Lesson 1 assignment',
-        isCompleted: true,
+        title: 'Introduction Assignment',
+        description: 'Week 1 assignment - Submit your work',
+        isCompleted: false,
+        content: `<h3>Assignment: The Characteristics of Life</h3>
+<p><strong>Due Date:</strong> End of Week 1</p>
+
+<h4>Instructions:</h4>
+<ol>
+  <li>Choose three living organisms from different kingdoms (e.g., plant, animal, fungi)</li>
+  <li>For each organism, explain how it demonstrates ALL seven characteristics of life</li>
+  <li>Include at least one diagram or illustration for each organism</li>
+  <li>Write 300-500 words per organism</li>
+</ol>
+
+<p><strong>Submission Format:</strong> PDF or Word document</p>`,
+        attachments: [
+          {
+            name: 'Assignment Template.docx',
+            url: '#',
+          },
+          {
+            name: 'Grading Rubric.pdf',
+            url: '#',
+          },
+        ],
       },
       {
         id: 'content-6',
         type: 'document',
-        title: 'Introduction',
-        description: 'Take note and download the resources',
+        title: 'Evolution',
+        description: 'Now learn how living things have evolved',
         isCompleted: false,
+        content: `<h2>Evolution: The Unifying Theory of Biology</h2>
+<p>Evolution is the process by which populations of organisms change over successive generations. It is driven by mechanisms such as natural selection, genetic drift, and gene flow.</p>
+
+<h3>Charles Darwin's Observations:</h3>
+<p>In 1859, Charles Darwin published "On the Origin of Species," which introduced the theory of evolution by natural selection. His observations of finches in the Galápagos Islands provided crucial evidence for this theory.</p>
+
+<h3>Key Concepts:</h3>
+<ul>
+  <li><strong>Natural Selection:</strong> Organisms better adapted to their environment tend to survive and reproduce more successfully</li>
+  <li><strong>Adaptation:</strong> Traits that increase an organism's fitness in its environment</li>
+  <li><strong>Common Descent:</strong> All life on Earth shares a common ancestor</li>
+</ul>`,
+        attachments: [
+          {
+            name: 'Evolution Timeline.pdf',
+            url: '#',
+          },
+        ],
       },
     ],
   },

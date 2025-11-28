@@ -28,6 +28,13 @@ export interface LessonContentItem {
   isCompleted: boolean;
   url?: string;
   icon?: string;
+  thumbnail?: string;
+  content?: string;
+  notes?: string;
+  attachments?: {
+    name: string;
+    url: string;
+  }[];
 }
 
 export interface StudentQuiz {

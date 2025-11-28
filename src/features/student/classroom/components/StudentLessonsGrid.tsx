@@ -28,42 +28,38 @@ export default function StudentLessonsGrid({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Lessons Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {lessons.map((lesson) => (
-          <div
-            key={lesson.id}
-            onClick={() => onLessonClick(lesson)}
-            className={`relative ${
-              lesson.isLocked
-                ? 'cursor-pointer opacity-75 bg-gray-50'
-                : 'cursor-pointer hover:shadow-md'
-            } transition-shadow`}
-          >
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {lessons.map((lesson) => (
+        <div
+          key={lesson.id}
+          onClick={() => onLessonClick(lesson)}
+          className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
+        >
+          <div className="flex items-center gap-4">
+            {/* Numbered Badge */}
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 text-lg font-bold">
+              {lesson.number}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                {lesson.title}
+              </h4>
+              <p className="text-sm text-gray-500">
+                Lesson {lesson.number}
+              </p>
+            </div>
+
+            {/* Lock Icon for locked lessons */}
             {lesson.isLocked && (
-              <div className="absolute top-2 right-2 z-10">
-                <Lock className="w-4 h-4 text-gray-400" />
+              <div className="flex-shrink-0">
+                <Lock className="w-6 h-6 text-gray-300" />
               </div>
             )}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-center group-hover:border-orange-200 transition-colors">
-              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl font-bold text-orange-600 mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
-                {lesson.number}
-              </div>
-              <h4 className="text-sm font-bold text-gray-900 truncate mb-1">{lesson.title}</h4>
-              <p className="text-xs text-gray-500 mb-3">Lesson {lesson.number}</p>
-              
-              <div className={`text-xs font-medium py-1.5 px-3 rounded-lg inline-block ${
-                lesson.isLocked 
-                  ? 'bg-gray-100 text-gray-500' 
-                  : 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors'
-              }`}>
-                {lesson.isLocked ? 'Locked' : 'Start Lesson'}
-              </div>
-            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import StudentLessonsGrid from '../components/StudentLessonsGrid';
 import QuizTab from '../components/QuizTab';
 import AssignmentTab from '../components/AssignmentTab';
 import LockedLessonModal from '../components/LockedLessonModal';
+import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
 import { SubjectTab, StudentLesson } from '../types/classroom.types';
 
 export default function SubjectDetailPage() {
@@ -79,19 +80,12 @@ export default function SubjectDetailPage() {
       {/* Lesson Tab */}
       {activeTab === 'lesson' && (
         <div className="space-y-4">
-          {/* Progress Card */}
-          <div className="rounded-lg border-l-4 border-orange-500 p-5" style={{ backgroundColor: '#FFF0F0' }}>
-            <p className="text-gray-700 text-sm mb-4 leading-relaxed">{subjectDescription}</p>
-            <div className="space-y-2">
-              <div className="w-full bg-gray-300 rounded-full h-2">
-                <div
-                  className="bg-orange-500 h-2 rounded-full transition-all"
-                  style={{ width: `${subject.progressPercentage || 0}%` }}
-                />
-              </div>
-              <p className="text-sm font-medium text-gray-900 text-right">{subject.progressPercentage}%</p>
-            </div>
-          </div>
+          {/* Course Overview Card */}
+          <CourseOverviewCard
+            description={subjectDescription}
+            progress={subject.progressPercentage || 0}
+            showProgress={true}
+          />
 
           {/* Teacher Card */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
