@@ -8,6 +8,7 @@ import { useToast } from '../../../../hooks/use-toast';
 import { lessonsApiClient } from '../api/lessonsApiClient';
 import { useQuery } from '@tanstack/react-query';
 import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
+import LessonSuccessModal from '../components/LessonSuccessModal';
 
 const addVideoSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -23,6 +24,8 @@ export default function AddVideoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdLessonData, setCreatedLessonData] = useState<{ title: string; lessonId?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get subject data to extract class and classArm info
@@ -61,7 +64,7 @@ export default function AddVideoPage() {
     }
   }, [lessonId, subjectId, navigate, toast]);
 
-  const handlePublish = async (data: AddVideoData) => {
+  const handleSaveAndContinue = async (data: AddVideoData) => {
     if (!videoFile) {
       toast({
         title: "Video Required",
@@ -107,18 +110,84 @@ export default function AddVideoPage() {
           file: videoFile,
         });
 
+        // Don't clear pending lesson - user might add more content
+        // Navigate back to content selection
+        toast({
+          title: "Success!",
+          description: "Video content added successfully.",
+          variant: "success",
+        });
+
+        navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
+      }
+    } catch (error: any) {
+      console.error('Error creating lesson:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to add video content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePublish = async (data: AddVideoData) => {
+    if (!videoFile) {
+      toast({
+        title: "Video Required",
+        description: "Please select a video file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (lessonId) {
+        // TODO: Update existing lesson
+        toast({
+          title: "Not Implemented",
+          description: "Updating existing lessons is not yet implemented.",
+          variant: "destructive",
+        });
+        return;
+      } else {
+        // Create new lesson with video content
+        const pendingLessonStr = sessionStorage.getItem('pendingLesson');
+        if (!pendingLessonStr || !subject) {
+          throw new Error('Missing required lesson or subject data');
+        }
+
+        const pendingLesson = JSON.parse(pendingLessonStr);
+
+        // Extract class info from subject
+        const classId = subject.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : '';
+
+        const response = await lessonsApiClient.createLesson({
+          title: pendingLesson.title,
+          number: pendingLesson.number,
+          startDate: pendingLesson.startDate,
+          subject: subjectId!,
+          class: classId,
+          classArm: subject.classArm,
+          contentType: 'video',
+          contentTitle: data.title,
+          contentDescription: data.description,
+          file: videoFile,
+        });
+
         // Clear pending lesson data
         sessionStorage.removeItem('pendingLesson');
+
+        // Show success modal
+        setCreatedLessonData({
+          title: pendingLesson.title,
+          lessonId: response.id,
+        });
+        setShowSuccessModal(true);
       }
-
-      toast({
-        title: "Success!",
-        description: "Lesson with video content has been created successfully.",
-        variant: "success",
-      });
-
-      // Navigate to subject detail page
-      navigate(`/teacher/subject/${subjectId}`);
     } catch (error: any) {
       console.error('Error creating lesson:', error);
       toast({
@@ -231,22 +300,30 @@ export default function AddVideoPage() {
               )}
             </div>
 
-            {/* Action Button */}
-            <div>
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={handleSubmit(handleSaveAndContinue)}
+                disabled={isSubmitting || !videoFile}
+                className="flex-1 px-6 py-3 bg-white border-2 border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isSubmitting ? 'Saving...' : 'Save & Continue'}
+              </button>
               <button
                 type="button"
                 onClick={handleSubmit(handlePublish)}
                 disabled={isSubmitting || !videoFile}
-                className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                {isSubmitting ? 'Creating Lesson...' : 'Create Lesson'}
+                {isSubmitting ? 'Publishing...' : 'Publish'}
               </button>
-              {!videoFile && (
-                <p className="mt-2 text-sm text-gray-500 text-center">
-                  Please upload a video file to continue
-                </p>
-              )}
             </div>
+            {!videoFile && (
+              <p className="mt-2 text-sm text-gray-500 text-center">
+                Please upload a video file to continue
+              </p>
+            )}
           </form>
         </div>
 
@@ -324,6 +401,28 @@ export default function AddVideoPage() {
           />
         </div>
       </div>
+
+      {/* Success Modal */}
+      {createdLessonData && (
+        <LessonSuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          lessonTitle={createdLessonData.title}
+          contentType="video"
+          onAddMore={() => {
+            setShowSuccessModal(false);
+            navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
+          }}
+          onViewLesson={() => {
+            setShowSuccessModal(false);
+            if (createdLessonData.lessonId) {
+              navigate(`/teacher/subject/${subjectId}/lesson/${createdLessonData.lessonId}`);
+            } else {
+              navigate(`/teacher/subject/${subjectId}`);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

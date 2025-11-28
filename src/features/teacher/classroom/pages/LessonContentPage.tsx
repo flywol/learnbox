@@ -1,11 +1,57 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, MessageCircle, X, RefreshCw, AlertCircle, Send } from 'lucide-react';
+import { ArrowLeft, MessageCircle, X, Send, Video, FileText, BarChart3, ClipboardList, Edit } from 'lucide-react';
 import { lessonsApiClient } from '../../lessons/api/lessonsApiClient';
 import { forumApiClient } from '../../lessons/api/forumApiClient';
 import { useToast } from '../../../../hooks/use-toast';
 import CourseOverviewCard from '../../../../common/components/CourseOverviewCard';
+
+// Mock lesson content items - keeping until content items endpoint is provided
+const mockLessonContents = [
+  {
+    id: '1',
+    type: 'video',
+    title: 'Beginning of everything',
+    description: 'Learn about how biology began',
+    isCompleted: true
+  },
+  {
+    id: '2',
+    type: 'document',
+    title: 'Introduction',
+    description: 'Learn about how biology began',
+    isCompleted: true
+  },
+  {
+    id: '3',
+    type: 'video',
+    title: 'Life and its characteristics',
+    description: 'Learn about how biology began',
+    isCompleted: false
+  },
+  {
+    id: '4',
+    type: 'quiz',
+    title: 'Introduction Quiz',
+    description: 'Lesson 1 quiz',
+    isCompleted: false
+  },
+  {
+    id: '5',
+    type: 'assignment',
+    title: 'Introduction',
+    description: 'Lesson 1 assignment',
+    isCompleted: false
+  },
+  {
+    id: '6',
+    type: 'document',
+    title: 'Introduction',
+    description: 'Take note and download the resources',
+    isCompleted: false
+  }
+];
 
 export default function LessonContentPage() {
   const { subjectId, lessonId } = useParams<{ subjectId: string; lessonId: string }>();
@@ -15,12 +61,10 @@ export default function LessonContentPage() {
   const [isForumOpen, setIsForumOpen] = useState(false);
   const [newMessage, setNewMessage] = useState('');
 
-  // Fetch lesson details
+  // Fetch lesson details - disabled for now, using mock data
   const {
     data: lesson,
-    isLoading,
-    error,
-    refetch
+    isLoading
   } = useQuery({
     queryKey: ['lesson', lessonId],
     queryFn: () => {
@@ -29,7 +73,7 @@ export default function LessonContentPage() {
       }
       return lessonsApiClient.getLesson(lessonId);
     },
-    enabled: !!lessonId,
+    enabled: false, // Disabled - using mock data below
     staleTime: 5 * 60 * 1000,
   });
 
@@ -75,16 +119,32 @@ export default function LessonContentPage() {
   const getContentIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return '▶️';
+        return <Video className="w-5 h-5" />;
       case 'document':
       case 'file':
-        return '📄';
+        return <FileText className="w-5 h-5" />;
       case 'quiz':
-        return '📊';
+        return <BarChart3 className="w-5 h-5" />;
       case 'assignment':
-        return '📝';
+        return <ClipboardList className="w-5 h-5" />;
       default:
-        return '📄';
+        return <FileText className="w-5 h-5" />;
+    }
+  };
+
+  const getIconBgColor = (type: string) => {
+    switch (type) {
+      case 'video':
+        return 'bg-red-50 text-red-600';
+      case 'document':
+      case 'file':
+        return 'bg-orange-50 text-orange-600';
+      case 'quiz':
+        return 'bg-purple-50 text-purple-600';
+      case 'assignment':
+        return 'bg-orange-50 text-orange-600';
+      default:
+        return 'bg-gray-50 text-gray-600';
     }
   };
 
@@ -103,148 +163,95 @@ export default function LessonContentPage() {
     );
   }
 
-  if (error || !lesson) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(`/teacher/subject/${subjectId}`)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Lesson Not Found</h1>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load lesson</h3>
-          <p className="text-gray-600 mb-4">The requested lesson could not be found or failed to load.</p>
-          <button
-            onClick={() => refetch()}
-            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors mx-auto"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Try Again</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Use mock lesson data if API call fails - keeping until lesson endpoint is stable
+  const displayLesson = lesson || {
+    id: lessonId,
+    number: '1',
+    title: 'Introduction to Biology',
+    subject: 'Biology',
+    class: 'JSS 1',
+    classArm: 'A',
+    startDate: new Date().toISOString().split('T')[0],
+    contentType: 'video',
+    contentTitle: 'Getting Started',
+    contentDescription: 'Introduction to the course'
+  };
 
   return (
     <div className={`flex ${isForumOpen ? 'mr-96' : ''} transition-all duration-300`}>
       <div className="flex-1 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(`/teacher/subject/${subjectId}`)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Lesson Content</h1>
+          <h1 className="text-xl font-semibold text-gray-500">Lesson content</h1>
         </div>
 
-        {/* Course Overview Card for Lesson */}
-        <div className="flex items-center justify-between">
-          <CourseOverviewCard
-            description={`Lesson ${lesson.number}: ${lesson.title}`}
-            showProgress={false}
-            onEdit={() => {
-              navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/edit`);
-            }}
-          />
-        </div>
+        {/* Course Overview Card */}
+        <CourseOverviewCard
+          description={`Lesson ${displayLesson.number}: ${displayLesson.title}`}
+          progress={0}
+          showProgress={false}
+          onEdit={() => {
+            navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/edit`);
+          }}
+        />
 
-        {/* Lesson Details Section */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Lesson Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Lesson Number</p>
-                <p className="text-base font-medium text-gray-900">{lesson.number}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Start Date</p>
-                <p className="text-base font-medium text-gray-900">{lesson.startDate}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Subject</p>
-                <p className="text-base font-medium text-gray-900">{lesson.subject}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Class</p>
-                <p className="text-base font-medium text-gray-900">
-                  {lesson.class} {lesson.classArm && `- ${lesson.classArm}`}
-                </p>
-              </div>
-            </div>
+        {/* Content Section */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Content</h3>
+            <button
+              onClick={() => navigate(`/teacher/subject/${subjectId}/lesson/${lessonId}/content/add`)}
+              className="flex items-center gap-2 px-4 py-2 text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+            >
+              <span className="text-lg">+</span>
+              Add New Content
+            </button>
           </div>
 
-          {/* Main Content Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Main Content</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 bg-orange-50 rounded-lg">
-                <div className="w-10 h-10 flex items-center justify-center text-orange-600 bg-white rounded-lg">
-                  {getContentIcon(lesson.contentType)}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900 mb-1">{lesson.contentTitle}</h4>
-                  <p className="text-gray-600 text-sm mb-2">{lesson.contentDescription}</p>
-                  {lesson.fileUrl && (
-                    <a
-                      href={lesson.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-orange-600 hover:text-orange-700 underline"
-                    >
-                      View/Download File
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Assignment Section (if exists) */}
-          {lesson.assignmentTitle && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Assignment</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
-                  <div className="w-10 h-10 flex items-center justify-center text-blue-600 bg-white rounded-lg">
-                    📝
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mockLessonContents.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
+              >
+                <div className="flex items-start gap-4">
+                  {/* Type Icon */}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconBgColor(item.type)}`}>
+                    {getContentIcon(item.type)}
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 mb-1">{lesson.assignmentTitle}</h4>
-                    <p className="text-gray-600 text-sm mb-2">{lesson.assignmentDescription}</p>
-                    <div className="flex gap-4 text-sm text-gray-600">
-                      {lesson.assignmentDueDate && (
-                        <span>Due: {lesson.assignmentDueDate} {lesson.assignmentDueTime}</span>
-                      )}
-                      {lesson.acceptLateSubmissions !== undefined && (
-                        <span>
-                          {lesson.acceptLateSubmissions ? '✓ Accepts late submissions' : '✗ No late submissions'}
-                        </span>
-                      )}
-                    </div>
-                    {lesson.assignmentFileUrl && (
-                      <a
-                        href={lesson.assignmentFileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-700 underline mt-2 inline-block"
-                      >
-                        View/Download Assignment File
-                      </a>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-900 mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="flex-shrink-0">
+                    {item.isCompleted ? (
+                      <button className="px-4 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors">
+                        View
+                      </button>
+                    ) : (
+                      <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </div>
 

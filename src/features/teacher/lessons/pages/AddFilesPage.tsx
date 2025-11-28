@@ -8,6 +8,7 @@ import { useToast } from '../../../../hooks/use-toast';
 import { lessonsApiClient } from '../api/lessonsApiClient';
 import { useQuery } from '@tanstack/react-query';
 import { subjectsClassesApiClient } from '../../classroom/api/subjectsClassesApiClient';
+import LessonSuccessModal from '../components/LessonSuccessModal';
 
 const addFilesSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -23,6 +24,8 @@ export default function AddFilesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdLessonData, setCreatedLessonData] = useState<{ title: string; lessonId?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get subject data to extract class and classArm info
@@ -59,6 +62,59 @@ export default function AddFilesPage() {
     }
   }, [subjectId, navigate, toast]);
 
+  const handleSaveAndContinue = async (data: AddFilesData) => {
+    if (files.length === 0) {
+      toast({
+        title: "File Required",
+        description: "Please select at least one file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const pendingLessonStr = sessionStorage.getItem('pendingLesson');
+      if (!pendingLessonStr || !subject) {
+        throw new Error('Missing required lesson or subject data');
+      }
+
+      const pendingLesson = JSON.parse(pendingLessonStr);
+      const classId = subject.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : '';
+
+      await lessonsApiClient.createLesson({
+        title: pendingLesson.title,
+        number: pendingLesson.number,
+        startDate: pendingLesson.startDate,
+        subject: subjectId!,
+        class: classId,
+        classArm: subject.classArm,
+        contentType: 'file',
+        contentTitle: data.title,
+        contentDescription: data.description,
+        file: files[0],
+      });
+
+      toast({
+        title: "Success!",
+        description: "Notes added successfully.",
+        variant: "success",
+      });
+
+      navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
+    } catch (error: any) {
+      console.error('Error creating lesson:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to add notes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handlePublish = async (data: AddFilesData) => {
     if (files.length === 0) {
       toast({
@@ -72,19 +128,15 @@ export default function AddFilesPage() {
     setIsSubmitting(true);
 
     try {
-      // Create new lesson with file content
       const pendingLessonStr = sessionStorage.getItem('pendingLesson');
       if (!pendingLessonStr || !subject) {
         throw new Error('Missing required lesson or subject data');
       }
 
       const pendingLesson = JSON.parse(pendingLessonStr);
-
-      // Extract class info from subject
       const classId = subject.classRef && typeof subject.classRef === 'object' ? subject.classRef._id : '';
 
-      // API only accepts one file, so use the first one
-      await lessonsApiClient.createLesson({
+      const response = await lessonsApiClient.createLesson({
         title: pendingLesson.title,
         number: pendingLesson.number,
         startDate: pendingLesson.startDate,
@@ -94,20 +146,16 @@ export default function AddFilesPage() {
         contentType: 'file',
         contentTitle: data.title,
         contentDescription: data.description,
-        file: files[0], // API accepts single file
+        file: files[0],
       });
 
-      // Clear pending lesson data
       sessionStorage.removeItem('pendingLesson');
 
-      toast({
-        title: "Success!",
-        description: "Lesson with file content has been created successfully.",
-        variant: "success",
+      setCreatedLessonData({
+        title: pendingLesson.title,
+        lessonId: response.id,
       });
-
-      // Navigate to subject detail page
-      navigate(`/teacher/subject/${subjectId}`);
+      setShowSuccessModal(true);
     } catch (error: any) {
       console.error('Error creating lesson:', error);
       toast({
@@ -219,22 +267,30 @@ export default function AddFilesPage() {
               )}
             </div>
 
-            {/* Action Button */}
-            <div>
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={handleSubmit(handleSaveAndContinue)}
+                disabled={isSubmitting || files.length === 0}
+                className="flex-1 px-6 py-3 bg-white border-2 border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isSubmitting ? 'Saving...' : 'Save & Continue'}
+              </button>
               <button
                 type="button"
                 onClick={handleSubmit(handlePublish)}
                 disabled={isSubmitting || files.length === 0}
-                className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                {isSubmitting ? 'Creating Lesson...' : 'Create Lesson'}
+                {isSubmitting ? 'Publishing...' : 'Publish'}
               </button>
-              {files.length === 0 && (
-                <p className="mt-2 text-sm text-gray-500 text-center">
-                  Please upload at least one file to continue
-                </p>
-              )}
             </div>
+            {files.length === 0 && (
+              <p className="mt-2 text-sm text-gray-500 text-center">
+                Please upload at least one file to continue
+              </p>
+            )}
           </form>
         </div>
 
@@ -319,6 +375,28 @@ export default function AddFilesPage() {
           />
         </div>
       </div>
+
+      {/* Success Modal */}
+      {createdLessonData && (
+        <LessonSuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          lessonTitle={createdLessonData.title}
+          contentType="document"
+          onAddMore={() => {
+            setShowSuccessModal(false);
+            navigate(`/teacher/subject/${subjectId}/lesson/add/content`);
+          }}
+          onViewLesson={() => {
+            setShowSuccessModal(false);
+            if (createdLessonData.lessonId) {
+              navigate(`/teacher/subject/${subjectId}/lesson/${createdLessonData.lessonId}`);
+            } else {
+              navigate(`/teacher/subject/${subjectId}`);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

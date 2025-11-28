@@ -96,7 +96,21 @@ export default function SubjectDetailPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const lessons = lessonsData?.lessons || [];
+  // Mock lesson data - keeping until lessons endpoint is stable
+  const mockLessons = [
+    { id: '1', number: '1', title: 'Introduction', contentTitle: 'Getting Started' },
+    { id: '2', number: '2', title: 'Reproduction in Organisms', contentTitle: 'Chapter 1' },
+    { id: '3', number: '3', title: 'Reproduction in Organisms', contentTitle: 'Chapter 2' },
+    { id: '4', number: '4', title: 'Introduction', contentTitle: 'Chapter 3' },
+    { id: '5', number: '5', title: 'Introduction', contentTitle: 'Chapter 4' },
+    { id: '6', number: '6', title: 'Introduction', contentTitle: 'Chapter 5' },
+    { id: '7', number: '7', title: 'Introduction', contentTitle: 'Chapter 6' },
+    { id: '8', number: '8', title: 'Introduction', contentTitle: 'Chapter 7' },
+    { id: '9', number: '9', title: 'Introduction', contentTitle: 'Chapter 8' },
+    { id: '10', number: '10', title: 'Introduction', contentTitle: 'Chapter 9' },
+  ];
+
+  const lessons = lessonsData?.lessons || mockLessons;
 
   // Fetch assignments for this subject
   const {
@@ -220,33 +234,26 @@ export default function SubjectDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/teacher/classes')}
-          className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <div>
-           <h1 className="text-2xl font-bold text-gray-900">{subject.name}</h1>
-           <p className="text-sm text-gray-500 flex items-center gap-2">
-             <span>Classroom</span>
-             <span className="w-1 h-1 rounded-full bg-gray-300" />
-             <span className="text-orange-600 font-medium">Manage Content</span>
-           </p>
-        </div>
+        <h1 className="text-2xl font-semibold text-gray-900">{subject.name}</h1>
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-gray-100/50 p-1.5 rounded-xl inline-flex gap-1 mb-8 overflow-x-auto max-w-full">
+      <div className="flex gap-6 border-b border-gray-200">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+            className={`pb-3 font-medium transition-colors border-b-2 ${
               activeTab === tab.key
-                ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                ? 'text-gray-900 border-gray-900'
+                : 'text-gray-500 border-transparent hover:text-gray-700'
             }`}
           >
             {tab.label}
@@ -283,11 +290,11 @@ export default function SubjectDetailPage() {
 
           {/* Lessons Content */}
           {lessonsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-2xl p-6 animate-pulse">
+                <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 animate-pulse">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                    <div className="w-12 h-12 bg-gray-200 rounded-2xl"></div>
                     <div className="flex-1">
                       <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                       <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -304,36 +311,28 @@ export default function SubjectDetailPage() {
           ) : lessons.length === 0 ? (
             <EmptyLessons onAddLesson={() => navigate(`/teacher/subject/${subjectId}/lesson/add`)} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {lessons.map((lesson) => (
                 <div
                   key={lesson.id}
                   onClick={() => handleLessonClick(lesson.id)}
-                  className="bg-white border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-orange-200 hover:shadow-md transition-all group relative overflow-hidden"
+                  className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                     <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-xl font-bold text-orange-600 group-hover:scale-110 transition-transform">
-                        {lesson.number}
-                     </div>
-                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600">
-                           <Edit className="w-4 h-4" />
-                        </button>
-                     </div>
-                  </div>
-                  
-                  <h3 className="font-bold text-gray-900 mb-1 truncate pr-8">
-                    {lesson.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm mb-4">Lesson {lesson.number}</p>
-                  
-                  <div className="flex items-center gap-3 text-xs text-gray-400 border-t border-gray-100 pt-4">
-                     <span className="flex items-center gap-1">
-                        <BookOpen className="w-3 h-3" />
-                        {lesson.contentTitle ? '1 item' : '0 items'}
-                     </span>
-                     <span>•</span>
-                     <span>45 mins</span>
+                  <div className="flex items-center gap-4">
+                    {/* Numbered Badge */}
+                    <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 text-lg font-bold">
+                      {lesson.number}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                        {lesson.title}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        Lesson {lesson.number}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
