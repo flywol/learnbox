@@ -90,24 +90,29 @@ export class BaseApiClient {
 	// Helper method to determine if a 401 error is a validation error vs token expiry
 	private isValidationError(_error: AxiosError, originalRequest: AxiosRequestConfig): boolean {
 		const url = originalRequest?.url || '';
-		
+
 		// List of endpoints that return 401 for validation errors, not token expiry
 		const validationEndpoints = [
 			'/auth/login',           // Wrong email/password
 			'/teacher/login',        // Wrong teacher email/password
 			'/student/login',        // Wrong student email/password
+			'/parent/login',         // Wrong parent email/password
 			'/auth/verify-otp',      // Wrong OTP
 			'/auth/resend-otp',      // OTP-related errors
 			'/auth/forgot-password', // Email not found
 			'/auth/reset-password',  // Invalid reset token
 			'/school/verify-domain', // School domain not found
+			'/auth/logout',          // Logout endpoint - don't retry with refresh token
+			'/teacher/logout',       // Teacher logout endpoint
+			'/student/logout',       // Student logout endpoint
+			'/parent/logout',        // Parent logout endpoint
 		];
-		
+
 		// Check if this is a validation endpoint
-		const isValidationEndpoint = validationEndpoints.some(endpoint => 
+		const isValidationEndpoint = validationEndpoints.some(endpoint =>
 			url.includes(endpoint)
 		);
-		
+
 		return isValidationEndpoint;
 	}
 

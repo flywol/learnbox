@@ -40,6 +40,7 @@ interface AuthState {
 	// Hydration state
 	hasHydrated: boolean;
 	isInitializing: boolean;
+	isLoggingOut: boolean;
 
 	// Actions
 	setRole: (role: Role) => void;
@@ -139,6 +140,7 @@ export const useAuthStore = create<AuthState>()(
 			loadingState: "idle",
 			hasHydrated: false,
 			isInitializing: false,
+			isLoggingOut: false,
 
 			// Hydration management
 			setHasHydrated: (value) => {
@@ -207,16 +209,14 @@ export const useAuthStore = create<AuthState>()(
 			// Fix for authStore.ts - Complete logout with storage clearing
 
 			logout: async () => {
+				const state = get();
 
-				try {
-					// Call API logout using the appropriate client
-					const state = get();
-					
-					const authClient = getAuthClientForRole(state.selectedRole);
-					await authClient.logout();
-				} catch (error) {
-					// Continue with local cleanup even if API call fails
+				// Prevent concurrent logout calls
+				if (state.isLoggingOut) {
+					return;
 				}
+
+				set({ isLoggingOut: true });
 
 				// Use StorageManager for complete cleanup
 				try {
@@ -225,7 +225,7 @@ export const useAuthStore = create<AuthState>()(
 					// Continue silently on error
 				}
 
-				// Reset all auth state
+				// Reset all auth state - do this synchronously before any API calls
 				set({
 					user: null,
 					isAuthenticated: false,
@@ -239,7 +239,8 @@ export const useAuthStore = create<AuthState>()(
 					signupData: null,
 					intendedDestination: null,
 					loadingState: "idle",
-					hasHydrated: false, // Force re-hydration
+					hasHydrated: true, // Keep hydrated to allow navigation
+					isLoggingOut: false, // Reset the flag
 				});
 
 			},

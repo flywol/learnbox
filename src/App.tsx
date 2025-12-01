@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Suspense } from "react";
 import { HydrationGate } from "./components/HydrationGate";
 
@@ -21,18 +21,21 @@ import { useEffect } from "react";
 import { useAuthStore } from "./features/auth/store/authStore";
 
 export default function App() {
+  const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    const handleUnauthorized = () => {
-      logout();
+    const handleUnauthorized = async () => {
+      await logout();
+      // Navigate to role selection after logout
+      navigate("/", { replace: true });
     };
 
     window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => {
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
-  }, [logout]);
+  }, [logout, navigate]);
 
   return (
     <HydrationGate>

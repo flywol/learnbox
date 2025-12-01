@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation, Link } from "react-router-dom";
+import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
 import {
 	Home,
 	BookOpen,
@@ -35,12 +35,20 @@ interface SidebarProps {
 export default function Sidebar({ isCollapsed, isTablet }: SidebarProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const location = useLocation();
+	const navigate = useNavigate();
 	const logout = useAuthStore((state) => state.logout);
 
 	const handleLogout = async () => {
 		if (isLoggingOut) return;
 		setIsLoggingOut(true);
-		await logout();
+		try {
+			await logout();
+			// Navigate immediately after logout completes
+			navigate("/", { replace: true });
+		} catch (error) {
+			// Even if logout fails, navigate to login
+			navigate("/", { replace: true });
+		}
 	};
 
 	// Active check — exact or starts with path + "/" or dashboard default

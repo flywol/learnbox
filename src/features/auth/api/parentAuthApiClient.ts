@@ -209,8 +209,8 @@ class ParentAuthApiClient extends BaseApiClient {
 		// Use StorageManager for complete cleanup
 		storageManager.clearAllAppData(true); // Keep remember me preference
 
-		// Redirect to login
-		window.location.href = "/";
+		// Dispatch event for App.tsx to handle navigation
+		window.dispatchEvent(new Event("auth:unauthorized"));
 	}
 
 	// User data management
