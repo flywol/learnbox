@@ -32,18 +32,18 @@ export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 	};
 
 	return (
-		<header className="bg-white border-b border-gray-200 px-4 md:px-8 py-4">
-			<div className="flex items-center justify-between">
+		<header className="bg-white border-b border-gray-200 px-3 md:px-6 lg:px-8 py-3 md:py-4">
+			<div className="flex items-center justify-between gap-2">
 				{/* Left side - School Branding */}
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
 					{/* Mobile Menu Toggle */}
 					<button
 						onClick={onMenuToggle}
-						className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+						className="md:hidden p-1.5 -ml-1 text-gray-600 hover:bg-gray-100 rounded-lg flex-shrink-0">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
+							width="20"
+							height="20"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -56,25 +56,27 @@ export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 						</svg>
 					</button>
 
-					<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-blue-900">
-						<span className="text-white font-semibold text-sm">
+					<div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center overflow-hidden bg-blue-900 flex-shrink-0">
+						<span className="text-white font-semibold text-xs md:text-sm">
 							{mockSchoolInfo.schoolInitial}
 						</span>
 					</div>
-					<div>
-						<h2 className="text-base font-semibold text-gray-900">
+					<div className="min-w-0">
+						<h2 className="text-xs md:text-sm lg:text-base font-semibold text-gray-900 truncate">
 							{mockSchoolInfo.schoolName}
 						</h2>
 					</div>
 				</div>
 
 				{/* Right side - User Controls */}
-				<div className="flex items-center gap-4">
-					<button className="p-2 hover:bg-gray-100 rounded-lg">
+				<div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+					{/* Settings - Hidden on mobile */}
+					<button className="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
 						<Settings className="w-5 h-5 text-gray-600" />
 					</button>
 					<NotificationDropdown onNotificationPageClick={handleNotificationPageClick} />
-					<div className="flex items-center gap-3 ml-4">
+					{/* User profile - Hidden on mobile */}
+					<div className="hidden md:flex items-center gap-3 ml-4">
 						<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
 							<span className="text-white font-semibold text-sm">
 								{getUserInitials()}

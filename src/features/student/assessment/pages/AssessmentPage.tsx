@@ -110,18 +110,18 @@ export default function AssessmentPage() {
   return (
     <div className="space-y-6">
       {/* Header with Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Assessment</h1>
-          <div className="flex items-center gap-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 md:mb-6">
+          <h1 className="text-lg md:text-xl font-semibold text-gray-900">Assessment</h1>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
             {/* Session Dropdown */}
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Session:</label>
-              <div className="relative">
+              <label className="text-xs md:text-sm text-gray-600 flex-shrink-0">Session:</label>
+              <div className="relative flex-1 sm:flex-initial">
                 <select
                   value={selectedSession}
                   onChange={(e) => setSelectedSession(e.target.value)}
-                  className="appearance-none px-4 py-2 pr-10 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  className="appearance-none w-full px-3 md:px-4 py-2 pr-10 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                 >
                   <option value="2023/2024">2023/2024</option>
                   <option value="2022/2023">2022/2023</option>
@@ -133,12 +133,12 @@ export default function AssessmentPage() {
 
             {/* Term Dropdown */}
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Term:</label>
-              <div className="relative">
+              <label className="text-xs md:text-sm text-gray-600 flex-shrink-0">Term:</label>
+              <div className="relative flex-1 sm:flex-initial">
                 <select
                   value={selectedTerm}
                   onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="appearance-none px-4 py-2 pr-10 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  className="appearance-none w-full px-3 md:px-4 py-2 pr-10 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                 >
                   <option value="1st term">1st term</option>
                   <option value="2nd term">2nd term</option>
@@ -187,20 +187,20 @@ export default function AssessmentPage() {
 
         {/* Footer */}
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Total Grade</label>
-              <div className="text-3xl font-bold text-gray-900">
+              <label className="block text-xs md:text-sm text-gray-600 mb-2">Total Grade</label>
+              <div className="text-2xl md:text-3xl font-bold text-gray-900">
                 {mockAssessmentData.totalGrade}%
               </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Remark</label>
+              <label className="block text-xs md:text-sm text-gray-600 mb-2">Remark</label>
               <input
                 type="text"
                 value={remark}
                 onChange={(e) => setRemark(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 md:px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Enter remark"
               />
             </div>
@@ -208,7 +208,7 @@ export default function AssessmentPage() {
 
           <button
             onClick={handleDownloadResult}
-            className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-orange-500 text-white text-sm md:text-base font-medium rounded-lg hover:bg-orange-600 transition-colors"
           >
             <Download className="w-4 h-4" />
             <span>Download Result</span>

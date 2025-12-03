@@ -56,14 +56,35 @@ export default function TasksSection({
 	};
 
 	return (
-		<div className="bg-white rounded-2xl p-6 shadow-sm">
-			<h2 className="text-xl font-bold text-gray-900 mb-6">Tasks</h2>
+		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
+			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Tasks</h2>
 
-			<div className="grid grid-cols-5 gap-6">
-				{/* Left side - Completed tasks circle (60% width = 3/5) */}
-				<div className="col-span-3 bg-orange-50 rounded-xl p-8 flex flex-col items-center justify-center">
-					<div className="relative w-44 h-44 mb-6">
-						<svg className="transform -rotate-90 w-44 h-44">
+			<div className="flex flex-col lg:grid lg:grid-cols-5 gap-4 md:gap-6">
+				{/* Left side - Completed tasks circle (60% width = 3/5 on desktop, full width on mobile) */}
+				<div className="lg:col-span-3 bg-orange-50 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center">
+					<div className="relative w-32 h-32 md:w-44 md:h-44 mb-4 md:mb-6">
+						<svg className="transform -rotate-90 w-32 h-32 md:w-44 md:h-44">
+							<circle
+								cx="64"
+								cy="64"
+								r={circleProps.radius}
+								stroke="#FED7AA"
+								strokeWidth="12"
+								fill="none"
+								className="md:hidden"
+							/>
+							<circle
+								cx="64"
+								cy="64"
+								r={circleProps.radius}
+								stroke="#F97316"
+								strokeWidth="12"
+								fill="none"
+								strokeDasharray={circleProps.circumference}
+								strokeDashoffset={circleProps.offset}
+								strokeLinecap="round"
+								className="md:hidden"
+							/>
 							<circle
 								cx="88"
 								cy="88"
@@ -71,6 +92,7 @@ export default function TasksSection({
 								stroke="#FED7AA"
 								strokeWidth="14"
 								fill="none"
+								className="hidden md:block"
 							/>
 							<circle
 								cx="88"
@@ -82,50 +104,51 @@ export default function TasksSection({
 								strokeDasharray={circleProps.circumference}
 								strokeDashoffset={circleProps.offset}
 								strokeLinecap="round"
+								className="hidden md:block"
 							/>
 						</svg>
 						<div className="absolute inset-0 flex items-center justify-center">
-							<span className="text-4xl font-bold text-gray-900">
+							<span className="text-2xl md:text-4xl font-bold text-gray-900">
 								{completedCount}/{totalCount}
 							</span>
 						</div>
 					</div>
-					<h3 className="text-lg font-semibold text-gray-900 mb-3">
+					<h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">
 						Completed Tasks
 					</h3>
-					<button className="px-6 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+					<button className="px-4 md:px-6 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
 						Add a task
 					</button>
 				</div>
 
-				{/* Right side - Task list (40% width = 2/5) */}
-				<div className="col-span-2">
+				{/* Right side - Task list (40% width = 2/5 on desktop, full width on mobile) */}
+				<div className="lg:col-span-2">
 					{tasks.length === 0 ? (
-						<div className="flex flex-col items-center justify-center py-12 text-center">
-							<div className="w-40 h-40 mb-4 flex items-center justify-center">
+						<div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
+							<div className="w-32 h-32 md:w-40 md:h-40 mb-3 md:mb-4 flex items-center justify-center">
 								<svg
-									className="w-32 h-32 text-gray-300"
+									className="w-24 h-24 md:w-32 md:h-32 text-gray-300"
 									fill="currentColor"
 									viewBox="0 0 24 24">
 									<path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
 								</svg>
 							</div>
-							<p className="text-gray-600 font-medium mb-2">Nothing to do yet</p>
-							<button className="px-6 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+							<p className="text-sm md:text-base text-gray-600 font-medium mb-2">Nothing to do yet</p>
+							<button className="px-4 md:px-6 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
 								Add a task
 							</button>
 						</div>
 					) : (
-						<div className="space-y-3">
+						<div className="space-y-2 md:space-y-3">
 							{tasks.map((task) => (
 								<div
 									key={task.id}
-									className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-									<div className="flex items-center gap-3">
-										<span className="text-2xl">{getTaskIcon(task.type)}</span>
-										<div>
-											<h4 className="font-semibold text-gray-900">{task.title}</h4>
-											<p className="text-sm text-gray-600">
+									className="flex items-center justify-between p-3 md:p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors gap-2">
+									<div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+										<span className="text-xl md:text-2xl flex-shrink-0">{getTaskIcon(task.type)}</span>
+										<div className="min-w-0">
+											<h4 className="text-sm md:text-base font-semibold text-gray-900 truncate">{task.title}</h4>
+											<p className="text-xs md:text-sm text-gray-600 truncate">
 												{task.subject}
 												{task.dueDate && ` - Due in ${task.dueDate}`}
 												{task.startTime && ` - ${task.startTime}`}

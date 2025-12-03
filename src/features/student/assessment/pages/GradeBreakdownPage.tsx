@@ -39,39 +39,39 @@ export default function GradeBreakdownPage() {
   const data = mockGradeBreakdownData;
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-4 md:space-y-6 max-w-5xl">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={() => navigate('/student/assessment')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Grade Breakdown</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Grade Breakdown</h1>
       </div>
 
       {/* Subject Header Card */}
-      <div className="bg-purple-100 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
+      <div className="bg-purple-100 rounded-lg p-4 md:p-6">
+        <div className="flex items-start gap-3 md:gap-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-200 rounded-full flex items-center justify-center text-2xl md:text-3xl flex-shrink-0">
             {data.subject.icon}
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">{data.subject.name}</h2>
-            <p className="text-sm text-gray-700 mb-3">Teacher: {data.subject.teacher}</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-1 truncate">{data.subject.name}</h2>
+            <p className="text-xs md:text-sm text-gray-700 mb-2 md:mb-3 truncate">Teacher: {data.subject.teacher}</p>
 
             {/* Progress Bar */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs md:text-sm">
                 <span className="text-gray-600">
                   Lesson {data.subject.lessonsCompleted}/{data.subject.totalLessons}
                 </span>
                 <span className="font-semibold text-gray-900">{data.subject.progress}%</span>
               </div>
-              <div className="w-full bg-gray-300 rounded-full h-2">
+              <div className="w-full bg-gray-300 rounded-full h-1.5 md:h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all"
+                  className="bg-blue-600 h-1.5 md:h-2 rounded-full transition-all"
                   style={{ width: `${data.subject.progress}%` }}
                 />
               </div>
@@ -132,35 +132,35 @@ export default function GradeBreakdownPage() {
 
       {/* Overview Section */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Overview</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-1">Total Grade</p>
-            <p className="text-3xl font-bold text-gray-900">{data.overview.totalGrade}%</p>
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">Overview</h3>
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4">
+            <p className="text-xs md:text-sm text-gray-600 mb-1">Total Grade</p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">{data.overview.totalGrade}%</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-1">Attendance</p>
-            <p className="text-3xl font-bold text-gray-900">{data.overview.attendance}</p>
+          <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4">
+            <p className="text-xs md:text-sm text-gray-600 mb-1">Attendance</p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">{data.overview.attendance}</p>
           </div>
         </div>
       </div>
 
       {/* Teacher's Remark */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Teacher's remark</h3>
-        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">Teacher's remark</h3>
+        <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 space-y-3 md:space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">Title</label>
             <div className="border-b-2 border-dashed border-gray-300 pb-2">
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-xs md:text-sm text-gray-500 italic break-words">
                 {data.teacherRemark.title || 'No title provided'}
               </p>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Suggestions</label>
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">Suggestions</label>
             <div className="border-b-2 border-dashed border-gray-300 pb-2">
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-xs md:text-sm text-gray-500 italic break-words">
                 {data.teacherRemark.suggestions || 'No suggestions provided'}
               </p>
             </div>

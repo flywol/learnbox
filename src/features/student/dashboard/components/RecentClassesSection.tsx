@@ -43,39 +43,39 @@ export default function RecentClassesSection({ classes }: RecentClassesSectionPr
 	}
 
 	return (
-		<div className="bg-white rounded-2xl p-6 shadow-sm">
-			<h2 className="text-xl font-bold text-gray-900 mb-6">Recent classes</h2>
-			<div className="space-y-3">
+		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
+			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Recent classes</h2>
+			<div className="space-y-2 md:space-y-3">
 				{classes.map((classItem) => {
 					const progressBarColor = getProgressBarColor(classItem.color);
 
 					return (
 						<div
 							key={classItem.id}
-							className={`${classItem.color} rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer`}>
-							<div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center text-2xl">
+							className={`${classItem.color} rounded-xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:shadow-md transition-shadow cursor-pointer`}>
+							<div className="w-10 h-10 md:w-12 md:h-12 bg-white/40 rounded-full flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
 								{classItem.subjectIcon}
 							</div>
 							<div className="flex-1 min-w-0">
-								<div className="flex items-center justify-between mb-2">
-									<h3 className="font-semibold text-gray-900 truncate">
+								<div className="flex items-center justify-between mb-1 md:mb-2">
+									<h3 className="text-sm md:text-base font-semibold text-gray-900 truncate">
 										{classItem.subjectName}
 									</h3>
-									<span className="text-sm font-medium text-gray-700">
+									<span className="text-xs md:text-sm font-medium text-gray-700 flex-shrink-0 ml-2">
 										{classItem.progress}%
 									</span>
 								</div>
-								<div className="w-full bg-white/50 rounded-full h-2 mb-2">
+								<div className="w-full bg-white/50 rounded-full h-1.5 md:h-2 mb-1 md:mb-2">
 									<div
-										className={`${progressBarColor} h-2 rounded-full transition-all`}
+										className={`${progressBarColor} h-1.5 md:h-2 rounded-full transition-all`}
 										style={{ width: `${classItem.progress}%` }}
 									/>
 								</div>
 								<div className="flex items-center justify-between text-xs text-gray-600">
-									<span>
+									<span className="truncate">
 										Lesson {classItem.lessonNumber}/{classItem.totalLessons}
 									</span>
-									<span>{classItem.lastAccessed}</span>
+									<span className="flex-shrink-0 ml-2">{classItem.lastAccessed}</span>
 								</div>
 							</div>
 						</div>

@@ -25,24 +25,24 @@ export default function EventsSection({ events }: EventsSectionProps) {
 	}
 
 	return (
-		<div className="bg-white rounded-2xl p-6 shadow-sm">
-			<h2 className="text-xl font-bold text-gray-900 mb-6">Events</h2>
-			<div className="space-y-3 max-h-[500px] overflow-y-auto">
+		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
+			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Events</h2>
+			<div className="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
 				{events.map((event) => (
 					<div
 						key={event.id}
-						className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer">
+						className="flex gap-3 md:gap-4 p-3 md:p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer">
 						<div className="flex-shrink-0 text-center">
-							<div className="w-14 h-14 rounded-lg bg-orange-50 flex flex-col items-center justify-center">
-								<span className="text-2xl font-bold text-gray-900">
+							<div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-orange-50 flex flex-col items-center justify-center">
+								<span className="text-xl md:text-2xl font-bold text-gray-900">
 									{event.day}
 								</span>
 								<span className="text-xs text-gray-600">{event.month}</span>
 							</div>
 						</div>
 						<div className="flex-1 min-w-0">
-							<h3 className="font-semibold text-gray-900 mb-1">{event.title}</h3>
-							<p className="text-sm text-gray-600 line-clamp-2">
+							<h3 className="text-sm md:text-base font-semibold text-gray-900 mb-1">{event.title}</h3>
+							<p className="text-xs md:text-sm text-gray-600 line-clamp-2">
 								{event.description}
 							</p>
 						</div>

@@ -19,10 +19,10 @@ export default function OverviewStats({ stats }: Props) {
 	const testScoreCircle = getCircularProgress(tests?.averageScore || 0);
 
 	return (
-		<div className="bg-white rounded-lg p-6 border border-gray-200">
-			<h2 className="text-lg font-semibold text-gray-900 mb-4">Overview</h2>
+		<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
+			<h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4">Overview</h2>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{/* Class Attendance - Green */}
 				<div className="bg-green-50 rounded-lg p-4 flex flex-col items-center">
 					{/* Circular Progress */}

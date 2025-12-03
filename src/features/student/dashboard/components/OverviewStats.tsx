@@ -20,10 +20,10 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 	const testScoreCircle = getCircleProps(testScores.averageScore);
 
 	return (
-		<div className="bg-white rounded-2xl p-6 shadow-sm">
-			<h2 className="text-xl font-bold text-gray-900 mb-6">Overview</h2>
+		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
+			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Overview</h2>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 				{/* Class Attendance */}
 				<div
 					className="bg-green-50 rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"

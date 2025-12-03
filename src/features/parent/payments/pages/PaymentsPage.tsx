@@ -17,22 +17,22 @@ export default function PaymentsPage() {
 	return (
 		<div>
 			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
+			<div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
 				<button
 					onClick={() => navigate(-1)}
-					className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+					className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors">
 					<ChevronLeft className="w-5 h-5 text-gray-700" />
 				</button>
-				<h1 className="text-xl font-semibold text-gray-900">School Payments</h1>
+				<h1 className="text-base md:text-xl font-semibold text-gray-900">School Payments</h1>
 			</div>
 
 			{/* Tabs */}
-			<div className="flex gap-1 mb-6">
+			<div className="flex gap-1 mb-4 md:mb-6 overflow-x-auto">
 				{tabs.map((tab) => (
 					<button
 						key={tab.id}
 						onClick={() => setActiveTab(tab.id)}
-						className={`px-6 py-2 font-medium transition-colors ${
+						className={`px-3 md:px-6 py-2 text-xs md:text-base font-medium transition-colors whitespace-nowrap ${
 							activeTab === tab.id
 								? "text-gray-900 border-b-2 border-orange-500"
 								: "text-gray-600 border-b-2 border-transparent hover:text-gray-900"
@@ -44,7 +44,7 @@ export default function PaymentsPage() {
 
 			{/* Generate Fee Tab */}
 			{activeTab === "generate" && (
-				<div className="bg-white rounded-lg p-6 border border-gray-200 ">
+				<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 ">
 					<div className="space-y-4">
 						{/* Full Name */}
 						<div>
@@ -111,7 +111,7 @@ export default function PaymentsPage() {
 
 			{/* Pay Fees Tab */}
 			{activeTab === "pay" && (
-				<div className="bg-white rounded-lg p-6 border border-gray-200 ">
+				<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 ">
 					{/* Wallet Icon */}
 					<div className="flex justify-center mb-6">
 						<div className="w-32 h-24 bg-gradient-to-br from-orange-800 to-orange-900 rounded-lg flex items-center justify-center relative">
@@ -243,18 +243,18 @@ export default function PaymentsPage() {
 
 			{/* Print Receipt Tab */}
 			{activeTab === "receipt" && (
-				<div className="bg-white rounded-lg p-6 border border-gray-200 ">
+				<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 ">
 					{/* Wallet Icon */}
-					<div className="flex justify-center mb-6">
-						<div className="w-32 h-24 bg-gradient-to-br from-orange-800 to-orange-900 rounded-lg flex items-center justify-center relative">
-							<Wallet className="w-12 h-12 text-white" />
+					<div className="flex justify-center mb-4 md:mb-6">
+						<div className="w-28 h-20 md:w-32 md:h-24 bg-gradient-to-br from-orange-800 to-orange-900 rounded-lg flex items-center justify-center relative">
+							<Wallet className="w-10 h-10 md:w-12 md:h-12 text-white" />
 							<span className="absolute bottom-2 text-white text-xs font-medium">
 								Tuition
 							</span>
 						</div>
 					</div>
 
-					<p className="text-center text-gray-600 text-sm">
+					<p className="text-center text-gray-600 text-xs md:text-sm">
 						Receipt will be generated after successful payment
 					</p>
 				</div>

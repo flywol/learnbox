@@ -101,11 +101,11 @@ export default function ChatPage() {
 	const [message, setMessage] = useState("");
 
 	return (
-		<div className="flex h-[calc(100vh-200px)] gap-4">
+		<div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] lg:h-[calc(100vh-200px)] gap-3 md:gap-4">
 			{/* Contacts Sidebar */}
-			<div className="w-80 bg-white rounded-lg border border-gray-200 flex flex-col">
+			<div className="w-full lg:w-80 bg-white rounded-lg border border-gray-200 flex flex-col max-h-96 lg:max-h-full">
 				{/* Search */}
-				<div className="p-4 border-b border-gray-200">
+				<div className="p-3 md:p-4 border-b border-gray-200">
 					<div className="relative">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
 						<input
@@ -117,17 +117,17 @@ export default function ChatPage() {
 				</div>
 
 				{/* Filter Tabs */}
-				<div className="flex gap-2 px-4 py-3 border-b border-gray-200">
-					<button className="px-4 py-1.5 bg-orange-500 text-white rounded-lg text-sm font-medium">
+				<div className="flex gap-1 md:gap-2 px-3 md:px-4 py-2 md:py-3 border-b border-gray-200 overflow-x-auto">
+					<button className="px-3 md:px-4 py-1.5 bg-orange-500 text-white rounded-lg text-xs md:text-sm font-medium whitespace-nowrap flex-shrink-0">
 						All messages
 					</button>
-					<button className="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">
+					<button className="px-3 md:px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-200 whitespace-nowrap flex-shrink-0">
 						Unread
 					</button>
-					<button className="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">
+					<button className="px-3 md:px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-200 whitespace-nowrap flex-shrink-0">
 						Teachers
 					</button>
-					<button className="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">
+					<button className="px-3 md:px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-200 whitespace-nowrap flex-shrink-0">
 						Students
 					</button>
 				</div>
@@ -138,21 +138,21 @@ export default function ChatPage() {
 						<button
 							key={contact.id}
 							onClick={() => setSelectedContact(contact)}
-							className={`w-full flex items-start gap-3 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+							className={`w-full flex items-start gap-2 md:gap-3 p-3 md:p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
 								selectedContact.id === contact.id ? "bg-orange-50" : ""
 							}`}>
 							{/* Avatar */}
-							<div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+							<div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg md:text-xl flex-shrink-0">
 								{contact.avatar}
 							</div>
 
 							{/* Content */}
 							<div className="flex-1 text-left min-w-0">
 								<div className="flex items-center justify-between mb-1">
-									<h3 className="text-sm font-semibold text-gray-900">
+									<h3 className="text-xs md:text-sm font-semibold text-gray-900 truncate">
 										{contact.name}
 									</h3>
-									<span className="text-xs text-gray-500">
+									<span className="text-xs text-gray-500 flex-shrink-0 ml-2">
 										{contact.timestamp}
 									</span>
 								</div>
@@ -171,27 +171,27 @@ export default function ChatPage() {
 			</div>
 
 			{/* Chat Area */}
-			<div className="flex-1 bg-white rounded-lg border border-gray-200 flex flex-col">
+			<div className="flex-1 bg-white rounded-lg border border-gray-200 flex flex-col min-h-0">
 				{/* Chat Header */}
-				<div className="p-4 border-b border-gray-200 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl">
+				<div className="p-3 md:p-4 border-b border-gray-200 flex items-center justify-between">
+					<div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+						<div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg md:text-xl flex-shrink-0">
 							{selectedContact.avatar}
 						</div>
-						<div>
-							<h3 className="text-sm font-semibold text-gray-900">
+						<div className="min-w-0">
+							<h3 className="text-xs md:text-sm font-semibold text-gray-900 truncate">
 								{selectedContact.name}
 							</h3>
-							<p className="text-xs text-gray-600">Biology teacher</p>
+							<p className="text-xs text-gray-600 truncate">Biology teacher</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2">
-						<button className="p-2 hover:bg-gray-100 rounded-lg">
-							<Search className="w-5 h-5 text-gray-600" />
+					<div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+						<button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg">
+							<Search className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
 						</button>
-						<button className="p-2 hover:bg-gray-100 rounded-lg">
+						<button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg">
 							<svg
-								className="w-5 h-5 text-gray-600"
+								className="w-4 h-4 md:w-5 md:h-5 text-gray-600"
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24">
@@ -207,7 +207,7 @@ export default function ChatPage() {
 				</div>
 
 				{/* Messages */}
-				<div className="flex-1 overflow-y-auto p-4 space-y-4">
+				<div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
 					{mockMessages.map((msg) => (
 						<div
 							key={msg.id}
@@ -215,17 +215,17 @@ export default function ChatPage() {
 								msg.sender === "me" ? "justify-end" : "justify-start"
 							}`}>
 							<div
-								className={`max-w-md ${
+								className={`max-w-[85%] md:max-w-md ${
 									msg.sender === "me"
 										? "bg-orange-500 text-white"
 										: "bg-blue-50 text-gray-900"
-								} rounded-2xl p-3`}>
+								} rounded-2xl p-2.5 md:p-3`}>
 								{msg.image ? (
-									<div className="w-48 h-32 bg-gradient-to-br from-pink-200 to-orange-200 rounded-lg flex items-center justify-center text-4xl">
+									<div className="w-36 h-24 md:w-48 md:h-32 bg-gradient-to-br from-pink-200 to-orange-200 rounded-lg flex items-center justify-center text-2xl md:text-4xl">
 										{msg.image}
 									</div>
 								) : (
-									<p className="text-sm">{msg.text}</p>
+									<p className="text-xs md:text-sm break-words">{msg.text}</p>
 								)}
 								<p
 									className={`text-xs mt-1 ${
@@ -239,23 +239,23 @@ export default function ChatPage() {
 				</div>
 
 				{/* Message Input */}
-				<div className="p-4 border-t border-gray-200">
-					<div className="flex items-center gap-2">
-						<button className="p-2 hover:bg-gray-100 rounded-lg">
-							<Paperclip className="w-5 h-5 text-gray-600" />
+				<div className="p-3 md:p-4 border-t border-gray-200">
+					<div className="flex items-center gap-1.5 md:gap-2">
+						<button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg flex-shrink-0">
+							<Paperclip className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
 						</button>
 						<input
 							type="text"
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}
 							placeholder="Message"
-							className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm"
+							className="flex-1 px-3 md:px-4 py-2 border border-gray-200 rounded-lg text-xs md:text-sm min-w-0"
 						/>
-						<button className="p-2 hover:bg-gray-100 rounded-lg">
-							<Mic className="w-5 h-5 text-gray-600" />
+						<button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg flex-shrink-0">
+							<Mic className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
 						</button>
-						<button className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-							<Send className="w-5 h-5" />
+						<button className="p-1.5 md:p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex-shrink-0">
+							<Send className="w-4 h-4 md:w-5 md:h-5" />
 						</button>
 					</div>
 				</div>

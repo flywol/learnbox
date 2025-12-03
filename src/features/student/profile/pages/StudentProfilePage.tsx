@@ -91,9 +91,9 @@ export default function StudentProfilePage() {
 				</div>
 
 				{/* Badges Grid */}
-				<div className="grid grid-cols-8 gap-4">
+				<div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
 					{Array.from({ length: mockAchievements.totalBadges }).map((_, i) => (
-						<div key={i} className={`text-6xl ${i >= mockAchievements.unlockedBadges ? "opacity-30" : ""}`}>
+						<div key={i} className={`text-4xl md:text-5xl lg:text-6xl ${i >= mockAchievements.unlockedBadges ? "opacity-30" : ""}`}>
 							🏅
 						</div>
 					))}
@@ -112,7 +112,7 @@ export default function StudentProfilePage() {
 					<h2 className="text-xl font-semibold text-gray-900">Edit Personal Information</h2>
 				</div>
 
-				<div className="grid grid-cols-2 gap-4 mb-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 					<div>
 						<label className="block text-sm text-gray-600 mb-2">Favourite food</label>
 						<input
@@ -190,15 +190,15 @@ export default function StudentProfilePage() {
 				{/* Academic Details */}
 				<div className="mb-8">
 					<h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Details</h3>
-					<div className="bg-gray-50 rounded-xl p-6">
-						<div className="grid grid-cols-3 gap-6 mb-6">
+					<div className="bg-gray-50 rounded-xl p-4 md:p-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
 							<div>
 								<p className="text-sm text-gray-600 mb-1">Name</p>
-								<p className="font-medium text-gray-900">{student?.fullName || "Jane Doe"}</p>
+								<p className="font-medium text-gray-900 break-words">{student?.fullName || "Jane Doe"}</p>
 							</div>
 							<div>
 								<p className="text-sm text-gray-600 mb-1">Email</p>
-								<p className="font-medium text-gray-900">{student?.email || "janejoe@gmail.com"}</p>
+								<p className="font-medium text-gray-900 break-all">{student?.email || "janejoe@gmail.com"}</p>
 							</div>
 							<div>
 								<p className="text-sm text-gray-600 mb-1">Date of Birth</p>
@@ -207,7 +207,7 @@ export default function StudentProfilePage() {
 								</p>
 							</div>
 						</div>
-						<div className="grid grid-cols-3 gap-6 mb-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
 							<div>
 								<p className="text-sm text-gray-600 mb-1">Class/Section</p>
 								<p className="font-medium text-gray-900">
@@ -223,7 +223,7 @@ export default function StudentProfilePage() {
 								<p className="font-medium text-gray-900">1st</p>
 							</div>
 						</div>
-						<div className="grid grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 							<div>
 								<p className="text-sm text-gray-600 mb-1">School ID</p>
 								<p className="font-medium text-gray-900">{student?.admissionNumber || "100004"}</p>
@@ -247,8 +247,8 @@ export default function StudentProfilePage() {
 							Edit
 						</button>
 					</div>
-					<div className="bg-gray-50 rounded-xl p-6">
-						<div className="grid grid-cols-3 gap-6 mb-6">
+					<div className="bg-gray-50 rounded-xl p-4 md:p-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
 							<div>
 								<p className="text-sm text-gray-600 mb-1">Favorite Food</p>
 								<p className="font-medium text-gray-900">{mockPersonalInfo.favoriteFood}</p>

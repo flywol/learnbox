@@ -48,25 +48,25 @@ export default function SubjectDetailPage() {
     'Explore the fascinating world of living organisms, from microscopic cells to complex ecosystems. Dive into the science of life, evolution, and the interconnectedness of all living things.';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={() => navigate('/student/classroom')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-semibold text-gray-900">{subject.name}</h1>
+        <h1 className="text-lg md:text-2xl font-semibold text-gray-900 truncate">{subject.name}</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-6 border-b border-gray-200">
+      <div className="flex gap-3 md:gap-6 border-b border-gray-200 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`pb-3 font-medium transition-colors border-b-2 ${
+            className={`pb-2 md:pb-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm md:text-base ${
               activeTab === tab.id
                 ? 'text-gray-900 border-gray-900'
                 : 'text-gray-500 border-transparent hover:text-gray-700'
@@ -88,21 +88,21 @@ export default function SubjectDetailPage() {
           />
 
           {/* Teacher Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full" />
-                <div>
+          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-300 rounded-full flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-gray-500 mb-0.5">Teacher:</p>
-                  <p className="text-sm font-semibold text-gray-900">{subject.teacher}</p>
+                  <p className="text-xs md:text-sm font-semibold text-gray-900 truncate">{subject.teacher}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <MessageCircle className="w-5 h-5 text-gray-600" />
+              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                <button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <MessageCircle className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
                 </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Phone className="w-5 h-5 text-gray-600" />
+                <button className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <Phone className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
                 </button>
               </div>
             </div>
@@ -118,11 +118,11 @@ export default function SubjectDetailPage() {
 
       {/* Live Class Tab */}
       {activeTab === 'live-class' && (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <p className="text-gray-500 mb-4">No live classes scheduled for this subject yet.</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 text-center">
+          <p className="text-gray-500 mb-4 text-sm md:text-base">No live classes scheduled for this subject yet.</p>
           <button
             onClick={() => navigate('/student/live-class')}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm md:text-base"
           >
             View All Live Classes
           </button>

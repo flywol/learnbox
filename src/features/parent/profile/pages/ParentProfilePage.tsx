@@ -11,24 +11,24 @@ export default function ParentProfilePage() {
 	return (
 		<div>
 			{/* Header Banner */}
-			<div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 mb-6 text-white">
-				<div className="flex items-center gap-4">
+			<div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-4 md:p-6 mb-4 md:mb-6 text-white">
+				<div className="flex items-center gap-3 md:gap-4">
 					{profile?.profilePicture ? (
 						<img
 							src={profile.profilePicture}
 							alt={profile.fullName}
-							className="w-20 h-20 rounded-full object-cover bg-white"
+							className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover bg-white flex-shrink-0"
 						/>
 					) : (
-						<div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-							<span className="text-4xl">👤</span>
+						<div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+							<span className="text-3xl md:text-4xl">👤</span>
 						</div>
 					)}
-					<div className="flex-1">
-						<h1 className="text-2xl font-bold">{profile?.fullName || "Loading..."}</h1>
+					<div className="flex-1 min-w-0">
+						<h1 className="text-xl md:text-2xl font-bold truncate">{profile?.fullName || "Loading..."}</h1>
 						<button
 							onClick={() => setShowSwitchModal(true)}
-							className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+							className="mt-2 px-3 md:px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs md:text-sm font-medium transition-colors">
 							Switch account
 						</button>
 					</div>
@@ -36,24 +36,24 @@ export default function ParentProfilePage() {
 			</div>
 
 			{/* Personal Information */}
-			<div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
+			<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 mb-4 md:mb-6">
 				<div className="flex items-center justify-between mb-4">
-					<h2 className="text-lg font-semibold text-gray-900">
+					<h2 className="text-base md:text-lg font-semibold text-gray-900">
 						Personal Information
 					</h2>
-					<button className="text-sm text-orange-600 hover:text-orange-700 font-medium">
+					<button className="text-xs md:text-sm text-orange-600 hover:text-orange-700 font-medium">
 						Edit
 					</button>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 					<div>
 						<label className="block text-xs text-gray-600 mb-1">Name</label>
-						<p className="text-sm font-medium text-gray-900">{profile?.fullName || "N/A"}</p>
+						<p className="text-sm font-medium text-gray-900 break-words">{profile?.fullName || "N/A"}</p>
 					</div>
 					<div>
 						<label className="block text-xs text-gray-600 mb-1">Email</label>
-						<p className="text-sm font-medium text-gray-900">
+						<p className="text-sm font-medium text-gray-900 break-all">
 							{profile?.email || "N/A"}
 						</p>
 					</div>
@@ -64,15 +64,15 @@ export default function ParentProfilePage() {
 					{children.map((child, index) => (
 						<div key={child._id}>
 							<label className="block text-xs text-gray-600 mb-1">Child {index + 1}</label>
-							<p className="text-sm font-medium text-gray-900">{child.fullName}</p>
+							<p className="text-sm font-medium text-gray-900 break-words">{child.fullName}</p>
 						</div>
 					))}
 				</div>
 			</div>
 
 			{/* Settings */}
-			<div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
-				<h2 className="text-lg font-semibold text-gray-900 mb-4">Settings</h2>
+			<div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 mb-4 md:mb-6">
+				<h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4">Settings</h2>
 
 				{/* Receive Notifications */}
 				<div className="flex items-center justify-between py-3 border-b border-gray-200">
@@ -81,7 +81,7 @@ export default function ParentProfilePage() {
 					</span>
 					<button
 						onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-						className={`relative w-12 h-6 rounded-full transition-colors ${
+						className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
 							notificationsEnabled ? "bg-orange-500" : "bg-gray-300"
 						}`}>
 						<span
@@ -93,26 +93,28 @@ export default function ParentProfilePage() {
 				</div>
 
 				{/* Accessibility Features */}
-				<div className="flex items-center justify-between py-3">
-					<span className="text-sm font-medium text-gray-900">
+				<div className="py-3 space-y-3">
+					<span className="text-sm font-medium text-gray-900 block">
 						Accessibility Features
 					</span>
-					<div className="flex items-center gap-4">
-						<div className="flex items-center gap-2">
-							<span className="text-sm text-gray-600">Text Size</span>
-							<button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-sm">
-								A
-							</button>
-							<button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-base font-medium">
-								A
-							</button>
-							<button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-lg font-bold">
-								A
-							</button>
+					<div className="space-y-3">
+						<div className="flex flex-wrap items-center gap-2">
+							<span className="text-xs md:text-sm text-gray-600 flex-shrink-0">Text Size</span>
+							<div className="flex items-center gap-1 md:gap-2">
+								<button className="px-2 md:px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-sm">
+									A
+								</button>
+								<button className="px-2 md:px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-base font-medium">
+									A
+								</button>
+								<button className="px-2 md:px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-lg font-bold">
+									A
+								</button>
+							</div>
 						</div>
-						<div className="flex items-center gap-2">
-							<span className="text-sm text-gray-600">Theme</span>
-							<button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-sm">
+						<div className="flex flex-wrap items-center gap-2">
+							<span className="text-xs md:text-sm text-gray-600 flex-shrink-0">Theme</span>
+							<button className="px-2 md:px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 text-xs md:text-sm">
 								Default Light
 							</button>
 						</div>
@@ -121,17 +123,17 @@ export default function ParentProfilePage() {
 			</div>
 
 			{/* Action Buttons */}
-			<div className="flex gap-4">
+			<div className="flex flex-col sm:flex-row gap-3 md:gap-4">
 				<button
 					onClick={() => setShowSwitchModal(true)}
-					className="px-6 py-3 border-2 border-gray-200 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2">
-					<RefreshCw className="w-5 h-5" />
+					className="px-4 md:px-6 py-2.5 md:py-3 border-2 border-gray-200 rounded-lg font-medium text-sm md:text-base text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+					<RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
 					Switch account
 				</button>
 				<button
 					onClick={() => setShowLogoutModal(true)}
-					className="px-6 py-3 border-2 border-orange-500 text-orange-600 rounded-lg font-medium hover:bg-orange-50 transition-colors flex items-center gap-2">
-					<LogOut className="w-5 h-5" />
+					className="px-4 md:px-6 py-2.5 md:py-3 border-2 border-orange-500 text-orange-600 rounded-lg font-medium text-sm md:text-base hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
+					<LogOut className="w-4 h-4 md:w-5 md:h-5" />
 					Logout
 				</button>
 			</div>
