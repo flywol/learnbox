@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/store/authStore";
@@ -43,7 +43,9 @@ const ROLE_AI_PATHS: Record<string, string> = {
 
 export default function LearnBoxAIWidget() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isHovered, setIsHovered] = useState(false);
 	const panelRef = useRef<HTMLDivElement>(null);
+	const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const navigate = useNavigate();
 	const user = useAuthStore((s) => s.user);
 	const selectedRole = useAuthStore((s) => s.selectedRole);
@@ -137,14 +139,35 @@ export default function LearnBoxAIWidget() {
 				</div>
 			)}
 
-			{/* Floating trigger button */}
+			{/* Floating trigger button — circle at rest, pill on hover */}
 			<button
 				onClick={() => setIsOpen((prev) => !prev)}
-				className="flex items-center gap-2 bg-[#FF6B35] text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-orange-600 transition-all hover:shadow-xl active:scale-95"
+				onMouseEnter={() => {
+					if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+					setIsHovered(true);
+				}}
+				onMouseLeave={() => {
+					hoverTimeout.current = setTimeout(() => setIsHovered(false), 120);
+				}}
+				className="flex items-center justify-center bg-[#FF6B35] text-white shadow-lg hover:bg-orange-600 active:scale-95 transition-[width,background-color,box-shadow] duration-200 ease-in-out overflow-hidden"
+				style={{
+					height: 48,
+					width: isHovered ? 148 : 48,
+					borderRadius: isHovered ? 14 : 24,
+				}}
 				aria-label="Open LearnBox AI"
 			>
-				<Sparkles className="w-5 h-5" />
-				<span className="text-sm">LearnBox AI</span>
+				<Sparkles className="w-5 h-5 flex-shrink-0" />
+				<span
+					className="text-sm font-semibold whitespace-nowrap overflow-hidden transition-all duration-200"
+					style={{
+						maxWidth: isHovered ? 100 : 0,
+						opacity: isHovered ? 1 : 0,
+						marginLeft: isHovered ? 8 : 0,
+					}}
+				>
+					LearnBox AI
+				</span>
 			</button>
 		</div>
 	);
