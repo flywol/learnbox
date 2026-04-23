@@ -11,7 +11,7 @@ interface StudentHeaderProps {
 export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 	const user = useAuthStore((state) => state.user);
 	const navigate = useNavigate();
-	const { schoolName, schoolLogo, schoolInitial } = useSchoolInfo();
+	const { schoolName, schoolLogoSrc, schoolInitial } = useSchoolInfo();
 
 	// Get initials from user's name
 	const getUserInitials = () => {
@@ -53,8 +53,8 @@ export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 					</button>
 
 					<div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center overflow-hidden bg-blue-900 flex-shrink-0">
-						{schoolLogo ? (
-							<img src={`data:image/png;base64,${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+						{schoolLogoSrc ? (
+							<img src={schoolLogoSrc} alt="School Logo" className="w-full h-full object-cover" />
 						) : (
 							<span className="text-white font-semibold text-xs md:text-sm">
 								{schoolInitial}

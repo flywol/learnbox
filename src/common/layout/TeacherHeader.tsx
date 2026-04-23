@@ -9,7 +9,7 @@ interface TeacherHeaderProps {
 
 export default function TeacherHeader({ onMenuToggle, showMenuButton }: TeacherHeaderProps) {
 	const user = useAuthStore((state) => state.user);
-	const { schoolName, schoolLogo, schoolInitial } = useSchoolInfo();
+	const { schoolName, schoolLogoSrc, schoolInitial } = useSchoolInfo();
 
 	return (
 		<header className="bg-white border-b border-gray-200 px-8 py-4">
@@ -25,8 +25,8 @@ export default function TeacherHeader({ onMenuToggle, showMenuButton }: TeacherH
 						</button>
 					)}
 					<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-orange-100 flex-shrink-0">
-						{schoolLogo ? (
-							<img src={`data:image/png;base64,${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+						{schoolLogoSrc ? (
+							<img src={schoolLogoSrc} alt="School Logo" className="w-full h-full object-cover" />
 						) : (
 							<span className="text-orange-600 font-semibold text-lg">{schoolInitial}</span>
 						)}
