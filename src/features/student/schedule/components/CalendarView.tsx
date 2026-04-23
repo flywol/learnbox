@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { studentApiClient } from "@/features/student/api/studentApiClient";
 
-const mockEvents: Record<string, string[]> = {
-	"2025-10-03": ["Assignment deadline is today"],
-	"2025-10-08": ["Physics live class"],
-	"2025-10-11": ["Class trip"],
-	"2025-10-10": ["Biology quiz due"],
-	"2025-10-21": ["Physics live class"],
-	"2025-10-27": ["Children's day"],
-	"2025-10-31": ["Biology quiz due"],
-};
+function toYMD(raw: string): string {
+	if (!raw) return '';
+	if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+		const [d, m, y] = raw.split('/');
+		return `${y}-${m}-${d}`;
+	}
+	try {
+		const d = new Date(raw);
+		if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+	} catch {}
+	return '';
+}
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTH_NAMES = [
@@ -18,9 +22,24 @@ const MONTH_NAMES = [
 ];
 
 export default function CalendarView() {
-	const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1));
+	const [currentDate, setCurrentDate] = useState(new Date());
+	const [eventMap, setEventMap] = useState<Record<string, string[]>>({});
+
 	const month = currentDate.getMonth();
 	const year = currentDate.getFullYear();
+
+	useEffect(() => {
+		studentApiClient.getCalendar().then((raw) => {
+			const map: Record<string, string[]> = {};
+			raw.forEach((ev: any) => {
+				const key = toYMD(ev.date ?? ev.startDate ?? ev.eventDate ?? '');
+				if (!key) return;
+				const label = ev.title ?? ev.description ?? ev.name ?? 'Event';
+				map[key] = [...(map[key] ?? []), label];
+			});
+			setEventMap(map);
+		}).catch(() => {});
+	}, []);
 
 	const navigateMonth = (dir: "prev" | "next") => {
 		setCurrentDate((d) => {
@@ -53,7 +72,6 @@ export default function CalendarView() {
 
 	return (
 		<div>
-			{/* Month navigation */}
 			<div className="flex items-center gap-4 mb-4">
 				<button
 					onClick={() => navigateMonth("prev")}
@@ -72,19 +90,16 @@ export default function CalendarView() {
 				</button>
 			</div>
 
-			{/* Calendar grid */}
 			<div className="grid grid-cols-7">
-				{/* Day headers */}
 				{DAY_NAMES.map((d) => (
 					<div key={d} className="py-2 text-center text-sm text-[#6b6b6b] font-normal border-b border-[#eeeeee]">
 						{d}
 					</div>
 				))}
 
-				{/* Day cells */}
 				{cells.map((cell, i) => {
 					const key = cell.inMonth ? dateKey(cell.day) : "";
-					const events = key ? (mockEvents[key] ?? []) : [];
+					const events = key ? (eventMap[key] ?? []) : [];
 					const hasEvent = events.length > 0;
 
 					return (

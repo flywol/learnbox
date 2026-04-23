@@ -216,6 +216,29 @@ class StudentApiClient extends BaseApiClient {
 	async markAllNotificationsRead() {
 		return this.post<any>('/student/notifications/read-all');
 	}
+
+	async getAssignment(assignmentId: string): Promise<ApiAssignment> {
+		const res = await this.get<any>(`/student/assignments/${assignmentId}`);
+		return extract<ApiAssignment>(res);
+	}
+
+	async getLiveClasses(): Promise<any[]> {
+		const res = await this.get<any>('/student/live-classes/upcoming');
+		const data = extract<any>(res);
+		return Array.isArray(data) ? data : (data?.liveClasses ?? data?.classes ?? []);
+	}
+
+	async getTimetable(): Promise<any[]> {
+		const res = await this.get<any>('/student/timetable');
+		const data = extract<any>(res);
+		return Array.isArray(data) ? data : (data?.timetable ?? data?.slots ?? []);
+	}
+
+	async getMySubmissions(): Promise<any[]> {
+		const res = await this.get<any>('/student/my-submissions');
+		const data = extract<any>(res);
+		return Array.isArray(data) ? data : (data?.submissions ?? []);
+	}
 }
 
 export const studentApiClient = new StudentApiClient();

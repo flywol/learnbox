@@ -2,12 +2,7 @@ import { Settings } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useNavigate } from "react-router-dom";
 import NotificationDropdown from "@/features/student/notifications/components/NotificationDropdown";
-
-// Mock school data for student - NO API CALLS
-const mockSchoolInfo = {
-	schoolName: "Lakeridge Mountain High School",
-	schoolInitial: "LM",
-};
+import { useSchoolInfo } from "@/common/hooks/useSchoolInfo";
 
 interface StudentHeaderProps {
 	onMenuToggle?: () => void;
@@ -16,6 +11,7 @@ interface StudentHeaderProps {
 export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 	const user = useAuthStore((state) => state.user);
 	const navigate = useNavigate();
+	const { schoolName, schoolLogo, schoolInitial } = useSchoolInfo();
 
 	// Get initials from user's name
 	const getUserInitials = () => {
@@ -57,13 +53,17 @@ export default function StudentHeader({ onMenuToggle }: StudentHeaderProps) {
 					</button>
 
 					<div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center overflow-hidden bg-blue-900 flex-shrink-0">
-						<span className="text-white font-semibold text-xs md:text-sm">
-							{mockSchoolInfo.schoolInitial}
-						</span>
+						{schoolLogo ? (
+							<img src={`data:image/png;base64,${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+						) : (
+							<span className="text-white font-semibold text-xs md:text-sm">
+								{schoolInitial}
+							</span>
+						)}
 					</div>
 					<div className="min-w-0">
 						<h2 className="text-xs md:text-sm lg:text-base font-semibold text-gray-900 truncate">
-							{mockSchoolInfo.schoolName}
+							{schoolName || "Loading…"}
 						</h2>
 					</div>
 				</div>
