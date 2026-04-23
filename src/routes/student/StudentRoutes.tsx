@@ -25,6 +25,11 @@ const ChatPage = lazy(
 	() => import("../../features/student/chat/pages/ChatPage")
 );
 
+// Schedule
+const SchedulePage = lazy(
+	() => import("../../features/student/schedule/pages/SchedulePage")
+);
+
 // Live Class
 const LiveClassPage = lazy(
 	() => import("../../features/student/live-class/pages/LiveClassPage")
@@ -92,6 +97,9 @@ export function StudentRoutes() {
 
 				{/* Notifications */}
 				<Route path="notifications" element={<NotificationsPage />} />
+
+				{/* Schedule */}
+				<Route path="schedule" element={<SchedulePage />} />
 
 				{/* Chat */}
 				<Route path="chat" element={<ChatPage />} />
