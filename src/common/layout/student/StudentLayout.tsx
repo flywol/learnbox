@@ -28,7 +28,7 @@ export default function StudentLayout({ children }: Props) {
 					onClose={() => setIsMobileMenuOpen(false)} 
 				/>
 				<main className="flex-1 overflow-auto w-full">
-					<div className="p-4 md:p-6 pb-20 md:pb-6">
+					<div className="p-4 md:p-6 pb-24">
 						{children || <Outlet />}
 					</div>
 				</main>

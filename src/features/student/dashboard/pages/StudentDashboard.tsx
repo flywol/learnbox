@@ -4,7 +4,7 @@ import OverviewStats from "../components/OverviewStats";
 import TasksSection from "../components/TasksSection";
 import RecentClassesSection from "../components/RecentClassesSection";
 import EventsSection from "../components/EventsSection";
-import { studentApiClient } from "@/features/student/api/studentApiClient";
+import { studentApiClient, subjectMeta } from "@/features/student/api/studentApiClient";
 import type {
 	StudentDashboardData,
 	StudentTask,
@@ -14,7 +14,11 @@ import type {
 } from "../types/dashboard.types";
 import { mockStudentDashboardData } from "../config/studentDashboardConfig";
 
-function buildDashboardData(upcoming: any[], calendar: any[]): Partial<StudentDashboardData> {
+function buildDashboardData(
+	upcoming: any[],
+	calendar: any[],
+	subjects: any[]
+): Partial<StudentDashboardData> {
 	const tasks: StudentTask[] = upcoming.map((item: any, i: number) => {
 		const subjectRaw = item.subject;
 		const subject =
@@ -30,17 +34,46 @@ function buildDashboardData(upcoming: any[], calendar: any[]): Partial<StudentDa
 		};
 	});
 
-	const events: StudentEvent[] = calendar.map((ev: any, i: number) => {
-		const rawDate = ev.date ?? ev.startDate ?? new Date().toISOString();
-		const d = new Date(rawDate);
+	// Only include events that have a meaningful title
+	const events: StudentEvent[] = calendar
+		.map((ev: any, i: number) => {
+			const rawDate = ev.date ?? ev.startDate ?? new Date().toISOString();
+			const d = new Date(rawDate);
+			const title = ev.title ?? ev.name ?? (ev.description || null) ?? "";
+			if (!title) return null;
+			return {
+				id: ev._id ?? ev.id ?? String(i),
+				title,
+				description: ev.description ?? ev.title ?? "",
+				date: rawDate,
+				day: d.getDate(),
+				month: d.toLocaleString("en-US", { month: "short" }),
+				type: (ev.type as StudentEvent["type"]) ?? "school",
+			};
+		})
+		.filter(Boolean) as StudentEvent[];
+
+	// Map class subjects to RecentClass with real progress
+	const recentClasses: RecentClass[] = subjects.slice(0, 4).map((s: any, i: number) => {
+		const name = s.name ?? s.subjectName ?? "Subject";
+		const meta = subjectMeta(name);
+		const completed = s.completedLessons ?? s.currentLesson ?? 0;
+		const total = s.totalLessons ?? 16;
+		const progress =
+			s.progressPercentage != null
+				? Math.round(s.progressPercentage)
+				: total > 0
+				? Math.round((completed / total) * 100)
+				: 0;
 		return {
-			id: ev._id ?? ev.id ?? String(i),
-			title: ev.title ?? "Event",
-			description: ev.description ?? "",
-			date: rawDate,
-			day: d.getDate(),
-			month: d.toLocaleString("en-US", { month: "short" }),
-			type: (ev.type as StudentEvent["type"]) ?? "school",
+			id: s._id ?? s.id ?? String(i),
+			subjectName: name,
+			subjectIcon: meta.icon,
+			progress,
+			lessonNumber: completed,
+			totalLessons: total,
+			lastAccessed: s.lastAccessed ?? (s.updatedAt ? "Recently" : "—"),
+			color: meta.bgColor,
 		};
 	});
 
@@ -57,12 +90,20 @@ function buildDashboardData(upcoming: any[], calendar: any[]): Partial<StudentDa
 		const dueInMins = Math.max(0, Math.floor((dueMs % (1000 * 60 * 60)) / (1000 * 60)));
 		upcomingDeadline = {
 			subject: first.subject ?? first.title,
-			dueIn: dueInHours > 0 ? `${dueInHours}hr${dueInHours !== 1 ? "s" : ""} ${dueInMins}mins` : `${dueInMins}mins`,
+			dueIn:
+				dueInHours > 0
+					? `${dueInHours}hr${dueInHours !== 1 ? "s" : ""} ${dueInMins}mins`
+					: `${dueInMins}mins`,
 			dueDate: new Date(first.dueDate!),
 		};
 	}
 
-	return { tasks, events, upcomingDeadline };
+	return {
+		tasks,
+		events,
+		upcomingDeadline,
+		...(recentClasses.length > 0 ? { recentClasses } : {}),
+	};
 }
 
 export default function StudentDashboard() {
@@ -72,15 +113,17 @@ export default function StudentDashboard() {
 	useEffect(() => {
 		const load = async () => {
 			try {
-				const [upcoming, calendar] = await Promise.allSettled([
+				const [upcoming, calendar, subjects] = await Promise.allSettled([
 					studentApiClient.getUpcoming(),
 					studentApiClient.getCalendar(),
+					studentApiClient.getClassSubjects(),
 				]);
 
 				const upcomingData = upcoming.status === "fulfilled" ? upcoming.value : [];
 				const calendarData = calendar.status === "fulfilled" ? calendar.value : [];
+				const subjectsData = subjects.status === "fulfilled" ? subjects.value : [];
 
-				const partial = buildDashboardData(upcomingData, calendarData);
+				const partial = buildDashboardData(upcomingData, calendarData, subjectsData);
 				setDashboardData((prev) => ({ ...prev, ...partial }));
 			} catch {
 				// Keep mock data on failure
@@ -94,9 +137,9 @@ export default function StudentDashboard() {
 	const completedTasksCount = dashboardData.tasks.filter((t) => t.status === "completed").length;
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 			{/* Left Column */}
-			<div className="lg:col-span-2 space-y-6">
+			<div className="md:col-span-2 space-y-6">
 				<WelcomeBanner upcomingDeadline={dashboardData.upcomingDeadline || undefined} />
 				<OverviewStats stats={dashboardData.overview} />
 				<TasksSection

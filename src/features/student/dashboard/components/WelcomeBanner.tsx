@@ -15,16 +15,16 @@ export default function WelcomeBanner({ upcomingDeadline }: WelcomeBannerProps) 
 	return (
 		<div className="bg-white rounded-2xl p-6 md:p-8 flex items-center justify-between shadow-sm gap-4">
 			<div className="flex-1 min-w-0">
-				<p className="text-lg text-[#343434] leading-[1.5]">Welcome,</p>
-				<h1 className="text-5xl font-bold text-[#2b2b2b] leading-[1.4] truncate">{firstName}</h1>
-				{upcomingDeadline ? (
-					<p className="text-lg text-[#6b6b6b] mt-1">
-						<span className="font-extrabold text-[#fd5d26]">{upcomingDeadline.subject}</span>
-						{" assignment is due in: "}
+				<h1 className="text-2xl md:text-3xl font-bold text-[#2b2b2b] leading-snug">
+					Welcome back, <span className="text-[#fd5d26]">{firstName}</span>
+				</h1>
+				<p className="text-base text-[#6b6b6b] mt-1">What do you want to do today?</p>
+				{upcomingDeadline && (
+					<p className="text-sm text-[#6b6b6b] mt-2">
+						<span className="font-semibold text-[#fd5d26]">{upcomingDeadline.subject}</span>
+						{" is due in "}
 						<span className="font-semibold text-[#2b2b2b]">{upcomingDeadline.dueIn}</span>
 					</p>
-				) : (
-					<p className="text-lg text-[#6b6b6b] mt-1">You're all caught up! No upcoming deadlines.</p>
 				)}
 			</div>
 			<div className="flex-shrink-0">

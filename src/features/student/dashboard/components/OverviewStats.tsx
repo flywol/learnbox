@@ -26,7 +26,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 				{/* Class Attendance */}
 				<div
-					className="bg-[#eaf9e8] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#eaf9e8] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat overflow-hidden relative"
 					style={{ backgroundImage: "url(/images/student/attendancebg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">
@@ -86,7 +86,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 
 				{/* Assignment */}
 				<div
-					className="bg-[#fff4b1] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#fff4b1] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat overflow-hidden relative"
 					style={{ backgroundImage: "url(/images/student/assignmentbg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">
@@ -142,7 +142,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 
 				{/* Average Test Score */}
 				<div
-					className="bg-[#e9eeff] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#e9eeff] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat overflow-hidden relative"
 					style={{ backgroundImage: "url(/images/student/testbg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">

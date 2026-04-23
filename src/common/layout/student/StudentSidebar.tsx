@@ -15,58 +15,22 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
-// Menu config for students
-const studentMenuItems = [
-	{
-		label: "Overview hub",
-		icon: Home,
-		path: "/student/dashboard",
-	},
-	{
-		label: "Classroom",
-		icon: BookOpen,
-		path: "/student/classroom",
-	},
-	{
-		label: "Schedule",
-		icon: Calendar,
-		path: "/student/schedule",
-	},
-	{
-		label: "Live class",
-		icon: Video,
-		path: "/student/live-class",
-	},
-	{
-		label: "Chat",
-		icon: MessageSquare,
-		path: "/student/chat",
-	},
-	{
-		label: "LearnBox library",
-		icon: Library,
-		path: "/student/library",
-	},
-	{
-		label: "Exam",
-		icon: FileText,
-		path: "/student/exam",
-	},
-	{
-		label: "Assessment",
-		icon: ClipboardList,
-		path: "/student/assessment",
-	},
-	{
-		label: "LearnBox AI",
-		icon: Sparkles,
-		path: "/student/learnbox-ai",
-	},
-	{
-		label: "Profile",
-		icon: User,
-		path: "/student/profile",
-	},
+// Primary nav items — always visible
+const primaryMenuItems = [
+	{ label: "Overview hub",  icon: Home,          path: "/student/dashboard" },
+	{ label: "Classroom",     icon: BookOpen,       path: "/student/classroom" },
+	{ label: "Schedule",      icon: Calendar,       path: "/student/schedule" },
+	{ label: "Live class",    icon: Video,          path: "/student/live-class" },
+	{ label: "Assessment",    icon: ClipboardList,  path: "/student/assessment" },
+	{ label: "LearnBox AI",   icon: Sparkles,       path: "/student/learnbox-ai" },
+	{ label: "Profile",       icon: User,           path: "/student/profile" },
+];
+
+// Secondary nav items — shown below a divider
+const secondaryMenuItems = [
+	{ label: "Exam",             icon: FileText,      path: "/student/exam" },
+	{ label: "Chat",             icon: MessageSquare, path: "/student/chat" },
+	{ label: "LearnBox library", icon: Library,       path: "/student/library" },
 ];
 
 interface StudentSidebarProps {
@@ -139,20 +103,42 @@ export default function StudentSidebar({ isOpen, onClose }: StudentSidebarProps)
 
 			{/* Menu */}
 			<nav className="flex-1 p-4 overflow-y-auto">
-				<ul className="space-y-2">
-					{studentMenuItems.map((item) => {
+				<ul className="space-y-1">
+					{primaryMenuItems.map((item) => {
 						const active = isMenuActive(item.path);
 						return (
 							<li key={item.path}>
 								<NavLink
 									to={item.path}
-									className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+									className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
 										active
 											? "bg-orange-50 text-orange-500"
 											: "text-gray-700 hover:bg-gray-50"
 									}`}>
-									<item.icon className="w-5 h-5" />
-									<span>{item.label}</span>
+									<item.icon className="w-5 h-5 flex-shrink-0" />
+									<span className="text-sm">{item.label}</span>
+								</NavLink>
+							</li>
+						);
+					})}
+				</ul>
+
+				<div className="my-3 border-t border-gray-100" />
+
+				<ul className="space-y-1">
+					{secondaryMenuItems.map((item) => {
+						const active = isMenuActive(item.path);
+						return (
+							<li key={item.path}>
+								<NavLink
+									to={item.path}
+									className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+										active
+											? "bg-orange-50 text-orange-500"
+											: "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+									}`}>
+									<item.icon className="w-4 h-4 flex-shrink-0" />
+									<span className="text-sm">{item.label}</span>
 								</NavLink>
 							</li>
 						);
