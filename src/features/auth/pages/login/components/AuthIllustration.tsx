@@ -1,13 +1,11 @@
 export default function AuthIllustration() {
-  return (
-    <div className="hidden lg:flex lg:w-1/2 bg-[#FFEFE980] items-center justify-center p-8">
-      <div className="w-full max-w-md">
-        <img
-          className="w-[710px] h-[560px] object-contain"
-          src="/images/illustration.svg"
-          alt="illustration"
-        />
-      </div>
-    </div>
-  );
+	return (
+		<div className="hidden lg:flex lg:w-[55%] bg-[rgba(255,239,233,0.5)] items-center justify-center overflow-hidden">
+			<img
+				src="/images/illustration.svg"
+				alt="Students illustration"
+				className="w-full h-full object-cover object-center"
+			/>
+		</div>
+	);
 }

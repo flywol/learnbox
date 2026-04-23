@@ -53,7 +53,7 @@ export default function StudentProfilePage() {
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#fd5d26]"></div>
 			</div>
 		);
 	}
@@ -119,7 +119,7 @@ export default function StudentProfilePage() {
 							type="text"
 							value={personalInfoForm.favoriteFood}
 							onChange={(e) => setPersonalInfoForm({ ...personalInfoForm, favoriteFood: e.target.value })}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fd5d26]"
 						/>
 					</div>
 					<div>
@@ -128,7 +128,7 @@ export default function StudentProfilePage() {
 							type="text"
 							value={personalInfoForm.favoriteSubject}
 							onChange={(e) => setPersonalInfoForm({ ...personalInfoForm, favoriteSubject: e.target.value })}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fd5d26]"
 						/>
 					</div>
 					<div>
@@ -137,7 +137,7 @@ export default function StudentProfilePage() {
 							type="text"
 							value={personalInfoForm.favoriteColor}
 							onChange={(e) => setPersonalInfoForm({ ...personalInfoForm, favoriteColor: e.target.value })}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fd5d26]"
 						/>
 					</div>
 					<div>
@@ -146,14 +146,14 @@ export default function StudentProfilePage() {
 							type="text"
 							value={personalInfoForm.favoriteTeacher}
 							onChange={(e) => setPersonalInfoForm({ ...personalInfoForm, favoriteTeacher: e.target.value })}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fd5d26]"
 						/>
 					</div>
 				</div>
 
 				<button
 					onClick={handleUpdatePersonalInfo}
-					className="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+					className="px-8 py-3 bg-[#fd5d26] text-white rounded-lg hover:bg-[#e84d17] transition-colors"
 				>
 					Update Profile
 				</button>
@@ -164,7 +164,7 @@ export default function StudentProfilePage() {
 	return (
 		<div className="space-y-6">
 			{/* Header with School Motto */}
-			<div className="bg-orange-500 text-white rounded-t-2xl p-6 text-center">
+			<div className="bg-[#fd5d26] text-white rounded-t-2xl p-6 text-center">
 				<p className="text-lg">School Motto: You shine when you work hard</p>
 			</div>
 
@@ -181,7 +181,7 @@ export default function StudentProfilePage() {
 					</div>
 					<button
 						onClick={() => setShowSwitchAccountModal(true)}
-						className="px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors text-sm"
+						className="px-4 py-2 bg-[#fff8f5] text-[#fd5d26] rounded-lg hover:bg-[#ffefe9] transition-colors text-sm"
 					>
 						Switch account
 					</button>
@@ -298,7 +298,7 @@ export default function StudentProfilePage() {
 					<div className="bg-gray-50 rounded-xl p-6 space-y-4">
 						<div className="flex items-center justify-between">
 							<p className="text-gray-900">Receive Notifications</p>
-							<button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-500">
+							<button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#fd5d26]">
 								<span className="translate-x-6 inline-block h-4 w-4 transform rounded-full bg-white transition" />
 							</button>
 						</div>
@@ -317,7 +317,7 @@ export default function StudentProfilePage() {
 									<p className="text-gray-700">Text Size</p>
 									<div className="flex items-center gap-2">
 										<button className="text-sm">A</button>
-										<button className="text-base font-semibold text-orange-500 border-b-2 border-orange-500">
+										<button className="text-base font-semibold text-orange-500 border-b-2 border-[#fd5d26]">
 											A
 										</button>
 										<button className="text-lg">A</button>
@@ -335,7 +335,7 @@ export default function StudentProfilePage() {
 				{/* Logout Button */}
 				<button
 					onClick={() => setShowLogoutModal(true)}
-					className="mt-6 px-6 py-3 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-2"
+					className="mt-6 px-6 py-3 border border-[#fd5d26] text-orange-500 rounded-lg hover:bg-[#fff8f5] transition-colors flex items-center gap-2"
 				>
 					Logout
 					<ChevronRight className="w-4 h-4" />
@@ -357,7 +357,7 @@ export default function StudentProfilePage() {
 							</button>
 							<button
 								onClick={handleLogout}
-								className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+								className="flex-1 px-6 py-3 bg-[#fd5d26] text-white rounded-lg hover:bg-[#e84d17] transition-colors"
 							>
 								Confirm
 							</button>
@@ -381,7 +381,7 @@ export default function StudentProfilePage() {
 							</button>
 							<button
 								onClick={handleLogout}
-								className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+								className="flex-1 px-6 py-3 bg-[#fd5d26] text-white rounded-lg hover:bg-[#e84d17] transition-colors"
 							>
 								Confirm
 							</button>

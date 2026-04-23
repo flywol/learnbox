@@ -201,7 +201,13 @@ const CombinedSchoolLoginPage = () => {
 	return (
 		<div className="flex min-h-screen bg-white">
 			<AuthIllustration />
-			<div className="flex flex-1 flex-col justify-center items-center p-6 sm:p-8 relative overflow-hidden">
+			<div className="flex flex-1 flex-col justify-center items-center px-8 py-12 relative overflow-hidden">
+				{/* Logo */}
+				<div className="absolute top-8 left-1/2 -translate-x-1/2">
+					<h1 className="text-2xl font-bold text-[#2b2b2b]">
+						Learn<span className="text-[#fd5d26]">Box</span>
+					</h1>
+				</div>
 				<SchoolDomainStep
 					form={schoolForm}
 					onSubmit={handleSchoolSubmit}

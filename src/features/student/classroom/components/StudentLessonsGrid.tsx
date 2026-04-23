@@ -1,65 +1,63 @@
-import { Lock } from 'lucide-react';
-import { StudentLesson } from '../types/classroom.types';
+import { Lock } from "lucide-react";
+import { StudentLesson } from "../types/classroom.types";
 
 interface StudentLessonsGridProps {
-  lessons: StudentLesson[];
-  onLessonClick: (lesson: StudentLesson) => void;
-  subjectDescription?: string;
-  progressPercentage?: number;
+	lessons: StudentLesson[];
+	onLessonClick: (lesson: StudentLesson) => void;
 }
 
-export default function StudentLessonsGrid({
-  lessons,
-  onLessonClick,
-}: Omit<StudentLessonsGridProps, 'subjectDescription' | 'progressPercentage'>) {
-  if (lessons.length === 0) {
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-        <div className="w-24 h-24 mx-auto mb-6">
-          <img
-            src="/images/onboarding/student-2.svg"
-            alt="No lessons"
-            className="w-full h-full object-contain"
-          />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No lesson yet</h3>
-      </div>
-    );
-  }
+export default function StudentLessonsGrid({ lessons, onLessonClick }: StudentLessonsGridProps) {
+	if (lessons.length === 0) {
+		return (
+			<div className="flex flex-col items-center justify-center py-16 gap-3">
+				<img src="/images/onboarding/student-2.svg" alt="" className="w-24 h-24 opacity-60" />
+				<p className="text-[#838383]">No lessons yet</p>
+			</div>
+		);
+	}
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {lessons.map((lesson) => (
-        <div
-          key={lesson.id}
-          onClick={() => onLessonClick(lesson)}
-          className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
-        >
-          <div className="flex items-center gap-4">
-            {/* Numbered Badge */}
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 text-lg font-bold">
-              {lesson.number}
-            </div>
+	return (
+		<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{lessons.map((lesson) => (
+				<div
+					key={lesson.id}
+					onClick={() => onLessonClick(lesson)}
+					className={`border rounded-xl p-4 cursor-pointer transition-all flex items-center gap-4 ${
+						lesson.isLocked
+							? "border-[#eeeeee] bg-white hover:border-[#d6d6d6]"
+							: "border-[#d6d6d6] bg-white hover:shadow-sm hover:border-[#fd5d26]/30"
+					}`}
+				>
+					{/* Numbered circle */}
+					<div
+						className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold ${
+							lesson.isLocked
+								? "bg-[#f5f5f5] text-[#c4c4c4]"
+								: "bg-[#ffc107]/30 text-[#8a6400]"
+						}`}
+						style={lesson.isLocked ? {} : {
+							background: "radial-gradient(circle, #ffe082 0%, #ffc107 60%, #ff9800 100%)",
+							color: "#5d3a00",
+						}}
+					>
+						{lesson.number}
+					</div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                {lesson.title}
-              </h4>
-              <p className="text-sm text-gray-500">
-                Lesson {lesson.number}
-              </p>
-            </div>
+					{/* Content */}
+					<div className="flex-1 min-w-0">
+						<p className={`text-xs mb-0.5 ${lesson.isLocked ? "text-[#c4c4c4]" : "text-[#838383]"}`}>
+							Lesson {lesson.number}
+						</p>
+						<h4 className={`font-bold truncate ${lesson.isLocked ? "text-[#c4c4c4]" : "text-[#2b2b2b]"}`}>
+							{lesson.title}
+						</h4>
+					</div>
 
-            {/* Lock Icon for locked lessons */}
-            {lesson.isLocked && (
-              <div className="flex-shrink-0">
-                <Lock className="w-6 h-6 text-gray-300" />
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+					{lesson.isLocked && (
+						<Lock className="w-5 h-5 text-[#c4c4c4] flex-shrink-0" />
+					)}
+				</div>
+			))}
+		</div>
+	);
 }

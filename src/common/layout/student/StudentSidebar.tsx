@@ -11,6 +11,7 @@ import {
 	ClipboardList,
 	User,
 	LogOut,
+	Sparkles,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
@@ -57,6 +58,11 @@ const studentMenuItems = [
 		path: "/student/assessment",
 	},
 	{
+		label: "LearnBox AI",
+		icon: Sparkles,
+		path: "/student/learnbox-ai",
+	},
+	{
 		label: "Profile",
 		icon: User,
 		path: "/student/profile",
@@ -78,7 +84,7 @@ export default function StudentSidebar({ isOpen, onClose }: StudentSidebarProps)
 		if (isLoggingOut) return;
 		setIsLoggingOut(true);
 		try {
-			await logout();
+			logout();
 			// Navigate immediately after logout completes
 			navigate("/", { replace: true });
 		} catch (error) {

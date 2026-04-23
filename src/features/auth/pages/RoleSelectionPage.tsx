@@ -3,120 +3,85 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { Role } from "../types/auth.types";
 
-const roleConfig = {
-	STUDENT: {
-		label: "I'm a student",
-		image: "/images/onboarding/student-role.svg",
-	},
-	PARENT: {
-		label: "I'm a parent",
-		image: "/images/onboarding/parent-role.svg",
-	},
-	TEACHER: {
-		label: "I'm a teacher",
-		image: "/images/onboarding/teacher-role.svg",
-	},
-	ADMIN: {
-		label: "I'm an admin",
-		image: "/images/onboarding/admin-role.svg",
-	},
+const roleConfig: Record<Role, { label: string; image: string }> = {
+	STUDENT: { label: "I'm a student", image: "/images/onboarding/student-role.svg" },
+	PARENT:  { label: "I'm a parent",  image: "/images/onboarding/parent-role.svg"  },
+	TEACHER: { label: "I'm a teacher", image: "/images/onboarding/teacher-role.svg" },
+	ADMIN:   { label: "I'm an admin",  image: "/images/onboarding/admin-role.svg"   },
 };
 
 const availableRoles: Role[] = ["STUDENT", "PARENT", "TEACHER", "ADMIN"];
 
-const RoleSelectionPage = () => {
+export default function RoleSelectionPage() {
 	const [selectedRole, setSelectedRoleLocal] = useState<Role | null>(null);
 	const { setRole } = useAuthStore();
 	const navigate = useNavigate();
 
-	const handleSelectRole = (role: Role) => {
-		setSelectedRoleLocal(role);
-	};
-
 	const handleSubmit = () => {
-		
-		if (selectedRole) {
-			setRole(selectedRole);
-			
-			// Teachers go to onboarding first, others go to school setup
-			if (selectedRole === "TEACHER") {
-				navigate("/onboarding");
-			} else {
-				navigate("/school-setup");
-			}
+		if (!selectedRole) return;
+		setRole(selectedRole);
+		if (selectedRole === "TEACHER") {
+			navigate("/onboarding");
+		} else {
+			navigate("/school-setup");
 		}
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50">
-			<div className="w-full max-w-3xl px-8 py-12">
-				<div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-16 py-12">
-					<div className="text-center mb-12">
-						<h1 className="text-4xl font-bold text-gray-900">
-							What's your role?
-						</h1>
-						<p className="mt-3 text-lg text-gray-600">
-							Select the role that best describes you.
-						</p>
-					</div>
+		<div className="min-h-screen bg-white flex items-center justify-center px-4">
+			<div className="border border-[#e6e6e6] rounded-2xl p-16 flex flex-col items-center gap-12 w-full max-w-4xl">
+				{/* Header */}
+				<div className="flex flex-col items-center gap-4 text-center text-[#2b2b2b]">
+					<h1 className="text-5xl font-bold leading-[1.4]">What's your role?</h1>
+					<p className="text-xl text-[#2b2b2b]">Select the role that best describes you.</p>
+				</div>
 
-					<div className="grid grid-cols-2 gap-6 mb-12">
+				{/* Role Cards */}
+				<div className="flex flex-col gap-8">
+					<div className="flex gap-8 flex-wrap justify-center">
 						{availableRoles.map((role) => (
 							<button
 								key={role}
-								onClick={() => handleSelectRole(role)}
-								className={`relative p-8 rounded-xl border-2 transition-all duration-200 ${
+								onClick={() => setSelectedRoleLocal(role)}
+								className={`relative w-[360px] h-[220px] border rounded-2xl overflow-hidden transition-all duration-200 flex flex-col items-center justify-center gap-4 ${
 									selectedRole === role
-										? "border-orange-500 bg-orange-50"
-										: "border-gray-200 hover:border-gray-300 bg-white"
-								}`}>
+										? "border-[#fd5d26] bg-orange-50"
+										: "border-[#969696] bg-white hover:border-[#fd5d26]/60"
+								}`}
+							>
 								{selectedRole === role && (
-									<div className="absolute top-4 right-4 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-										<svg
-											className="w-4 h-4 text-white"
-											fill="none"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											viewBox="0 0 24 24"
-											stroke="currentColor">
-											<path d="M5 13l4 4L19 7"></path>
+									<div className="absolute top-4 right-4 w-6 h-6 bg-[#fd5d26] rounded-full flex items-center justify-center">
+										<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
 										</svg>
 									</div>
 								)}
-
-								<div className="flex flex-col items-center">
-									<div className="w-32 h-32 mb-4 flex items-center justify-center">
-										<img
-											src={roleConfig[role]?.image || roleConfig.TEACHER.image}
-											alt={`${role} illustration`}
-											className="w-full h-full object-contain"
-										/>
-									</div>
-									<span className="text-lg font-medium text-gray-900">
-										{roleConfig[role]?.label || `I'm a ${role.toLowerCase()}`}
-									</span>
-								</div>
+								<img
+									src={roleConfig[role].image}
+									alt={roleConfig[role].label}
+									className="w-[140px] h-[120px] object-contain"
+								/>
+								<span className="text-xl font-semibold text-[#2b2b2b]">
+									{roleConfig[role].label}
+								</span>
 							</button>
 						))}
 					</div>
-
-					<div className="flex justify-center">
-						<button
-							onClick={handleSubmit}
-							disabled={!selectedRole}
-							className={`px-24 py-4 rounded-full font-semibold text-lg transition-all duration-200 ${
-								selectedRole
-									? "bg-orange-500 text-white hover:bg-orange-600"
-									: "bg-gray-200 text-gray-400 cursor-not-allowed"
-							}`}>
-							Next
-						</button>
-					</div>
 				</div>
+
+				{/* Continue Button */}
+				<button
+					onClick={handleSubmit}
+					disabled={!selectedRole}
+					className={`w-[400px] py-[17px] rounded-2xl font-semibold text-xl transition-all duration-200 ${
+						selectedRole
+							? "bg-[#fd5d26] text-white hover:bg-[#e84d17]"
+							: "bg-gray-200 text-gray-400 cursor-not-allowed"
+					}`}
+				>
+					Continue
+				</button>
 			</div>
 		</div>
 	);
-};
-
-export default RoleSelectionPage;
+}

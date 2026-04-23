@@ -64,6 +64,14 @@ const GradeBreakdownPage = lazy(
 	() => import("../../features/student/assessment/pages/GradeBreakdownPage")
 );
 
+// LearnBox AI
+const LearnBoxAIHomePage = lazy(
+	() => import("../../features/student/learnbox-ai/pages/LearnBoxAIHomePage")
+);
+const LearnBoxAIChatPage = lazy(
+	() => import("../../features/student/learnbox-ai/pages/LearnBoxAIChatPage")
+);
+
 export function StudentRoutes() {
 	return (
 		<Routes>
@@ -104,6 +112,10 @@ export function StudentRoutes() {
 				{/* Assessment */}
 				<Route path="assessment" element={<AssessmentPage />} />
 				<Route path="assessment/:subjectId" element={<GradeBreakdownPage />} />
+
+				{/* LearnBox AI */}
+				<Route path="learnbox-ai" element={<LearnBoxAIHomePage />} />
+				<Route path="learnbox-ai/chat/:subjectId" element={<LearnBoxAIChatPage />} />
 
 				{/* Fallback */}
 				<Route path="*" element={<LayoutNotFoundPage />} />

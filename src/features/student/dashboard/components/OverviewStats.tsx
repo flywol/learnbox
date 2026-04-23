@@ -21,12 +21,12 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 
 	return (
 		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
-			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Overview</h2>
+			<h2 className="text-xl font-semibold text-[#343434] mb-4 md:mb-6">Overview</h2>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 				{/* Class Attendance */}
 				<div
-					className="bg-green-50 rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#eaf9e8] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
 					style={{ backgroundImage: "url(/images/student/attendancebg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">
@@ -43,7 +43,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 								cx="72"
 								cy="72"
 								r={attendanceCircle.radius}
-								stroke="#10B981"
+								stroke="#22c55e"
 								strokeWidth="12"
 								fill="none"
 								strokeDasharray={attendanceCircle.circumference}
@@ -57,10 +57,10 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 							</span>
 						</div>
 					</div>
-					<h3 className="text-lg font-semibold text-gray-900 mb-2">
+					<h3 className="text-lg font-bold text-[#2b2b2b] mb-2 text-center">
 						Class Attendance
 					</h3>
-					<div className="text-sm text-gray-600 text-center space-y-1">
+					<div className="text-sm text-[#2b2b2b] text-center space-y-1">
 						<p>
 							Total classes:{" "}
 							<span className="font-medium">
@@ -86,7 +86,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 
 				{/* Assignment */}
 				<div
-					className="bg-yellow-50 rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#fff4b1] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
 					style={{ backgroundImage: "url(/images/student/assignmentbg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">
@@ -103,7 +103,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 								cx="72"
 								cy="72"
 								r={assignmentCircle.radius}
-								stroke="#F59E0B"
+								stroke="#eab308"
 								strokeWidth="12"
 								fill="none"
 								strokeDasharray={assignmentCircle.circumference}
@@ -117,8 +117,8 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 							</span>
 						</div>
 					</div>
-					<h3 className="text-lg font-semibold text-gray-900 mb-2">Assignment</h3>
-					<div className="text-sm text-gray-600 text-center space-y-1">
+					<h3 className="text-lg font-bold text-[#2b2b2b] mb-2 text-center">Assignment</h3>
+					<div className="text-sm text-[#2b2b2b] text-center space-y-1">
 						<p>
 							Total assignments:{" "}
 							<span className="font-medium">
@@ -142,7 +142,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 
 				{/* Average Test Score */}
 				<div
-					className="bg-blue-50 rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
+					className="bg-[#e9eeff] rounded-xl p-6 flex flex-col items-center bg-cover bg-center bg-no-repeat"
 					style={{ backgroundImage: "url(/images/student/testbg.svg)" }}
 				>
 					<div className="relative w-36 h-36 mb-4">
@@ -159,7 +159,7 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 								cx="72"
 								cy="72"
 								r={testScoreCircle.radius}
-								stroke="#3B82F6"
+								stroke="#6366f1"
 								strokeWidth="12"
 								fill="none"
 								strokeDasharray={testScoreCircle.circumference}
@@ -173,10 +173,10 @@ export default function OverviewStats({ stats }: OverviewStatsProps) {
 							</span>
 						</div>
 					</div>
-					<h3 className="text-lg font-semibold text-gray-900 mb-2">
+					<h3 className="text-lg font-bold text-[#2b2b2b] mb-2 text-center">
 						Average Test Score
 					</h3>
-					<div className="text-sm text-gray-600 text-center space-y-1">
+					<div className="text-sm text-[#2b2b2b] text-center space-y-1">
 						<p>
 							Total tests:{" "}
 							<span className="font-medium">

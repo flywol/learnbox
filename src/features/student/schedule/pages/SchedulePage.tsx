@@ -1,65 +1,77 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import TimetableView from '../components/TimetableView';
-import CalendarView from '../components/CalendarView';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import TimetableView from "../components/TimetableView";
+import CalendarView from "../components/CalendarView";
+
+type SubTab = "timetable" | "calendar";
 
 export default function SchedulePage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'timetable' | 'calendar'>('timetable');
+	const navigate = useNavigate();
+	const [subTab, setSubTab] = useState<SubTab>("timetable");
 
-  // Read tab from URL parameters on mount
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab') as 'timetable' | 'calendar';
-    if (tabFromUrl && ['timetable', 'calendar'].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
+	const handleTopTab = (tab: "class" | "academic-record") => {
+		if (tab === "class") navigate("/student/classroom");
+		if (tab === "academic-record") navigate("/student/assessment");
+	};
 
-  return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Schedule</h1>
-        <p className="text-sm md:text-base text-gray-600 mt-1">View your timetable and upcoming events</p>
-      </div>
+	return (
+		<div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+			{/* Top toolbar */}
+			<div className="flex items-center gap-6 px-8 py-6 border-b border-[#eeeeee]">
+				<button
+					onClick={() => handleTopTab("class" as const)}
+					className="px-6 py-3 border border-[#838383] rounded-lg text-[#838383] text-lg font-normal hover:border-[#fd5d26] hover:text-[#fd5d26] transition-colors"
+				>
+					Class
+				</button>
+				<button
+					className="px-6 py-3 bg-[#fd5d26] rounded-lg text-white text-lg font-semibold"
+				>
+					Schedule
+				</button>
+				<button
+					onClick={() => handleTopTab("academic-record" as const)}
+					className="px-6 py-3 border border-[#838383] rounded-lg text-[#838383] text-lg font-normal hover:border-[#fd5d26] hover:text-[#fd5d26] transition-colors"
+				>
+					Academic Record
+				</button>
+			</div>
 
-      {/* Tabs Navigation */}
-      <div className="border-b border-gray-200">
-        <div className="flex space-x-1">
-          <button
-            onClick={() => {
-              setActiveTab('timetable');
-              setSearchParams({ tab: 'timetable' });
-            }}
-            className={`px-4 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium transition-colors ${
-              activeTab === 'timetable'
-                ? 'border-b-2 border-orange-500 text-orange-500'
-                : 'text-gray-700 hover:text-orange-500'
-            }`}
-          >
-            Timetable
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('calendar');
-              setSearchParams({ tab: 'calendar' });
-            }}
-            className={`px-4 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium transition-colors ${
-              activeTab === 'calendar'
-                ? 'border-b-2 border-orange-500 text-orange-500'
-                : 'text-gray-700 hover:text-orange-500'
-            }`}
-          >
-            Calendar
-          </button>
-        </div>
-      </div>
+			{/* Sub-tabs */}
+			<div className="flex items-center gap-1 px-8 pt-4 border-b border-[#eeeeee]">
+				<div className="flex flex-col items-center">
+					<button
+						onClick={() => setSubTab("timetable")}
+						className={`px-4 py-1.5 text-base font-semibold transition-colors ${
+							subTab === "timetable" ? "text-[#2b2b2b]" : "text-[#838383] font-normal"
+						}`}
+					>
+						Timetable
+					</button>
+					{subTab === "timetable" && (
+						<div className="h-0.5 w-full bg-[#2b2b2b] rounded-full" />
+					)}
+				</div>
+				<div className="flex flex-col items-center">
+					<button
+						onClick={() => setSubTab("calendar")}
+						className={`px-4 py-1.5 text-base transition-colors ${
+							subTab === "calendar" ? "text-[#2b2b2b] font-semibold" : "text-[#838383] font-normal"
+						}`}
+					>
+						Calendar
+					</button>
+					{subTab === "calendar" && (
+						<div className="h-0.5 w-full bg-[#2b2b2b] rounded-full" />
+					)}
+				</div>
+			</div>
 
-      {/* Tab Content */}
-      <div className="mt-4 md:mt-6">
-        {activeTab === 'timetable' && <TimetableView />}
-        {activeTab === 'calendar' && <CalendarView />}
-      </div>
-    </div>
-  );
+			{/* Content */}
+			<div className="p-8">
+				{subTab === "timetable" && <TimetableView />}
+				{subTab === "calendar" && <CalendarView />}
+			</div>
+		</div>
+	);
 }

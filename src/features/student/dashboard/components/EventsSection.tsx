@@ -8,7 +8,7 @@ export default function EventsSection({ events }: EventsSectionProps) {
 	if (events.length === 0) {
 		return (
 			<div className="bg-white rounded-2xl p-6 shadow-sm">
-				<h2 className="text-xl font-bold text-gray-900 mb-6">Events</h2>
+				<h2 className="text-xl font-bold text-[#343434] mb-6">Events</h2>
 				<div className="flex flex-col items-center justify-center py-12 text-center">
 					<div className="w-48 h-48 mb-4 flex items-center justify-center">
 						<svg
@@ -26,14 +26,14 @@ export default function EventsSection({ events }: EventsSectionProps) {
 
 	return (
 		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
-			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Events</h2>
+			<h2 className="text-lg md:text-xl font-bold text-[#343434] mb-4 md:mb-6">Events</h2>
 			<div className="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
 				{events.map((event) => (
 					<div
 						key={event.id}
-						className="flex gap-3 md:gap-4 p-3 md:p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer">
+						className="flex gap-3 md:gap-4 p-3 md:p-4 border border-[#eeeeee] rounded-xl hover:border-[#d6d6d6] transition-colors cursor-pointer">
 						<div className="flex-shrink-0 text-center">
-							<div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-orange-50 flex flex-col items-center justify-center">
+							<div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#fff8f5] flex flex-col items-center justify-center">
 								<span className="text-xl md:text-2xl font-bold text-gray-900">
 									{event.day}
 								</span>

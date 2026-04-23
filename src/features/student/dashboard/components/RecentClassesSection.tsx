@@ -26,7 +26,7 @@ export default function RecentClassesSection({ classes }: RecentClassesSectionPr
 	if (classes.length === 0) {
 		return (
 			<div className="bg-white rounded-2xl p-6 shadow-sm">
-				<h2 className="text-xl font-bold text-gray-900 mb-6">Recent classes</h2>
+				<h2 className="text-xl font-bold text-[#343434] mb-6">Recent classes</h2>
 				<div className="flex flex-col items-center justify-center py-12 text-center">
 					<div className="w-48 h-48 mb-4 flex items-center justify-center">
 						<svg
@@ -44,7 +44,7 @@ export default function RecentClassesSection({ classes }: RecentClassesSectionPr
 
 	return (
 		<div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
-			<h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Recent classes</h2>
+			<h2 className="text-lg md:text-xl font-bold text-[#343434] mb-4 md:mb-6">Recent classes</h2>
 			<div className="space-y-2 md:space-y-3">
 				{classes.map((classItem) => {
 					const progressBarColor = getProgressBarColor(classItem.color);

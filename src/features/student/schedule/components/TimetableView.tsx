@@ -1,130 +1,120 @@
-import { Calendar } from 'lucide-react';
+type SubjectEntry = {
+	name: string;
+	duration: string;
+	borderColor: string;
+};
 
-// Mock data for student timetable - keeping until timetable endpoint is provided
-const mockTimetableData = {
-  'Monday-08:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
-  'Tuesday-08:00am': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', icon: '📚' },
-  'Wednesday-08:00am': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', icon: '🧬' },
-  'Friday-08:00am': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', icon: '⚗️' },
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
-  'Tuesday-09:00am': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', icon: '🧬' },
-  'Thursday-09:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
+const TIME_SLOTS = [
+	"08:00am", "09:00am", "10:00am", "11:00am",
+	"12:00pm", "01:00pm", "02:00pm", "03:00pm",
+] as const;
 
-  'Monday-10:00am': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', icon: '📚' },
-  'Wednesday-10:00am': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', icon: '⚗️' },
-  'Friday-10:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
+const TIMETABLE: Record<string, SubjectEntry> = {
+	"Monday-08:00am":    { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+	"Tuesday-08:00am":   { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+	"Wednesday-08:00am": { name: "Biology",       duration: "50mins",    borderColor: "#fea181" },
+	"Friday-08:00am":    { name: "Chemistry",     duration: "50mins",    borderColor: "#ffe860" },
 
-  'Tuesday-11:00am': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
+	"Tuesday-09:00am":   { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+	"Thursday-09:00am":  { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
 
-  'Monday-12:00pm': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', icon: '⚗️' },
-  'Wednesday-12:00pm': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
-  'Thursday-12:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', icon: '🧬' },
+	"Monday-10:00am":    { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+	"Wednesday-10:00am": { name: "Chemistry",    duration: "50mins",    borderColor: "#ffe860" },
+	"Friday-10:00am":    { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
 
-  'Tuesday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', icon: '📚' },
-  'Thursday-01:00pm': { subjectName: 'English', duration: '1hr 30mins', color: 'bg-green-100 text-green-700', icon: '📚' },
+	"Tuesday-11:00am":   { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+	"Thursday-11:00am":  { name: "Chemistry",    duration: "50mins",    borderColor: "#ffe860" },
 
-  'Monday-02:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', icon: '🧬' },
-  'Wednesday-02:00pm': { subjectName: 'Biology', duration: '50mins', color: 'bg-orange-100 text-orange-700', icon: '⚗️' },
+	"Monday-12:00pm":    { name: "Chemistry",    duration: "50mins",    borderColor: "#ffe860" },
+	"Wednesday-12:00pm": { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+	"Thursday-12:00pm":  { name: "Biology",      duration: "50mins",    borderColor: "#fea181" },
 
-  'Tuesday-03:00pm': { subjectName: 'Chemistry', duration: '50mins', color: 'bg-yellow-100 text-yellow-700', icon: '⚗️' },
-  'Thursday-03:00pm': { subjectName: 'Further M...', duration: '1hr', color: 'bg-blue-100 text-blue-700', icon: '📐' },
+	"Tuesday-01:00pm":   { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+	"Thursday-01:00pm":  { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+
+	"Monday-02:00pm":    { name: "Biology",      duration: "50mins",    borderColor: "#fea181" },
+	"Wednesday-02:00pm": { name: "Biology",      duration: "50mins",    borderColor: "#fea181" },
+
+	"Tuesday-03:00pm":   { name: "Chemistry",    duration: "50mins",    borderColor: "#ffe860" },
+	"Thursday-03:00pm":  { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+	"Friday-03:00pm":    { name: "Further M...", duration: "1hr",       borderColor: "#cad6ff" },
+
+	"Monday-03:00pm":    { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+	"Wednesday-03:00pm": { name: "English",      duration: "1hr 30mins", borderColor: "#a8e59f" },
+
+	"Monday-01:00pm":    { name: "Biology",      duration: "50mins",    borderColor: "#fea181" },
+	"Friday-02:00pm":    { name: "Biology",      duration: "50mins",    borderColor: "#fea181" },
+};
+
+const SUBJECT_ICONS: Record<string, string> = {
+	"Further M...": "📐",
+	"English":      "📗",
+	"Biology":      "🧬",
+	"Chemistry":    "⚗️",
 };
 
 export default function TimetableView() {
-  const timeSlots = [
-    '08:00am', '09:00am', '10:00am', '11:00am', '12:00pm',
-    '01:00pm', '02:00pm', '03:00pm'
-  ];
+	return (
+		<div className="overflow-x-auto">
+			<div className="min-w-[700px]">
+				{/* Day headers */}
+				<div className="grid grid-cols-[160px_repeat(5,1fr)] mb-1">
+					<div />
+					{DAYS.map((day, i) => (
+						<div
+							key={day}
+							className={`text-sm font-bold text-center pb-2 ${
+								i === 0 ? "text-[#2b2b2b]" : "text-[#9f9d9d] font-normal"
+							}`}
+						>
+							{day}
+						</div>
+					))}
+				</div>
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+				{/* Time rows */}
+				{TIME_SLOTS.map((time) => (
+					<div key={time}>
+						<div className="h-px bg-[#eeeeee] w-full" />
+						<div className="grid grid-cols-[160px_repeat(5,1fr)] py-2 min-h-[72px]">
+							{/* Time label */}
+							<div className="flex items-start pt-1 gap-1 text-[#6b6b6b] text-base font-medium">
+								{time}
+							</div>
 
-  return (
-    <div className="space-y-4">
-      {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start space-x-3">
-        <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
-        <div>
-          <h4 className="font-medium text-blue-900 text-sm">Your Weekly Timetable</h4>
-          <p className="text-blue-700 text-sm mt-1">
-            View your class schedule for the week. Tap on any subject to see more details.
-          </p>
-        </div>
-      </div>
-
-      {/* Timetable Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div className="grid grid-cols-6 gap-0 border-b border-gray-200">
-          <div className="p-4 bg-gray-50 font-medium text-gray-700">Time</div>
-          {days.map((day) => (
-            <div key={day} className="p-4 bg-gray-50 font-medium text-gray-700 text-center">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Time Slots */}
-        {timeSlots.map((time) => (
-          <div key={time} className="grid grid-cols-6 gap-0 border-b border-gray-200 last:border-b-0">
-            <div className="p-4 bg-gray-50 font-medium text-gray-600 text-sm flex items-center">
-              <span className="flex items-center">
-                <span className="mr-1">⏰</span>
-                {time}
-              </span>
-            </div>
-            {days.map((day) => {
-              const key = `${day}-${time}`;
-              const subject = mockTimetableData[key as keyof typeof mockTimetableData];
-
-              return (
-                <div key={key} className="p-2 h-24 flex items-center justify-center">
-                  {subject ? (
-                    <div
-                      className={`w-full h-full rounded-lg ${subject.color} p-3 flex flex-col justify-center items-center text-center transition-all hover:shadow-md hover:scale-105 cursor-pointer`}
-                      title={`${subject.subjectName} - ${subject.duration}`}
-                    >
-                      <div className="text-lg mb-1">
-                        {subject.icon}
-                      </div>
-                      <div className="text-xs font-semibold mb-1 leading-tight">
-                        {subject.subjectName}
-                      </div>
-                      <div className="text-xs opacity-75 leading-tight">
-                        {subject.duration}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      —
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="flex items-center space-x-6 flex-wrap text-sm text-gray-600">
-        <span className="font-medium">Your subjects:</span>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-blue-100" />
-          <span>Further Mathematics</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-green-100" />
-          <span>English</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-orange-100" />
-          <span>Biology</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-yellow-100" />
-          <span>Chemistry</span>
-        </div>
-      </div>
-    </div>
-  );
+							{/* Day cells */}
+							{DAYS.map((day) => {
+								const entry = TIMETABLE[`${day}-${time}`];
+								return (
+									<div key={day} className="flex items-start justify-center px-1">
+										{entry ? (
+											<div
+												className="w-full rounded-xl p-3 flex items-center gap-2 border cursor-pointer hover:shadow-sm transition-shadow"
+												style={{ borderColor: entry.borderColor }}
+											>
+												<span className="text-lg flex-shrink-0">
+													{SUBJECT_ICONS[entry.name] ?? "📌"}
+												</span>
+												<div className="min-w-0">
+													<p className="text-sm font-bold text-[#343434] truncate leading-snug">
+														{entry.name}
+													</p>
+													<p className="text-[10px] text-[#6b6b6b] font-medium leading-snug">
+														{entry.duration}
+													</p>
+												</div>
+											</div>
+										) : null}
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				))}
+				<div className="h-px bg-[#eeeeee] w-full" />
+			</div>
+		</div>
+	);
 }
