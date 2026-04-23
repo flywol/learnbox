@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import StudentSidebar from "./StudentSidebar";
 import StudentHeader from "./StudentHeader";
+import LearnBoxAIWidget from "@/common/components/ai/LearnBoxAIWidget";
 
 interface Props {
 	children?: ReactNode;
@@ -32,6 +33,7 @@ export default function StudentLayout({ children }: Props) {
 					</div>
 				</main>
 			</div>
+			<LearnBoxAIWidget />
 		</div>
 	);
 }

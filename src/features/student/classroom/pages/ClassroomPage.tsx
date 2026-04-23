@@ -1,10 +1,15 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useClassroomStore } from "../store/classroomStore";
 import SubjectCard from "../components/SubjectCard";
 
 export default function ClassroomPage() {
 	const navigate = useNavigate();
-	const { subjects } = useClassroomStore();
+	const { subjects, subjectsLoading, fetchSubjects } = useClassroomStore();
+
+	useEffect(() => {
+		fetchSubjects();
+	}, [fetchSubjects]);
 
 	return (
 		<div className="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -29,15 +34,23 @@ export default function ClassroomPage() {
 
 			{/* Subject grid */}
 			<div className="p-8">
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-					{subjects.map((subject) => (
-						<SubjectCard
-							key={subject.id}
-							subject={subject}
-							onClick={() => navigate(`/student/classroom/subject/${subject.id}`)}
-						/>
-					))}
-				</div>
+				{subjectsLoading ? (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+						{Array.from({ length: 6 }).map((_, i) => (
+							<div key={i} className="h-28 bg-gray-100 rounded-xl animate-pulse" />
+						))}
+					</div>
+				) : (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+						{subjects.map((subject) => (
+							<SubjectCard
+								key={subject.id}
+								subject={subject}
+								onClick={() => navigate(`/student/classroom/subject/${subject.id}`)}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -1,72 +1,13 @@
 import { create } from "zustand";
 import { Notification } from "../types/notification.types";
-
-// Mock notification data - NO API CALLS until endpoint is provided
-const mockNotifications: Notification[] = [
-	{
-		id: "notif-1",
-		title: "Assignment Due",
-		message: "Math homework is due tomorrow at 11:59 PM",
-		isRead: false,
-		created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-		deleted_at: null,
-	},
-	{
-		id: "notif-2",
-		title: "New Material",
-		message: "New study materials uploaded for English Literature",
-		isRead: false,
-		created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-		deleted_at: null,
-	},
-	{
-		id: "notif-3",
-		title: "Grade Posted",
-		message: "Your Chemistry quiz grade has been posted",
-		isRead: true,
-		created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-		deleted_at: null,
-	},
-	{
-		id: "notif-4",
-		title: "Class Cancelled",
-		message: "Physics class tomorrow has been cancelled",
-		isRead: true,
-		created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-		deleted_at: null,
-	},
-	{
-		id: "notif-5",
-		title: "Upcoming Event",
-		message: "Science fair next week - don't forget to register",
-		isRead: false,
-		created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2 days ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-		deleted_at: null,
-	},
-	{
-		id: "notif-6",
-		title: "Feedback Available",
-		message: "Teacher feedback on your essay is now available",
-		isRead: true,
-		created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-		updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-		deleted_at: null,
-	},
-];
+import { studentApiClient } from "@/features/student/api/studentApiClient";
 
 interface NotificationsState {
-	// Core state
 	notifications: Notification[];
 	isLoading: boolean;
 	error: string | null;
 	hasHydrated: boolean;
 
-	// Actions
 	fetchNotifications: () => Promise<void>;
 	markAsRead: (notificationId: string) => Promise<void>;
 	markAllAsRead: () => Promise<void>;
@@ -78,107 +19,59 @@ interface NotificationsState {
 }
 
 export const useNotificationsStore = create<NotificationsState>((set, get) => ({
-	// Initial state
 	notifications: [],
 	isLoading: false,
 	error: null,
 	hasHydrated: false,
 
-	// Hydration management
-	setHasHydrated: (value) => {
-		set({ hasHydrated: value });
-	},
+	setHasHydrated: (value) => set({ hasHydrated: value }),
 
-	// Fetch all notifications - using mock data
 	fetchNotifications: async () => {
-		const state = get();
-		if (state.isLoading) return;
-
+		if (get().isLoading) return;
 		try {
 			set({ isLoading: true, error: null });
-
-			// Simulate API delay
-			await new Promise(resolve => setTimeout(resolve, 500));
-
-			set({
-				notifications: mockNotifications,
-				isLoading: false,
-				error: null,
-			});
-
+			const notifications = await studentApiClient.getNotifications();
+			set({ notifications, isLoading: false });
 		} catch (error: any) {
-			set({
-				isLoading: false,
-				error: error.message || "Failed to fetch notifications",
-			});
+			set({ isLoading: false, error: error.message || "Failed to fetch notifications" });
 		}
 	},
 
-	// Mark single notification as read
 	markAsRead: async (notificationId: string) => {
 		try {
-			// Simulate API delay
-			await new Promise(resolve => setTimeout(resolve, 200));
-
-			// Update local state
+			await studentApiClient.markNotificationRead(notificationId);
 			set((state) => ({
-				notifications: state.notifications.map((notification) =>
-					notification.id === notificationId
-						? { ...notification, isRead: true }
-						: notification
+				notifications: state.notifications.map((n) =>
+					n.id === notificationId ? { ...n, isRead: true } : n
 				),
 			}));
-
 		} catch (error: any) {
 			set({ error: error.message || "Failed to mark notification as read" });
 		}
 	},
 
-	// Mark all notifications as read
 	markAllAsRead: async () => {
-		const state = get();
-		const unreadNotifications = state.notifications.filter(n => !n.isRead);
-
-		if (unreadNotifications.length === 0) return;
-
+		const unread = get().notifications.filter((n) => !n.isRead);
+		if (unread.length === 0) return;
 		try {
-			set({ isLoading: true, error: null });
-
-			// Simulate API delay
-			await new Promise(resolve => setTimeout(resolve, 500));
-
-			// Update local state
+			set({ isLoading: true });
+			await studentApiClient.markAllNotificationsRead();
 			set((state) => ({
-				notifications: state.notifications.map((notification) => ({
-					...notification,
-					isRead: true,
-				})),
+				notifications: state.notifications.map((n) => ({ ...n, isRead: true })),
 				isLoading: false,
 			}));
-
 		} catch (error: any) {
-			set({
-				isLoading: false,
-				error: error.message || "Failed to mark all notifications as read",
-			});
+			set({ isLoading: false, error: error.message || "Failed to mark all as read" });
 		}
 	},
 
-	// Get unread count
-	getUnreadCount: () => {
-		const state = get();
-		return state.notifications.filter(n => !n.isRead).length;
-	},
+	getUnreadCount: () => get().notifications.filter((n) => !n.isRead).length,
 
-	// Get recent notifications (for dropdown)
-	getRecentNotifications: (count = 3) => {
-		const state = get();
-		return state.notifications
+	getRecentNotifications: (count = 3) =>
+		[...get().notifications]
 			.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-			.slice(0, count);
-	},
+			.slice(0, count),
 
-	// Error management
 	setError: (error) => set({ error }),
 	clearError: () => set({ error: null }),
 }));

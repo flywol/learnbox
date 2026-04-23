@@ -4,6 +4,7 @@ import TeacherSidebar from "./TeacherSidebar";
 import TeacherHeader from "./TeacherHeader";
 import { useDeviceType } from "@/common/hooks/useDeviceType";
 import { DeviceRestrictedPage } from "@/common/security/DeviceRestrictedPage";
+import LearnBoxAIWidget from "@/common/components/ai/LearnBoxAIWidget";
 
 interface Props {
 	children?: ReactNode;
@@ -72,6 +73,7 @@ export default function TeacherLayout({ children }: Props) {
 					</div>
 				</main>
 			</div>
+			<LearnBoxAIWidget />
 		</div>
 	);
 }

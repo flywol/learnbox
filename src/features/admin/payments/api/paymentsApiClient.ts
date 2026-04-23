@@ -41,7 +41,7 @@ class PaymentsApiClient extends BaseApiClient {
   }
 
   async getSchoolPayments(): Promise<SchoolPaymentsData> {
-    const response = await this.api.get<SchoolPaymentsResponse>('/admin/mock-school-payments');
+    const response = await this.api.get<SchoolPaymentsResponse>('/admin/payment-overview');
     return response.data.data;
   }
 }

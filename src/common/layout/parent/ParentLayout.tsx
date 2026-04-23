@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import ParentSidebar from "./ParentSidebar";
 import ParentHeader from "./ParentHeader";
 import { ParentProvider } from "@/features/parent/context/ParentContext";
+import LearnBoxAIWidget from "@/common/components/ai/LearnBoxAIWidget";
 
 
 interface Props {
@@ -24,9 +25,9 @@ export function ParentLayoutContent({ children }: Props) {
 			<ParentHeader onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
 			{/* Sidebar and main content below header */}
 			<div className="flex flex-1 overflow-hidden">
-				<ParentSidebar 
-					isOpen={isMobileMenuOpen} 
-					onClose={() => setIsMobileMenuOpen(false)} 
+				<ParentSidebar
+					isOpen={isMobileMenuOpen}
+					onClose={() => setIsMobileMenuOpen(false)}
 				/>
 				<main className="flex-1 overflow-auto w-full">
 					<div className="p-4 md:p-6 pb-20 md:pb-6">
@@ -34,6 +35,7 @@ export function ParentLayoutContent({ children }: Props) {
 					</div>
 				</main>
 			</div>
+			<LearnBoxAIWidget />
 		</div>
 	);
 }

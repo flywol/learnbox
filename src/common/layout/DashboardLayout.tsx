@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import { ProfileProvider } from "../contexts/ProfileContext";
 import { useDeviceType } from "@/common/hooks/useDeviceType";
 import { DeviceRestrictedPage } from "@/common/security/DeviceRestrictedPage";
+import LearnBoxAIWidget from "@/common/components/ai/LearnBoxAIWidget";
 
 interface Props {
 	children?: ReactNode;
@@ -74,6 +75,7 @@ export default function DashboardLayout({ children }: Props) {
 						</div>
 					</main>
 				</div>
+			<LearnBoxAIWidget />
 			</div>
 		</ProfileProvider>
 	);

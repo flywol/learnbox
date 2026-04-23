@@ -7,9 +7,11 @@ import {
   ClassSchedule,
   ForumMessage,
 } from '../types/classroom.types';
+import { studentApiClient, subjectMeta } from '@/features/student/api/studentApiClient';
 
 interface ClassroomState {
   subjects: StudentSubject[];
+  subjectsLoading: boolean;
   lessons: Record<string, StudentLesson[]>; // subjectId -> lessons
   quizzes: StudentQuiz[];
   assignments: StudentAssignment[];
@@ -17,6 +19,7 @@ interface ClassroomState {
   forumMessages: Record<string, ForumMessage[]>; // lessonId -> messages
 
   // Actions
+  fetchSubjects: () => Promise<void>;
   getSubjectById: (id: string) => StudentSubject | undefined;
   getLessonsBySubject: (subjectId: string) => StudentLesson[];
   getQuizzesBySubject: (subjectId: string) => StudentQuiz[];
@@ -496,7 +499,8 @@ const mockForumMessages: Record<string, ForumMessage[]> = {
 };
 
 export const useClassroomStore = create<ClassroomState>((set, get) => ({
-  subjects: mockSubjects,
+  subjects: [],
+  subjectsLoading: false,
   lessons: {
     'subject-1': mockBiologyLessons,
   },
@@ -504,6 +508,36 @@ export const useClassroomStore = create<ClassroomState>((set, get) => ({
   assignments: mockAssignments,
   schedules: mockSchedules,
   forumMessages: mockForumMessages,
+
+  fetchSubjects: async () => {
+    if (get().subjectsLoading) return;
+    set({ subjectsLoading: true });
+    try {
+      const apiSubjects = await studentApiClient.getClassSubjects();
+      const subjects: StudentSubject[] = apiSubjects.map((s) => {
+        const id = s._id ?? s.id ?? '';
+        const { icon, bgColor } = subjectMeta(s.name);
+        const teacherName =
+          typeof s.teacher === 'object'
+            ? (s.teacher?.fullName ?? s.teacher?.name ?? '')
+            : (s.teacherName ?? '');
+        return {
+          id,
+          name: s.name,
+          icon,
+          bgColor,
+          teacher: teacherName,
+          currentLesson: s.currentLesson ?? s.completedLessons ?? 0,
+          totalLessons: s.totalLessons ?? 0,
+          progressPercentage: s.progressPercentage ?? 0,
+        };
+      });
+      set({ subjects, subjectsLoading: false });
+    } catch {
+      // Fall back to mock data so the UI still renders
+      set({ subjects: mockSubjects, subjectsLoading: false });
+    }
+  },
 
   getSubjectById: (id: string) => {
     return get().subjects.find((subject) => subject.id === id);
