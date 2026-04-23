@@ -69,6 +69,14 @@ const GradeBreakdownPage = lazy(
 	() => import("../../features/student/assessment/pages/GradeBreakdownPage")
 );
 
+// School Documents
+const SchoolDocumentsPage = lazy(
+	() => import("../../features/student/school-documents/pages/SchoolDocumentsPage")
+);
+const SchoolDocumentDetailPage = lazy(
+	() => import("../../features/student/school-documents/pages/SchoolDocumentDetailPage")
+);
+
 // LearnBox AI
 const LearnBoxAIHomePage = lazy(
 	() => import("../../features/student/learnbox-ai/pages/LearnBoxAIHomePage")
@@ -120,6 +128,10 @@ export function StudentRoutes() {
 				{/* Assessment */}
 				<Route path="assessment" element={<AssessmentPage />} />
 				<Route path="assessment/:subjectId" element={<GradeBreakdownPage />} />
+
+				{/* School Documents */}
+				<Route path="school-documents" element={<SchoolDocumentsPage />} />
+				<Route path="school-documents/:documentId" element={<SchoolDocumentDetailPage />} />
 
 				{/* LearnBox AI */}
 				<Route path="learnbox-ai" element={<LearnBoxAIHomePage />} />
