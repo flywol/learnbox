@@ -203,9 +203,10 @@ const CombinedSchoolLoginPage = () => {
 			<AuthIllustration />
 			<div className="flex flex-1 flex-col justify-center items-center px-8 py-12 relative overflow-hidden">
 				{/* Logo */}
-				<div className="absolute top-8 left-1/2 -translate-x-1/2">
-					<h1 className="text-2xl font-bold text-[#2b2b2b]">
-						Learn<span className="text-[#fd5d26]">Box</span>
+				<div className="absolute top-8 left-1/2 -translate-x-1/2 text-center">
+					<h1 className="text-2xl font-bold text-[#2b2b2b] leading-tight">
+						Learn<br />
+						<span className="bg-[#fd5d26] text-white px-1.5 rounded">Box</span>
 					</h1>
 				</div>
 				<SchoolDomainStep
