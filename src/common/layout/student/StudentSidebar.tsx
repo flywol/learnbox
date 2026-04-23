@@ -1,37 +1,27 @@
 import { useState } from "react";
 import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
+import React from "react";
 import {
 	Home,
 	BookOpen,
-	Calendar,
-	Video,
-	MessageSquare,
 	Library,
-	FileText,
-	ClipboardList,
 	User,
 	LogOut,
 	Sparkles,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
-// Primary nav items — always visible
+// Primary nav items
 const primaryMenuItems = [
-	{ label: "Overview hub",  icon: Home,          path: "/student/dashboard" },
-	{ label: "Classroom",     icon: BookOpen,       path: "/student/classroom" },
-	{ label: "Schedule",      icon: Calendar,       path: "/student/schedule" },
-	{ label: "Live class",    icon: Video,          path: "/student/live-class" },
-	{ label: "Assessment",    icon: ClipboardList,  path: "/student/assessment" },
-	{ label: "LearnBox AI",   icon: Sparkles,       path: "/student/learnbox-ai" },
-	{ label: "Profile",       icon: User,           path: "/student/profile" },
+	{ label: "Overview hub",     icon: Home,     path: "/student/dashboard" },
+	{ label: "Classroom",        icon: BookOpen, path: "/student/classroom" },
+	{ label: "LearnBox library", icon: Library,  path: "/student/library" },
+	{ label: "LearnBox AI",      icon: Sparkles, path: "/student/learnbox-ai" },
+	{ label: "Profile",          icon: User,     path: "/student/profile" },
 ];
 
-// Secondary nav items — shown below a divider
-const secondaryMenuItems = [
-	{ label: "Exam",             icon: FileText,      path: "/student/exam" },
-	{ label: "Chat",             icon: MessageSquare, path: "/student/chat" },
-	{ label: "LearnBox library", icon: Library,       path: "/student/library" },
-];
+// Secondary nav items (none currently)
+const secondaryMenuItems: { label: string; icon: React.ElementType; path: string }[] = [];
 
 interface StudentSidebarProps {
 	isOpen?: boolean;
@@ -123,27 +113,30 @@ export default function StudentSidebar({ isOpen, onClose }: StudentSidebarProps)
 					})}
 				</ul>
 
-				<div className="my-3 border-t border-gray-100" />
-
-				<ul className="space-y-1">
-					{secondaryMenuItems.map((item) => {
-						const active = isMenuActive(item.path);
-						return (
-							<li key={item.path}>
-								<NavLink
-									to={item.path}
-									className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
-										active
-											? "bg-orange-50 text-orange-500"
-											: "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-									}`}>
-									<item.icon className="w-4 h-4 flex-shrink-0" />
-									<span className="text-sm">{item.label}</span>
-								</NavLink>
-							</li>
-						);
-					})}
-				</ul>
+				{secondaryMenuItems.length > 0 && (
+					<>
+						<div className="my-3 border-t border-gray-100" />
+						<ul className="space-y-1">
+							{secondaryMenuItems.map((item) => {
+								const active = isMenuActive(item.path);
+								return (
+									<li key={item.path}>
+										<NavLink
+											to={item.path}
+											className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+												active
+													? "bg-orange-50 text-orange-500"
+													: "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+											}`}>
+											<item.icon className="w-4 h-4 flex-shrink-0" />
+											<span className="text-sm">{item.label}</span>
+										</NavLink>
+									</li>
+								);
+							})}
+						</ul>
+					</>
+				)}
 			</nav>
 
 			{/* Footer actions */}
