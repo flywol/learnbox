@@ -9,6 +9,7 @@ import {
 	LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 // Menu config for parents
 const parentMenuItems = [
@@ -93,10 +94,8 @@ export default function ParentSidebar({ isOpen, onClose }: ParentSidebarProps) {
 			`}>
 				{/* Logo */}
 				<div className="p-6 flex justify-between items-center">
-					<Link to="/parent/dashboard">
-						<h1 className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity">
-							Learn<span className="text-orange-500">Box</span>
-						</h1>
+					<Link to="/parent/dashboard" className="hover:opacity-80 transition-opacity">
+						<LearnBoxLogo size="sm" />
 					</Link>
 					{/* Close button for mobile */}
 					<button 

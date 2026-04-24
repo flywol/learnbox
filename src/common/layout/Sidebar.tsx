@@ -10,6 +10,7 @@ import {
 	LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 // Menu config — root-level paths only
 const menuItems = [
@@ -68,14 +69,12 @@ export default function Sidebar({ isCollapsed, isTablet }: SidebarProps) {
 		<aside className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isTablet && !isCollapsed ? 'fixed top-16 left-0 bottom-0 z-20 shadow-xl' : ''}`}>
 			{/* Logo */}
 			<div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
-				<Link to="/admin/dashboard">
-					<h1 className={`font-bold cursor-pointer hover:opacity-80 transition-opacity ${isCollapsed ? 'text-lg text-center' : 'text-2xl'}`}>
-						{isCollapsed ? (
-							<span className="text-orange-500">L</span>
-						) : (
-							<>Learn<span className="text-orange-500">Box</span></>
-						)}
-					</h1>
+				<Link to="/admin/dashboard" className="hover:opacity-80 transition-opacity">
+					{isCollapsed ? (
+						<span className="text-xl font-bold text-[#FD5D26]">L</span>
+					) : (
+						<LearnBoxLogo size="sm" />
+					)}
 				</Link>
 			</div>
 

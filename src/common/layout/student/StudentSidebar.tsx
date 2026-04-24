@@ -10,6 +10,7 @@ import {
 	Layers,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 const navItems = [
 	{ label: "Overview hub",     icon: Home,     path: "/student/dashboard" },
@@ -67,10 +68,8 @@ export default function StudentSidebar({ isOpen, onClose }: StudentSidebarProps)
 			`}>
 				{/* Logo */}
 				<div className="p-6 flex justify-between items-center flex-shrink-0">
-					<Link to="/student/dashboard">
-						<h1 className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity">
-							Learn<span className="text-orange-500">Box</span>
-						</h1>
+					<Link to="/student/dashboard" className="hover:opacity-80 transition-opacity">
+						<LearnBoxLogo size="sm" />
 					</Link>
 					<button
 						onClick={onClose}

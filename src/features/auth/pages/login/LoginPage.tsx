@@ -15,6 +15,7 @@ import { normalizeSchoolUrl } from "../../utils/authHelpers";
 import AuthIllustration from "./components/AuthIllustration";
 import SchoolDomainStep from "./components/SchoolDomainStep";
 import LoginForm from "./components/LoginForm";
+import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 const CombinedSchoolLoginPage = () => {
 	const [currentStep, setCurrentStep] = useState<"school" | "login">("school");
@@ -202,12 +203,9 @@ const CombinedSchoolLoginPage = () => {
 		<div className="flex min-h-screen bg-white">
 			<AuthIllustration />
 			<div className="flex flex-1 flex-col justify-center items-center px-8 py-12 relative overflow-hidden">
-				{/* Logo */}
-				<div className="absolute top-8 left-1/2 -translate-x-1/2 text-center">
-					<h1 className="text-2xl font-bold text-[#2b2b2b] leading-tight">
-						Learn<br />
-						<span className="bg-[#fd5d26] text-white px-1.5 rounded">Box</span>
-					</h1>
+				{/* Logo — top-right of right panel */}
+				<div className="absolute top-8 right-12">
+					<LearnBoxLogo size="md" />
 				</div>
 				<SchoolDomainStep
 					form={schoolForm}

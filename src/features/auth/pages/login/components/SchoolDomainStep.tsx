@@ -1,5 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { SchoolSetupFormData } from "../../../schemas/authSchema";
+import { Link2 } from "lucide-react";
 
 interface SchoolDomainStepProps {
 	form: UseFormReturn<SchoolSetupFormData>;
@@ -25,21 +26,24 @@ export default function SchoolDomainStep({ form, onSubmit, isVisible, isValidati
 				{/* Form */}
 				<form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
 					<div>
-						<input
-							id="schoolUrl"
-							type="text"
-							{...form.register("schoolUrl")}
-							className="w-full h-12 px-4 border border-[#969696] rounded-lg text-sm placeholder:text-[#838383] focus:outline-none focus:border-[#fd5d26] transition-colors"
-							placeholder="Input school domain"
-							disabled={isValidating}
-						/>
+						<div className="relative">
+							<input
+								id="schoolUrl"
+								type="text"
+								{...form.register("schoolUrl")}
+								className="w-full h-12 pl-4 pr-11 border border-[#969696] rounded-lg text-sm placeholder:text-[#838383] focus:outline-none focus:border-[#fd5d26] transition-colors"
+								placeholder="Input school domain"
+								disabled={isValidating}
+							/>
+							<Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#969696] pointer-events-none" />
+						</div>
 						{form.formState.errors.schoolUrl && (
 							<p className="text-red-500 text-sm mt-1">
 								{form.formState.errors.schoolUrl.message}
 							</p>
 						)}
 						<div className="flex justify-end mt-1">
-							<a href="#" className="text-sm text-[#2b2b2b] hover:text-[#fd5d26]">
+							<a href="#" className="text-sm text-[#969696] hover:text-[#fd5d26]">
 								Need help
 							</a>
 						</div>
