@@ -202,30 +202,34 @@ const CombinedSchoolLoginPage = () => {
 	return (
 		<div className="flex min-h-screen bg-white">
 			<AuthIllustration />
-			<div className="flex flex-1 flex-col justify-center items-center px-8 py-12 relative overflow-hidden">
-				{/* Logo — top-right of right panel */}
-				<div className="absolute top-8 right-12">
+			<div className="flex flex-1 flex-col items-center px-8 py-10">
+				{/* Logo — top-center of right panel */}
+				<div className="mb-auto pb-8">
 					<LearnBoxLogo size="md" />
 				</div>
-				<SchoolDomainStep
-					form={schoolForm}
-					onSubmit={handleSchoolSubmit}
-					isVisible={currentStep === "school"}
-					isValidating={isValidating}
-				/>
+				{/* Form — centered in remaining space */}
+				<div className="flex-1 flex items-center justify-center w-full relative overflow-hidden">
+					<SchoolDomainStep
+						form={schoolForm}
+						onSubmit={handleSchoolSubmit}
+						isVisible={currentStep === "school"}
+						isValidating={isValidating}
+					/>
 
-				<LoginForm
-					form={loginForm}
-					onSubmit={handleLoginSubmit}
-					onForgotPassword={handleForgotPassword}
-					onBackToSchool={handleBackToSchool}
-					isVisible={currentStep === "login"}
-					isLoggingIn={isLoggingIn}
-					schoolDomain={schoolDomain}
-					selectedRole={selectedRole!}
-					message={message}
-					loginError={loginError}
-				/>
+					<LoginForm
+						form={loginForm}
+						onSubmit={handleLoginSubmit}
+						onForgotPassword={handleForgotPassword}
+						onBackToSchool={handleBackToSchool}
+						isVisible={currentStep === "login"}
+						isLoggingIn={isLoggingIn}
+						schoolDomain={schoolDomain}
+						selectedRole={selectedRole!}
+						message={message}
+						loginError={loginError}
+					/>
+				</div>
+				<div className="mt-auto pt-8" />
 			</div>
 		</div>
 	);

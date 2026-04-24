@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
 	Home,
 	BookOpen,
@@ -9,7 +9,6 @@ import {
 	LogOut
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 // Menu config for teachers — root-level paths only
 const teacherMenuItems = [
@@ -80,17 +79,6 @@ export default function TeacherSidebar({ isCollapsed, isTablet }: TeacherSidebar
 
 	return (
 		<aside className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isTablet && !isCollapsed ? 'fixed top-16 left-0 bottom-0 z-20 shadow-xl' : ''}`}>
-			{/* Logo */}
-			<div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
-				<Link to="/teacher/dashboard" className="hover:opacity-80 transition-opacity">
-					{isCollapsed ? (
-						<span className="text-xl font-bold text-[#FD5D26]">L</span>
-					) : (
-						<LearnBoxLogo size="sm" />
-					)}
-				</Link>
-			</div>
-
 			{/* Menu */}
 			<nav className="flex-1 p-4 overflow-y-auto">
 				<ul className="space-y-2">

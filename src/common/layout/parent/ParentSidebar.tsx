@@ -9,7 +9,6 @@ import {
 	LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 // Menu config for parents
 const parentMenuItems = [
@@ -92,15 +91,11 @@ export default function ParentSidebar({ isOpen, onClose }: ParentSidebarProps) {
 				md:relative md:translate-x-0
 				${isOpen ? 'translate-x-0' : '-translate-x-full'}
 			`}>
-				{/* Logo */}
-				<div className="p-6 flex justify-between items-center">
-					<Link to="/parent/dashboard" className="hover:opacity-80 transition-opacity">
-						<LearnBoxLogo size="sm" />
-					</Link>
-					{/* Close button for mobile */}
-					<button 
+				{/* Mobile close button */}
+				<div className="p-4 flex justify-end md:hidden">
+					<button
 						onClick={onClose}
-						className="md:hidden p-1 text-gray-500 hover:bg-gray-100 rounded-lg"
+						className="p-1 text-gray-500 hover:bg-gray-100 rounded-lg"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 					</button>

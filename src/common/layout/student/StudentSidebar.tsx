@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
 	Home,
 	BookOpen,
@@ -10,7 +10,6 @@ import {
 	Layers,
 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import LearnBoxLogo from "@/common/components/ui/LearnBoxLogo";
 
 const navItems = [
 	{ label: "Overview hub",     icon: Home,     path: "/student/dashboard" },
@@ -66,14 +65,11 @@ export default function StudentSidebar({ isOpen, onClose }: StudentSidebarProps)
 				md:relative md:translate-x-0
 				${isOpen ? "translate-x-0" : "-translate-x-full"}
 			`}>
-				{/* Logo */}
-				<div className="p-6 flex justify-between items-center flex-shrink-0">
-					<Link to="/student/dashboard" className="hover:opacity-80 transition-opacity">
-						<LearnBoxLogo size="sm" />
-					</Link>
+				{/* Mobile close button */}
+				<div className="p-4 flex justify-end md:hidden flex-shrink-0">
 					<button
 						onClick={onClose}
-						className="md:hidden p-1 text-gray-500 hover:bg-gray-100 rounded-lg"
+						className="p-1 text-gray-500 hover:bg-gray-100 rounded-lg"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 							<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
