@@ -4,21 +4,21 @@ export const createTeacherActionCards = (handlers: {
   onAddLiveClass: () => void;
 }): ActionConfig[] => [
   {
-    iconSrc: '/assets/add-new.svg',
+    iconSrc: '/assets/teaching1.png',
     title: 'Add live class',
     description: 'Start a live class session with your students',
     onClick: handlers.onAddLiveClass,
     buttonText: 'Add'
   },
   {
-    iconSrc: '/assets/add-new2.svg',
+    iconSrc: '/assets/assignment1.png',
     title: 'Add new assignment',
     description: 'Create and assign homework to your students',
     onClick: () => {/* TODO: Implement add assignment */},
     buttonText: 'Add'
   },
   {
-    iconSrc: '/assets/add-new.svg',
+    iconSrc: '/assets/rollCall1.png',
     title: 'Take attendance',
     description: 'Mark student attendance for today\'s classes',
     onClick: () => {/* TODO: Implement attendance */},

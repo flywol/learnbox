@@ -17,42 +17,47 @@ interface RecentClassesSectionProps {
 
 export default function RecentClassesSection({
   classes,
-  selectedDay = "Today",
-  onDayChange
+  selectedDay = 'Today',
+  onDayChange,
 }: RecentClassesSectionProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
-  const dayOptions = ["Today", "Tomorrow", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  const getClassIcon = (subject?: string) => {
-    // Return a colored circle based on subject
-    const colors = {
-      'English': 'bg-blue-500',
-      'Mathematics': 'bg-green-500', 
-      'Physics': 'bg-purple-500',
-      'Chemistry': 'bg-red-500',
-      'Biology': 'bg-yellow-500',
-    };
-    
-    return colors[subject as keyof typeof colors] || 'bg-gray-500';
+  const dayOptions = ['Today', 'Tomorrow', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  const subjectColors: Record<string, string> = {
+    English: 'bg-blue-500',
+    Mathematics: 'bg-green-500',
+    Physics: 'bg-purple-500',
+    Chemistry: 'bg-red-500',
+    Biology: 'bg-yellow-500',
   };
 
+  const getClassColor = (subject?: string) =>
+    subjectColors[subject as keyof typeof subjectColors] || 'bg-gray-500';
+
+  const scheduledCount = classes.filter((c) => !c.isEmpty).length;
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white rounded-2xl border border-[#d6d6d6]">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Recent classes</h2>
-        
-        {/* Day Selector Dropdown */}
+      <div className="px-5 pt-5 pb-3 flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-[#2b2b2b]">Recent classes</h2>
+          <p className="text-sm text-[#969696] mt-0.5">
+            You have {scheduledCount} class{scheduledCount !== 1 ? 'es' : ''} today
+          </p>
+        </div>
+
+        {/* Day selector */}
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-1 px-2 py-0.5 bg-[#ffefe9] rounded-full text-sm font-semibold text-[#2b2b2b] hover:bg-orange-100 transition-colors"
           >
             {selectedDay}
             <ChevronDown className="w-4 h-4" />
           </button>
-          
+
           {isDropdownOpen && (
             <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
               {dayOptions.map((day) => (
@@ -63,7 +68,7 @@ export default function RecentClassesSection({
                     setIsDropdownOpen(false);
                   }}
                   className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                    day === selectedDay ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-700'
+                    day === selectedDay ? 'bg-orange-50 text-[#fd5d26] font-medium' : 'text-gray-700'
                   }`}
                 >
                   {day}
@@ -74,55 +79,44 @@ export default function RecentClassesSection({
         </div>
       </div>
 
-      {/* Schedule List */}
-      <div className="p-4">
-        <div className="text-xs text-gray-500 mb-4">
-          You have {classes.filter(c => !c.isEmpty).length} classes today
-        </div>
-        
-        <div className="space-y-3">
-          {classes.map((classItem, index) => (
-            <div key={index} className="flex items-center gap-4">
-              {/* Time */}
-              <div className="w-16 text-sm font-medium text-gray-700">
-                {classItem.time}
-              </div>
-              
-              {/* Arrow */}
-              <div className="text-orange-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-              
-              {/* Class Details or Empty Slot */}
-              <div className="flex-1">
-                {classItem.isEmpty ? (
-                  <div className="border-b border-dashed border-gray-300 h-px"></div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    {/* Subject Icon */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getClassIcon(classItem.subject)}`}>
-                      <span className="text-white text-xs font-medium">
-                        {classItem.subject?.charAt(0) || 'C'}
-                      </span>
-                    </div>
-                    
-                    {/* Class Info */}
-                    <div>
-                      <div className="font-medium text-gray-900">{classItem.subject}</div>
-                      <div className="text-xs text-gray-500">
-                        {classItem.duration && `${classItem.duration}, `}
-                        {classItem.classCode}
-                      </div>
-                    </div>
+      {/* Schedule list */}
+      <div className="px-5 pb-5 space-y-3">
+        {classes.map((classItem, index) => (
+          <div key={index} className="flex items-center gap-3">
+            <span className="w-16 text-sm font-medium text-[#2b2b2b] flex-shrink-0">
+              {classItem.time}
+            </span>
+
+            {classItem.isEmpty ? (
+              <>
+                <span className="text-[#fd5d26] text-xs font-bold">»</span>
+                <div className="flex-1 border-b border-dashed border-gray-300" />
+              </>
+            ) : (
+              <>
+                <span className="text-[#fd5d26] text-xs font-bold">»</span>
+                <div className="flex-1 border border-[#d6d6d6] rounded-xl px-3 py-2 flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${getClassColor(classItem.subject)}`}
+                  >
+                    <span className="text-white text-xs font-medium">
+                      {classItem.subject?.charAt(0) || 'C'}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#2b2b2b] text-sm truncate">
+                      {classItem.subject}
+                    </p>
+                    <p className="text-xs text-[#6b6b6b] truncate">
+                      {[classItem.duration, classItem.classCode].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+
         {classes.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500 text-sm">No classes scheduled</p>

@@ -1,7 +1,7 @@
 interface ActionCardProps {
   iconSrc: string;
   title: string;
-  description: string;
+  description?: string;
   onClick: () => void;
   buttonText?: string;
 }
@@ -9,25 +9,22 @@ interface ActionCardProps {
 export default function ActionCard({
   iconSrc,
   title,
-  description,
   onClick,
-  buttonText = "Start"
+  buttonText = "Start",
 }: ActionCardProps) {
   return (
-    <div 
-      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+    <div
+      className="border border-[#d6d6d6] rounded-xl h-28 overflow-hidden flex flex-col items-center justify-center gap-2 px-4 cursor-pointer hover:shadow-md transition-shadow"
       onClick={onClick}
     >
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <img src={iconSrc} alt={title} className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-gray-900 mb-1">{title}</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
-        </div>
+      <div className="flex items-center gap-3 w-full justify-center">
+        <img src={iconSrc} alt={title} className="w-12 h-12 object-contain flex-shrink-0" />
+        <p className="text-base font-medium text-black leading-snug">{title}</p>
       </div>
-      <button className="w-full py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors">
+      <button
+        className="w-full h-6 bg-[#fd5d26] text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors"
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+      >
         {buttonText}
       </button>
     </div>

@@ -21,10 +21,7 @@ import TaskDetailModal from '../../tasks/components/TaskDetailModal';
 import CreateLiveClassModal from '../../classroom/components/modals/CreateLiveClassModal';
 
 import { useTeacherDashboard } from '../hooks/useTeacherDashboard';
-
-import { getFirstName } from "@/common/utils/userUtils";
-
-// ... imports
+import { getFirstName } from '@/common/utils/userUtils';
 
 export default function TeacherDashboard() {
   const user = useAuthStore((state) => state.user);
@@ -50,23 +47,25 @@ export default function TeacherDashboard() {
     actionCards,
     isLiveClassModalOpen,
     handleCloseLiveClassModal,
-    teacherSubjects
+    teacherSubjects,
   } = useTeacherDashboard();
+
+  const firstName = getFirstName(user?.fullName, 'Joe');
 
   return (
     <>
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Main Content - Left Side (3/4) */}
+        {/* Left column (3/4) */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Welcome Header */}
-          <div className="bg-gray-100 rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome {getFirstName(user?.fullName, "Joe")}, what do you want to do today?
+          {/* Welcome section */}
+          <div className="bg-white rounded-2xl border border-[#d6d6d6] p-6">
+            <h1 className="text-xl font-semibold text-[#2b2b2b] mb-6">
+              Welcome{' '}
+              <span className="text-[#fd5d26]">{firstName},</span>{' '}
+              what do you want to do today?
             </h1>
-            
-            {/* Action Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {actionCards.map((action, index) => (
                 <ActionCard
                   key={index}
@@ -81,61 +80,53 @@ export default function TeacherDashboard() {
           </div>
 
           {/* Classroom Overview */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Classroom Overview</h2>
+          <div className="bg-white rounded-2xl border border-[#d6d6d6] p-6">
+            <h2 className="text-xl font-semibold text-[#2b2b2b] mb-5">Classroom Overview</h2>
 
-            {/* Top Row Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
               <StatCard
                 icon={Users}
                 label="Total students"
                 value={stats.totalStudents}
-                iconColor="text-red-500"
                 loading={loading}
               />
               <StatCard
                 icon={BookOpen}
                 label="Total classes"
                 value={stats.totalClasses}
-                iconColor="text-blue-500"
                 loading={loading}
               />
               <StatCard
                 icon={ClipboardList}
                 label="Assignment created"
                 value={stats.assignmentCreated}
-                iconColor="text-green-500"
                 loading={loading}
               />
             </div>
 
-            {/* Bottom Row Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <StatCard
                 icon={AlertCircle}
                 label="Not graded"
                 value={stats.notGraded}
-                iconColor="text-red-500"
                 loading={loading}
               />
               <StatCard
                 icon={FileText}
                 label="Quiz created"
                 value={stats.quizCreated}
-                iconColor="text-purple-500"
                 loading={loading}
               />
               <StatCard
                 icon={CheckCircle}
                 label="Not graded"
                 value={stats.notGradedQuiz}
-                iconColor="text-orange-500"
                 loading={loading}
               />
             </div>
           </div>
 
-          {/* Tasks Section */}
+          {/* Tasks */}
           <TasksSection
             completedTasks={completedTasks}
             totalTasks={totalTasks}
@@ -144,9 +135,8 @@ export default function TeacherDashboard() {
           />
         </div>
 
-        {/* Sidebar - Right Side (1/4) */}
+        {/* Right sidebar (1/4) */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Recent Classes */}
           <RecentClassesSection
             classes={schedule}
             selectedDay={selectedDay}
@@ -154,11 +144,11 @@ export default function TeacherDashboard() {
           />
 
           {/* Events */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[400px] flex flex-col">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Events</h2>
+          <div className="bg-white rounded-2xl border border-[#d6d6d6] flex flex-col max-h-[500px]">
+            <div className="px-5 pt-5 pb-3 border-b border-[#eee] flex-shrink-0">
+              <h2 className="text-xl font-semibold text-[#2b2b2b]">Events</h2>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-4">
               <EventsSection
                 events={events}
                 isLoading={eventsLoading}
